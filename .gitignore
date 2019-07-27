@@ -1,0 +1,23 @@
+# AndroidStudio files
+*.iml
+*.ipr
+*.iws
+
+# keep codestyle & copyright
+**/.idea/*
+**/.gradle/*
+**/captures/*
+**/build/*
+local.properties
+.externalNativeBuild
+
+# linux specific files
+.directory
+*.*~
+
+# mac specific files
+.DS_Store
+
+# windows specific files
+Thumbs.db
+thumbs.db
