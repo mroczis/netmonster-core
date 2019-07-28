@@ -7,6 +7,8 @@ import cz.mroczis.netmonster.core.model.annotation.SinceSdk
 data class SignalGsm(
     /**
      * Received signal strength indication
+     *
+     * Unit: dBm
      */
     @IntRange(from = RSSI_MIN, to = RSSI_MAX)
     val rssi: Int?,
@@ -14,6 +16,8 @@ data class SignalGsm(
     /**
      * Bit error rate
      * Zero is best here
+     *
+     * Unit: None
      */
     @IntRange(from = BIT_ERROR_RATE_MIN, to = BIT_ERROR_RATE_MAX)
     val bitErrorRate: Int?,
@@ -21,6 +25,8 @@ data class SignalGsm(
     /**
      * Timing advance is normalized value that can tell you how far you are from signal source.
      * The bigger the value the farther you are.
+     *
+     * Unit: None
      */
     @SinceSdk(Build.VERSION_CODES.N)
     @IntRange(from = TIMING_ADVANCE_MIN, to = TIMING_ADVANCE_MAX)
@@ -30,6 +36,11 @@ data class SignalGsm(
     override val dbm: Int?
         get() = rssi
 
+    /**
+     * Same as [rssi] just different unit.
+     *
+     * Unit: ASU
+     */
     @IntRange(from = 0, to = 31)
     val asu: Int? = rssi?.plus(113)?.div(2)
 

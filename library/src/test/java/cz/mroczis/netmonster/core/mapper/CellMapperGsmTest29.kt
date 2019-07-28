@@ -22,7 +22,7 @@ import io.mockk.mockkClass
 /**
  * Testing conversion [CellInfoGsm] -> [CellGsm]
  */
-class GsmMapperTest29 : SdkTest(Build.VERSION_CODES.Q) {
+class CellMapperGsmTest29 : SdkTest(Build.VERSION_CODES.Q) {
 
     companion object {
         const val CID = 10362

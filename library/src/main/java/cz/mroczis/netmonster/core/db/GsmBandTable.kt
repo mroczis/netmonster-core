@@ -43,7 +43,7 @@ object GsmBandTable {
     )
 
     internal fun get(arfcn: Int, mcc: String): BandEntity? {
-        val band = bands.firstOrNull { it.range.contains(arfcn) }
+        val band = bands.firstOrNull { it.channelRange.contains(arfcn) }
 
         return if (band != null && band.number == NUMBER_UNKNOWN) {
             // PSC, DSC situation here -> result depends on country
@@ -55,7 +55,7 @@ object GsmBandTable {
                     DCS_AMERICAS.contains(mcc) ->
                         band.copy(name = "1800", number = 1800)
                     else ->
-                        band.copy(range = 512..810, name = "1900", number = 1900)
+                        band.copy(channelRange = 512..810, name = "1900", number = 1900)
                 }
             } else {
                 band.copy(name = "1800", number = 1800)

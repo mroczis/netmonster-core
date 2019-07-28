@@ -63,11 +63,25 @@ data class CellGsm(
 
     companion object {
 
+        /**
+         * Correct min CID value is 0. Some Samsung phones use it as N/A value.
+         */
         const val CID_MIN = 1L
-        const val CID_MAX = 65534L
 
+        /**
+         * Correct max CID value is 65 535. Some terminals use it as N/A value.
+         */
+        const val CID_MAX = 65_534L
+
+        /**
+         * Correct min LAC value is 0. Some Samsung phones use it as N/A value.
+         */
         const val LAC_MIN = 1L
-        const val LAC_MAX = 65534L
+
+        /**
+         * Correct max LAC value is 65 535. Some terminals use it as N/A value.
+         */
+        const val LAC_MAX = 65_534L
 
         const val BSIC_MIN = 0L
         const val BSIC_MAX = 63L
