@@ -7,7 +7,7 @@ import cz.mroczis.netmonster.core.model.annotation.SinceSdk
 
 data class SignalWcdma(
     /**
-     * Received signal strength indication
+     * Received Signal Strength Indicator
      *
      * Unit: dBm
      */
@@ -15,7 +15,7 @@ data class SignalWcdma(
     val rssi: Int?,
 
     /**
-     * Bit error rate
+     * Bit Error Rate
      * Zero is best here
      *
      * Unit: None
@@ -25,7 +25,7 @@ data class SignalWcdma(
     val bitErrorRate: Int?,
 
     /**
-     * Energy per bit to noise power density ratio
+     * Energy per Bit to Noise Power Density Ratio
      *
      * Unit: dB
      */
@@ -34,7 +34,7 @@ data class SignalWcdma(
     val ecno: Int?,
 
     /**
-     * Received signal code power
+     * Received Signal Code Power
      *
      * Unit: dBm
      */
@@ -43,7 +43,7 @@ data class SignalWcdma(
     val rscp: Int?,
 
     /**
-     * Energy per chip to Interference power ratio
+     * Energy per Chip to Interference Power Ratio
      * Huawei exclusive feature.
      *
      * Unit: dB

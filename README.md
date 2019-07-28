@@ -17,6 +17,7 @@ Here's small comparison for each of voice / data network you can meet.
 #### GSM
 |function    |Min SDK Android|Min SDK NetMonster Core |
 |------------|---------------|------------------------|
+|CGI         |-              |I (14)                  |
 |NCC         |-              |N (24)                  |
 |BCC         |-              |N (24)                  |
 |Band        |-              |N (24)                  |
@@ -24,7 +25,8 @@ Here's small comparison for each of voice / data network you can meet.
 
 #### WCDMA  
 |function    |Min SDK Android|Min SDK NetMonster Core |  
-|------------|---------------|------------------------|  
+|------------|---------------|------------------------|
+|CGI         |-              |I (14)                  |
 |CID (16b)   |-              |I (14)                  |  
 |RNC         |-              |I (14)                  |
 |Ec/Io       |-              |M (23)                  |  
@@ -36,6 +38,7 @@ Here's small comparison for each of voice / data network you can meet.
 #### LTE
 |function    |Min SDK Android|Min SDK NetMonster Core |
 |------------|---------------|------------------------|
+|eCGI        |-              |I (14)                  |
 |CID (8b)    |-              |I (14)                  |
 |eNb         |-              |I (14)                  | 
 |RSSI        |O (26)         |I (14)                  |

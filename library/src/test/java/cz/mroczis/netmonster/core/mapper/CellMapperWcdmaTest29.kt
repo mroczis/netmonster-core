@@ -47,6 +47,7 @@ class CellMapperWcdmaTest29 : SdkTest(Build.VERSION_CODES.Q) {
                 rnc shouldBe 3109
                 lac shouldBe LAC
                 psc shouldBe PSC
+                cgi shouldBe "230112941006043"
                 network shouldBe Network.map(MCC, MNC)
                 connectionStatus shouldBe PrimaryConnection()
 

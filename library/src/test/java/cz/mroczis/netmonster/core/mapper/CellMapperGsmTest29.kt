@@ -49,6 +49,7 @@ class CellMapperGsmTest29 : SdkTest(Build.VERSION_CODES.Q) {
                 bsic shouldBe BSIC
                 bcc shouldBe 4
                 ncc shouldBe 3
+                cgi shouldBe "230112941010362"
                 network shouldBe Network.map(MCC, MNC)
                 connectionStatus shouldBe PrimaryConnection()
 

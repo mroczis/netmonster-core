@@ -8,6 +8,8 @@ import cz.mroczis.netmonster.core.model.cell.CellGsm.Companion.CID_MAX
 import cz.mroczis.netmonster.core.model.cell.CellGsm.Companion.CID_MIN
 import cz.mroczis.netmonster.core.model.cell.CellGsm.Companion.LAC_MAX
 import cz.mroczis.netmonster.core.model.cell.CellGsm.Companion.LAC_MIN
+import cz.mroczis.netmonster.core.model.cell.CellWcdma.Companion.CID_MAX
+import cz.mroczis.netmonster.core.model.cell.CellWcdma.Companion.CID_MIN
 import cz.mroczis.netmonster.core.model.cell.CellWcdma.Companion.LAC_MAX
 import cz.mroczis.netmonster.core.model.cell.CellWcdma.Companion.LAC_MIN
 import cz.mroczis.netmonster.core.model.connection.IConnection
@@ -57,6 +59,14 @@ data class CellWcdma(
      */
     val rnc: Int?
         get() = ci?.shr(16)
+
+    /**
+     * 15-decimal digit code that contains MCC-MNC-LAC-CID
+     */
+    val cgi: String?
+        get() = if (network != null && lac != null && ci != null) {
+            "${network.toPlmn()}${lac.toString().padStart(5, '0')}${cid.toString().padStart(5, '0')}"
+        } else null
 
 
     companion object {

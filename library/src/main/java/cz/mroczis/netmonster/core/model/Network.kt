@@ -28,6 +28,10 @@ data class Network internal constructor(
     val iso: String?
 ) {
 
+    fun toInt(): Int = toPlmn(separator = "").toInt()
+
+    fun toPlmn(separator: String = "") = "$mcc$separator$mnc"
+
     companion object {
 
         const val MCC_MIN = 1
@@ -39,12 +43,12 @@ data class Network internal constructor(
         internal val MCC_RANGE = MCC_MIN..MCC_MAX
         internal val MNC_RANGE = MNC_MIN..MNC_MAX
 
-        fun map(mcc: Int, mnc : Int) : Network? =
+        fun map(mcc: Int, mnc: Int): Network? =
             if (mcc.inRangeOrNull(MCC_RANGE) != null && mnc.inRangeOrNull(MNC_RANGE) != null) {
-                Network(mcc.toString(), mnc.toString(), MccIsoTable.getByMcc(mcc.toString()))
+                Network(mcc.toString(), mnc.toString().padStart(2, '0'), MccIsoTable.getByMcc(mcc.toString()))
             } else null
 
-        fun map(mcc: String?, mnc : String?) : Network? {
+        fun map(mcc: String?, mnc: String?): Network? {
             val mccInt = mcc?.toIntOrNull()
             val mncInt = mnc?.toIntOrNull()
 
