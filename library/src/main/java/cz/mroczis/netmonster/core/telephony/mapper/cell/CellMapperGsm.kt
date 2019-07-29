@@ -43,7 +43,7 @@ internal fun CellSignalStrengthGsm.mapSignal(): SignalGsm {
  * [CellIdentityGsm] -> [CellGsm]
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-internal fun CellIdentityGsm.mapCell(connection: IConnection, signal: SignalGsm) : CellGsm? {
+internal fun CellIdentityGsm.mapCell(connection: IConnection, signal: SignalGsm): CellGsm? {
     val network = mapNetwork()
     val cid = cid.inRangeOrNull(CellGsm.CID_RANGE)
     val lac = lac.inRangeOrNull(CellGsm.LAC_RANGE)
@@ -78,7 +78,7 @@ internal fun CellIdentityGsm.mapCell(connection: IConnection, signal: SignalGsm)
  */
 @Suppress("DEPRECATION")
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-internal fun CellIdentityGsm.mapNetwork() : Network? =
+internal fun CellIdentityGsm.mapNetwork(): Network? =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         Network.map(mccString, mncString)
     } else {

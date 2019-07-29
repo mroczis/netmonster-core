@@ -21,7 +21,7 @@ class CellInfoMapper : ICellMapper<List<CellInfo>> {
             } else if (it is CellInfoLte) {
                 mapLte(it)
             } else if (it is CellInfoCdma) {
-                null
+                mapCdma(it)
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 && it is CellInfoWcdma) {
                 mapWcdma(it)
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && it is CellInfoTdscdma) {
@@ -39,6 +39,12 @@ class CellInfoMapper : ICellMapper<List<CellInfo>> {
     }
 
     private fun mapLte(model: CellInfoLte): ICell? {
+        val connection = model.mapConnection()
+        val signal = model.cellSignalStrength.mapSignal()
+        return model.cellIdentity.mapCell(connection, signal)
+    }
+
+    private fun mapCdma(model: CellInfoCdma): ICell? {
         val connection = model.mapConnection()
         val signal = model.cellSignalStrength.mapSignal()
         return model.cellIdentity.mapCell(connection, signal)
