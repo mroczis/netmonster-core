@@ -12,12 +12,12 @@ class GsmBandTableTest : FreeSpec() {
 
     init {
         "GSM 900" {
-            GsmBandTable.get(0, "230").applyNonNull {
+            BandTableGsm.get(0, "230").applyNonNull {
                 name shouldBe "900"
                 number shouldBe 900
             }
 
-            GsmBandTable.map(0, "230").applyNonNull {
+            BandTableGsm.map(0, "230").applyNonNull {
                 arfcn shouldBe 0
                 channelNumber shouldBe 0
                 name shouldBe "900"
@@ -29,13 +29,13 @@ class GsmBandTableTest : FreeSpec() {
             // DCS-only ARFCN
             811.let { arfcn ->
                 // Czechia
-                GsmBandTable.get(arfcn, "230").applyNonNull {
+                BandTableGsm.get(arfcn, "230").applyNonNull {
                     name shouldBe "1800"
                     number shouldBe 1800
                 }
 
                 // USA
-                GsmBandTable.get(arfcn, "310").applyNonNull {
+                BandTableGsm.get(arfcn, "310").applyNonNull {
                     name shouldBe "1800"
                     number shouldBe 1800
                 }
@@ -45,31 +45,31 @@ class GsmBandTableTest : FreeSpec() {
             // PCS/DCS ARFCN
             600.let { arfcn ->
                 // Czechia -> DCS
-                GsmBandTable.get(arfcn, "230").applyNonNull {
+                BandTableGsm.get(arfcn, "230").applyNonNull {
                     name shouldBe "1800"
                     number shouldBe 1800
                 }
 
                 // USA -> PCS
-                GsmBandTable.get(arfcn, "310").applyNonNull {
+                BandTableGsm.get(arfcn, "310").applyNonNull {
                     name shouldBe "1900"
                     number shouldBe 1900
                 }
 
                 // British Virgin Islands -> Can be both
-                GsmBandTable.get(arfcn, "348").applyNonNull {
+                BandTableGsm.get(arfcn, "348").applyNonNull {
                     name shouldBe "1800/1900"
-                    number shouldBe GsmBandTable.NUMBER_UNKNOWN
+                    number shouldBe BandTableGsm.NUMBER_UNKNOWN
                 }
 
                 // Costa Rica -> DCS
-                GsmBandTable.get(arfcn, "348").applyNonNull {
+                BandTableGsm.get(arfcn, "348").applyNonNull {
                     name shouldBe "1800/1900"
-                    number shouldBe GsmBandTable.NUMBER_UNKNOWN
+                    number shouldBe BandTableGsm.NUMBER_UNKNOWN
                 }
 
                 // Non-existing country in South America -> PCS
-                GsmBandTable.get(arfcn, "777").applyNonNull {
+                BandTableGsm.get(arfcn, "777").applyNonNull {
                     name shouldBe "1900"
                     number shouldBe 1900
                 }

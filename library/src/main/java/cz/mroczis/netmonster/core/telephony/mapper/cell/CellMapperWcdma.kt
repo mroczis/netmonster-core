@@ -4,7 +4,7 @@ import android.annotation.TargetApi
 import android.os.Build
 import android.telephony.CellIdentityWcdma
 import android.telephony.CellSignalStrengthWcdma
-import cz.mroczis.netmonster.core.db.WcdmaBandTable
+import cz.mroczis.netmonster.core.db.BandTableWcdma
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.band.BandWcdma
 import cz.mroczis.netmonster.core.model.cell.CellWcdma
@@ -82,12 +82,15 @@ internal fun CellIdentityWcdma.mapCell(connection: IConnection, signal: SignalWc
     } else null
 
     val band = if (uarfcn != null) {
-        WcdmaBandTable.map(uarfcn)
+        BandTableWcdma.map(uarfcn)
     } else null
 
     return if (lac == null && ci != null && ci < 100) {
         // Samsung phones (SM-G960F) tend to report LAC = 0 and sequence of CIs starting with 1 (step 1) for
         // neighbouring cells. This check assumes there's less than 100 neighbouring cells
+        null
+    } else if (ci == null && psc == null && uarfcn == null) {
+        // Generally invalid data that can be used
         null
     } else {
         CellWcdma(

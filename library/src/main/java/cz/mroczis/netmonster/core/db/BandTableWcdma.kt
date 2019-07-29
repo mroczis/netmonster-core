@@ -3,7 +3,7 @@ package cz.mroczis.netmonster.core.db
 import cz.mroczis.netmonster.core.db.model.BandEntity
 import cz.mroczis.netmonster.core.model.band.BandWcdma
 
-object WcdmaBandTable {
+object BandTableWcdma {
 
     /**
      * WCDMA FDD min (band 2, additional column) from

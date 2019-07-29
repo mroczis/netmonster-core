@@ -4,7 +4,7 @@ import android.annotation.TargetApi
 import android.os.Build
 import android.telephony.CellIdentityGsm
 import android.telephony.CellSignalStrengthGsm
-import cz.mroczis.netmonster.core.db.GsmBandTable
+import cz.mroczis.netmonster.core.db.BandTableGsm
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.band.BandGsm
 import cz.mroczis.netmonster.core.model.cell.CellGsm
@@ -57,7 +57,7 @@ internal fun CellIdentityGsm.mapCell(connection: IConnection, signal: SignalGsm)
     } else null
 
     val band = if (arfcn != null && network != null) {
-        GsmBandTable.map(arfcn, network.mcc)
+        BandTableGsm.map(arfcn, network.mcc)
     } else null
 
     return if (cid != null && lac != null) {

@@ -4,10 +4,6 @@ import android.os.Build
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.annotation.SinceSdk
 import cz.mroczis.netmonster.core.model.band.BandWcdma
-import cz.mroczis.netmonster.core.model.cell.CellGsm.Companion.CID_MAX
-import cz.mroczis.netmonster.core.model.cell.CellGsm.Companion.CID_MIN
-import cz.mroczis.netmonster.core.model.cell.CellGsm.Companion.LAC_MAX
-import cz.mroczis.netmonster.core.model.cell.CellGsm.Companion.LAC_MIN
 import cz.mroczis.netmonster.core.model.cell.CellWcdma.Companion.CID_MAX
 import cz.mroczis.netmonster.core.model.cell.CellWcdma.Companion.CID_MIN
 import cz.mroczis.netmonster.core.model.cell.CellWcdma.Companion.LAC_MAX

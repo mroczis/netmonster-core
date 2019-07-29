@@ -7,6 +7,7 @@ import cz.mroczis.netmonster.core.applyNonNull
 import cz.mroczis.netmonster.core.letNonNull
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.cell.CellGsm
+import cz.mroczis.netmonster.core.model.cell.CellWcdma
 import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 import cz.mroczis.netmonster.core.model.signal.SignalGsm
 import cz.mroczis.netmonster.core.telephony.mapper.cell.mapCell
@@ -17,7 +18,7 @@ import io.mockk.every
 import io.mockk.mockkClass
 
 /**
- * Testing conversion [CellInfoGsm] -> [CellGsm]
+ * Testing conversion [CellInfoWcdma] -> [CellWcdma]
  */
 class CellMapperWcdmaTest29 : SdkTest(Build.VERSION_CODES.Q) {
 

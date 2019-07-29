@@ -3,7 +3,7 @@ package cz.mroczis.netmonster.core.db
 import cz.mroczis.netmonster.core.db.model.BandEntity
 import cz.mroczis.netmonster.core.model.band.BandGsm
 
-object GsmBandTable {
+object BandTableGsm {
 
     const val NUMBER_UNKNOWN = -1
 
