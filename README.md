@@ -21,7 +21,7 @@ Here's small comparison for each of voice / data network you can meet.
 |NCC         |-              |N (24)                  |
 |BCC         |-              |N (24)                  |
 |Band        |-              |N (24)                  |
-|TA          |N (24)         |O (26)                  |
+|TA          |O (26)         |N (24)                  |
 
 #### WCDMA  
 |function    |Min SDK Android|Min SDK NetMonster Core |  

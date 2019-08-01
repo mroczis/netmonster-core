@@ -3,15 +3,18 @@ package cz.mroczis.netmonster.core.model.cell
 import android.os.Build
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.annotation.SinceSdk
-import cz.mroczis.netmonster.core.model.band.BandWcdma
-import cz.mroczis.netmonster.core.model.cell.CellWcdma.Companion.CID_MAX
-import cz.mroczis.netmonster.core.model.cell.CellWcdma.Companion.CID_MIN
-import cz.mroczis.netmonster.core.model.cell.CellWcdma.Companion.LAC_MAX
-import cz.mroczis.netmonster.core.model.cell.CellWcdma.Companion.LAC_MIN
+import cz.mroczis.netmonster.core.model.band.BandTdscdma
+import cz.mroczis.netmonster.core.model.cell.CellTdscdma.Companion.CID_MAX
+import cz.mroczis.netmonster.core.model.cell.CellTdscdma.Companion.CID_MIN
+import cz.mroczis.netmonster.core.model.cell.CellTdscdma.Companion.CPID_MAX
+import cz.mroczis.netmonster.core.model.cell.CellTdscdma.Companion.CPID_MIN
+import cz.mroczis.netmonster.core.model.cell.CellTdscdma.Companion.LAC_MAX
+import cz.mroczis.netmonster.core.model.cell.CellTdscdma.Companion.LAC_MIN
 import cz.mroczis.netmonster.core.model.connection.IConnection
-import cz.mroczis.netmonster.core.model.signal.SignalWcdma
+import cz.mroczis.netmonster.core.model.signal.SignalTdscdma
 
-data class CellWcdma(
+@SinceSdk(Build.VERSION_CODES.Q)
+data class CellTdscdma(
     /**
      * Current network operator or null if unknown
      */
@@ -30,15 +33,15 @@ data class CellWcdma(
     val lac: Int?,
 
     /**
-     * 9-bit Primary Scrambling Code
-     * in range from [PSC_MIN] to [PSC_MAX], null if unavailable
+     * 8-bit Cell Parameters ID
+     * in range from [CPID_MIN] to [CPID_MAX], null if unavailable
      */
-    val psc: Int?,
+    val cpid: Int?,
 
     @SinceSdk(Build.VERSION_CODES.N)
-    override val band: BandWcdma?,
+    override val band: BandTdscdma?,
 
-    override val signal: SignalWcdma,
+    override val signal: SignalTdscdma,
     override val connectionStatus: IConnection
 ) : ICell {
 
@@ -66,29 +69,18 @@ data class CellWcdma(
 
 
     companion object {
-
-        /**
-         * Correct min CID value is 0. Some Samsung phones use it as N/A value.
-         */
         const val CID_MIN = 1L
         const val CID_MAX = 268_435_455L
 
-        /**
-         * Correct min LAC value is 0. Some Samsung phones use it as N/A value.
-         */
         const val LAC_MIN = 1L
-
-        /**
-         * Correct max LAC value is 65 535. Some terminals use it as N/A value.
-         */
         const val LAC_MAX = 65_534L
 
-        const val PSC_MIN = 0L
-        const val PSC_MAX = 511L
+        const val CPID_MIN = 0L
+        const val CPID_MAX = 127L
 
         internal val CID_RANGE = CID_MIN..CID_MAX
         internal val LAC_RANGE = LAC_MIN..LAC_MAX
-        internal val PSC_RANGE = PSC_MIN..PSC_MAX
+        internal val CPID_RANGE = CPID_MIN..CPID_MAX
     }
 
 }

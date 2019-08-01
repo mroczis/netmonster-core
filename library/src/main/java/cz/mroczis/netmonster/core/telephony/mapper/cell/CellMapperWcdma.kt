@@ -33,7 +33,7 @@ internal fun CellSignalStrengthWcdma.mapSignal(): SignalWcdma {
             ?.inRangeOrNull(SignalWcdma.RSSI_RANGE)
     } else {
         // Some older phones reported inadequate values when it came to ASU and DBM sources
-        // We must decide what happens if values to dot fit
+        // We must decide what happens if values do not fit
         val rssiFromAsu = (-113 + 2 * asuLevel).inRangeOrNull(SignalWcdma.RSSI_RANGE) // ASU -> DBM
         val rssiFromDbm = dbm.inRangeOrNull(SignalWcdma.RSSI_RANGE)
         // In real world those two values must be equal
@@ -90,7 +90,7 @@ internal fun CellIdentityWcdma.mapCell(connection: IConnection, signal: SignalWc
         // neighbouring cells. This check assumes there's less than 100 neighbouring cells
         null
     } else if (ci == null && psc == null && uarfcn == null) {
-        // Generally invalid data that can be used
+        // Generally invalid data that cannot be used
         null
     } else {
         CellWcdma(
