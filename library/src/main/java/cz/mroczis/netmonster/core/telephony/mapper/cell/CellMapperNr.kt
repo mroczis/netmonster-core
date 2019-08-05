@@ -16,7 +16,7 @@ import cz.mroczis.netmonster.core.util.inRangeOrNull
  * [CellIdentityNr] -> [CellNr]
  */
 @TargetApi(Build.VERSION_CODES.Q)
-internal fun CellIdentityNr.mapCell(connection: IConnection, signal: SignalNr): CellNr? {
+internal fun CellIdentityNr.mapCell(connection: IConnection, signal: SignalNr?): CellNr? {
     val network = Network.map(mccString, mncString)
     val nci = nci.inRangeOrNull(CellNr.CID_RANGE)
     val tac = tac.inRangeOrNull(CellNr.TAC_RANGE)
@@ -30,7 +30,7 @@ internal fun CellIdentityNr.mapCell(connection: IConnection, signal: SignalNr): 
         tac = tac,
         pci = pci,
         connectionStatus = connection,
-        signal = signal,
+        signal = signal ?: SignalNr(),
         band = band
     )
 }

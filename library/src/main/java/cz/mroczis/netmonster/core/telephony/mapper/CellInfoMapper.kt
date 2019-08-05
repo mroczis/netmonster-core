@@ -27,7 +27,7 @@ class CellInfoMapper : ICellMapper<List<CellInfo>> {
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && it is CellInfoTdscdma) {
                 mapTdscdma(it)
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && it is CellInfoNr) {
-                null
+                mapNr(it)
             } else null
         }
 
@@ -62,6 +62,13 @@ class CellInfoMapper : ICellMapper<List<CellInfo>> {
         val connection = model.mapConnection()
         val signal = model.cellSignalStrength.mapSignal()
         return model.cellIdentity.mapCell(connection, signal)
+    }
+
+    @TargetApi(Build.VERSION_CODES.Q)
+    private fun mapNr(model: CellInfoNr): ICell? {
+        val connection = model.mapConnection()
+        val signal = (model.cellSignalStrength as? CellSignalStrengthNr)?.mapSignal()
+        return (model.cellIdentity as? CellIdentityNr)?.mapCell(connection, signal)
     }
 
 }

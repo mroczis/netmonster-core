@@ -55,6 +55,8 @@ data class SignalNr(
     val ssSinr: Int?
 ) : ISignal {
 
+    internal constructor() : this(null, null, null,null,null, null)
+
     override val dbm: Int?
         get() = csiRsrp
 
