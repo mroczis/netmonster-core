@@ -1,8 +1,10 @@
 package cz.mroczis.netmonster.core.telephony.mapper
 
+import android.Manifest
 import android.annotation.TargetApi
 import android.os.Build
 import android.telephony.*
+import androidx.annotation.RequiresPermission
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.telephony.mapper.cell.mapCell
 import cz.mroczis.netmonster.core.telephony.mapper.cell.mapConnection
@@ -14,6 +16,7 @@ import cz.mroczis.netmonster.core.telephony.mapper.cell.mapSignal
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 class CellInfoMapper : ICellMapper<List<CellInfo>> {
 
+    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     override fun map(model: List<CellInfo>): List<ICell> =
         model.mapNotNull {
             if (it is CellInfoGsm) {

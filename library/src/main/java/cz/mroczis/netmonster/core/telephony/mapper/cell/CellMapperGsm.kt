@@ -4,11 +4,15 @@ import android.annotation.TargetApi
 import android.os.Build
 import android.telephony.CellIdentityGsm
 import android.telephony.CellSignalStrengthGsm
+import android.telephony.SignalStrength
+import android.telephony.gsm.GsmCellLocation
 import cz.mroczis.netmonster.core.db.BandTableGsm
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.band.BandGsm
 import cz.mroczis.netmonster.core.model.cell.CellGsm
+import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.connection.IConnection
+import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 import cz.mroczis.netmonster.core.model.signal.SignalGsm
 import cz.mroczis.netmonster.core.util.Reflection
 import cz.mroczis.netmonster.core.util.inRangeOrNull
@@ -84,3 +88,28 @@ internal fun CellIdentityGsm.mapNetwork(): Network? =
     } else {
         Network.map(mcc, mnc)
     }
+
+@Suppress("DEPRECATION")
+internal fun GsmCellLocation.mapGsm(signalStrength: SignalStrength?, network: Network?): ICell? {
+    val cid = cid.inRangeOrNull(CellGsm.CID_RANGE)
+    val lac = lac.inRangeOrNull(CellGsm.LAC_RANGE)
+
+    val rssi = signalStrength?.gsmSignalStrength?.inRangeOrNull(SignalGsm.RSSI_RANGE)
+    val ber = signalStrength?.gsmBitErrorRate?.inRangeOrNull(SignalGsm.BIT_ERROR_RATE_RANGE)
+
+    return if (cid != null && lac != null) {
+        return CellGsm(
+            cid = cid,
+            lac = lac,
+            bsic = null,
+            band = null,
+            signal = SignalGsm(
+                rssi = rssi,
+                bitErrorRate = ber,
+                timingAdvance = null
+            ),
+            network = network,
+            connectionStatus = PrimaryConnection()
+        )
+    } else null
+}

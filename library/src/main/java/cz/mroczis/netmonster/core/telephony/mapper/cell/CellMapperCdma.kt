@@ -4,8 +4,12 @@ import android.annotation.TargetApi
 import android.os.Build
 import android.telephony.CellIdentityCdma
 import android.telephony.CellSignalStrengthCdma
+import android.telephony.SignalStrength
+import android.telephony.cdma.CdmaCellLocation
 import cz.mroczis.netmonster.core.model.cell.CellCdma
+import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.connection.IConnection
+import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 import cz.mroczis.netmonster.core.model.signal.SignalCdma
 import cz.mroczis.netmonster.core.util.inRangeOrNull
 
@@ -50,6 +54,40 @@ internal fun CellIdentityCdma.mapCell(connection: IConnection, signal: SignalCdm
             lon = lon,
             signal = signal,
             connectionStatus = connection
+        )
+    } else null
+}
+
+@Suppress("DEPRECATION")
+internal fun CdmaCellLocation.mapCdma(signal: SignalStrength?): ICell? {
+    val bid = baseStationId.inRangeOrNull(CellCdma.BID_RANGE)
+    val nid = networkId.inRangeOrNull(CellCdma.NID_RANGE)
+    val sid = systemId.inRangeOrNull(CellCdma.SID_RANGE)
+    val lat = baseStationLatitude.inRangeOrNull(CellCdma.LAT_RANGE)?.toDouble()?.let { it * 90.0 / 1296000 }
+    val lon = baseStationLongitude.inRangeOrNull(CellCdma.LON_RANGE)?.toDouble()?.let { it * 90.0 / 1296000 }
+
+    val cdmaRssi = signal?.cdmaDbm?.inRangeOrNull(SignalCdma.RSSI_RANGE)
+    val cdmaEcio = signal?.cdmaEcio?.inRangeOrNull(SignalCdma.ECIO_RANGE)?.toDouble()?.let { it / 10.0 }
+
+    val evdoRssi = signal?.evdoDbm?.inRangeOrNull(SignalCdma.RSSI_RANGE)
+    val evdoEcio = signal?.evdoEcio?.inRangeOrNull(SignalCdma.ECIO_RANGE)?.toDouble()?.let { it / 10.0 }
+    val evdoSnr = signal?.evdoSnr?.inRangeOrNull(SignalCdma.SNR_RANGE)
+
+    return if (sid != null) {
+        CellCdma(
+            sid = sid,
+            bid = bid,
+            nid = nid,
+            lat = lat,
+            lon = lon,
+            signal = SignalCdma(
+                cdmaRssi = cdmaRssi,
+                cdmaEcio = cdmaEcio,
+                evdoRssi = evdoRssi,
+                evdoEcio = evdoEcio,
+                evdoSnr = evdoSnr
+            ),
+            connectionStatus = PrimaryConnection()
         )
     } else null
 }

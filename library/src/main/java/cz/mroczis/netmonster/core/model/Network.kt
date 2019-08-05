@@ -56,6 +56,12 @@ data class Network internal constructor(
                 return Network(mcc, mnc, MccIsoTable.getByMcc(mcc))
             } else null
         }
+
+        fun map(plmn: String?): Network? =
+            if (plmn != null && plmn.length >= 5) {
+                map(plmn.substring(0, 3), plmn.substring(3, 5))
+            } else null
+
     }
 
 }

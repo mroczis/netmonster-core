@@ -24,11 +24,11 @@ object Reflection {
     const val SS_LTE_SNR = "mLteRssnr"
     const val SS_LTE_CQI = "mLteCqi"
 
-    fun intFieldOrNull(name: String, source: Any) =
+    fun intFieldOrNull(name: String, source: Any?) =
         try {
-            source.javaClass.getDeclaredField(name).apply {
+            source?.javaClass?.getDeclaredField(name)?.apply {
                 isAccessible = true
-            }.get(source) as? Int
+            }?.get(source) as? Int
         } catch (e: Throwable) {
             null
         }

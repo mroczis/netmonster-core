@@ -4,11 +4,16 @@ import android.annotation.TargetApi
 import android.os.Build
 import android.telephony.CellIdentityWcdma
 import android.telephony.CellSignalStrengthWcdma
+import android.telephony.SignalStrength
+import android.telephony.gsm.GsmCellLocation
 import cz.mroczis.netmonster.core.db.BandTableWcdma
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.band.BandWcdma
 import cz.mroczis.netmonster.core.model.cell.CellWcdma
+import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.connection.IConnection
+import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
+import cz.mroczis.netmonster.core.model.signal.SignalGsm
 import cz.mroczis.netmonster.core.model.signal.SignalWcdma
 import cz.mroczis.netmonster.core.util.Reflection
 import cz.mroczis.netmonster.core.util.inRangeOrNull
@@ -42,11 +47,11 @@ internal fun CellSignalStrengthWcdma.mapSignal(): SignalWcdma {
         } else rssiFromDbm
     }
 
-    val ecio = Reflection.intFieldOrNull(Reflection.UMTS_ECIO, this)?.inRangeOrNull(SignalWcdma.ECIO_RANGE)
+
     val rscp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         REGEX_RSCP.find(string)?.groupValues?.getOrNull(1)?.toInt()
             ?.inRangeOrNull(SignalWcdma.RSCP_RANGE)
-    } else Reflection.intFieldOrNull(Reflection.UMTS_RSCP, this)
+    } else null
 
     val bitError = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         REGEX_BIT_ERROR.find(string)?.groupValues?.getOrNull(1)?.toInt()
@@ -63,7 +68,7 @@ internal fun CellSignalStrengthWcdma.mapSignal(): SignalWcdma {
         bitErrorRate = bitError,
         ecno = ecno,
         rscp = rscp,
-        ecio = ecio
+        ecio = null
     )
 }
 
@@ -116,3 +121,33 @@ internal fun CellIdentityWcdma.mapNetwork(): Network? =
     } else {
         Network.map(mcc, mnc)
     }
+
+@Suppress("DEPRECATION")
+internal fun GsmCellLocation.mapWcdma(signalStrength: SignalStrength?, network: Network?): ICell? {
+    val cid = cid.inRangeOrNull(CellWcdma.CID_RANGE)
+    val lac = lac.inRangeOrNull(CellWcdma.LAC_RANGE)
+    val psc = psc.inRangeOrNull(CellWcdma.PSC_RANGE)
+
+    val rssi = signalStrength?.gsmSignalStrength?.inRangeOrNull(SignalGsm.RSSI_RANGE)
+    val ber = signalStrength?.gsmBitErrorRate?.inRangeOrNull(SignalGsm.BIT_ERROR_RATE_RANGE)
+    val ecio = Reflection.intFieldOrNull(Reflection.UMTS_ECIO, signalStrength)?.inRangeOrNull(SignalWcdma.ECIO_RANGE)
+    val rscp = Reflection.intFieldOrNull(Reflection.UMTS_RSCP, signalStrength)?.inRangeOrNull(SignalWcdma.RSCP_RANGE)
+
+    return if (cid != null && lac != null) {
+        CellWcdma(
+            ci = cid,
+            lac = lac,
+            psc = psc,
+            band = null,
+            signal = SignalWcdma(
+                rssi = rssi,
+                bitErrorRate = ber,
+                ecio = ecio,
+                rscp = rscp,
+                ecno = null
+            ),
+            network = network,
+            connectionStatus = PrimaryConnection()
+        )
+    } else null
+}

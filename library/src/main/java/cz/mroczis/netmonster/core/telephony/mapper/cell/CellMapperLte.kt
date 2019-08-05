@@ -4,11 +4,15 @@ import android.annotation.TargetApi
 import android.os.Build
 import android.telephony.CellIdentityLte
 import android.telephony.CellSignalStrengthLte
+import android.telephony.SignalStrength
+import android.telephony.gsm.GsmCellLocation
 import cz.mroczis.netmonster.core.db.BandTableLte
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.band.BandLte
 import cz.mroczis.netmonster.core.model.cell.CellLte
+import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.connection.IConnection
+import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 import cz.mroczis.netmonster.core.model.signal.SignalLte
 import cz.mroczis.netmonster.core.util.Reflection
 import cz.mroczis.netmonster.core.util.inRangeOrNull
@@ -78,11 +82,11 @@ internal fun CellSignalStrengthLte.mapSignal(): SignalLte {
                 rsrp /= 10
             } while (rsrp / 10 > 140)
 
-            if (rsrp in 1..43) {
+            if (rsrp in 1.0..43.0) {
                 rsrp += -140
             }
 
-        } else if (rsrp in 1..43) {
+        } else if (rsrp in 1.0..43.0) {
             rsrp += -140
         }
 
@@ -161,3 +165,49 @@ internal fun CellIdentityLte.mapNetwork(): Network? =
     } else {
         Network.map(mcc, mnc)
     }
+
+@Suppress("DEPRECATION")
+internal fun GsmCellLocation.mapLte(signalStrength: SignalStrength?, network: Network?): ICell? {
+    val ci = cid.inRangeOrNull(CellLte.CID_RANGE)
+    val tac = lac.inRangeOrNull(CellLte.TAC_RANGE)
+
+    val signalMain = Reflection.intFieldOrNull(Reflection.SS_LTE_RSSI, signalStrength)
+    val signalGsm = signalStrength?.gsmSignalStrength
+
+    // Some devices do report signal strength on LTE as GSM signal strength
+    val rssi =
+        (if (signalGsm != null && (0..31).contains(signalGsm) && (signalMain == null || !(0..31).contains(signalMain))) {
+            -113 + 2 * signalGsm
+        } else signalMain)?.inRangeOrNull(SignalLte.RSSI_RANGE)
+
+    val rsrp = Reflection.intFieldOrNull(Reflection.SS_LTE_RSRP, signalStrength)?.toDouble()
+        ?.inRangeOrNull(SignalLte.RSRP_RANGE)
+
+    val rsrq = Reflection.intFieldOrNull(Reflection.SS_LTE_RSRQ, signalStrength)?.toDouble()
+        ?.inRangeOrNull(SignalLte.RSRQ_RANGE)
+
+    val snr = Reflection.intFieldOrNull(Reflection.SS_LTE_SNR, signalStrength)?.toDouble()
+        ?.inRangeOrNull(SignalLte.SNR_RANGE)
+
+    val cqi = Reflection.intFieldOrNull(Reflection.SS_LTE_CQI, signalStrength)
+        ?.inRangeOrNull(SignalLte.CQI_RANGE)
+
+    return if (ci != null) {
+        CellLte(
+            network = network,
+            eci = ci,
+            tac = tac,
+            pci = null,
+            band = null,
+            signal = SignalLte(
+                rssi = rssi,
+                rsrp = rsrp,
+                rsrq = rsrq,
+                cqi = cqi,
+                snr = snr,
+                timingAdvance = null
+            ),
+            connectionStatus = PrimaryConnection()
+        )
+    } else null
+}
