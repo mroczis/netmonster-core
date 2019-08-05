@@ -6,8 +6,6 @@ import cz.mroczis.netmonster.core.model.annotation.SinceSdk
 @SinceSdk(Build.VERSION_CODES.N)
 data class BandGsm(
     val arfcn: Int,
-    val downlink: Double?,
-    val uplink: Double?,
     override val name: String?,
     override val number: Int?
 ) : IBand {

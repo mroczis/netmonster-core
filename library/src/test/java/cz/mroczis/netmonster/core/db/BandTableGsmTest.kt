@@ -8,7 +8,7 @@ import io.kotlintest.specs.FreeSpec
 /**
  * Conversion from ARFCN to more complex [BandGsm]
  */
-class GsmBandTableTest : FreeSpec() {
+class BandTableGsmTest : FreeSpec() {
 
     init {
         "GSM 900" {

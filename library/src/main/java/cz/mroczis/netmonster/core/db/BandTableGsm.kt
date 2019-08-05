@@ -1,6 +1,7 @@
 package cz.mroczis.netmonster.core.db
 
 import cz.mroczis.netmonster.core.db.model.BandEntity
+import cz.mroczis.netmonster.core.db.model.IBandEntity
 import cz.mroczis.netmonster.core.model.band.BandGsm
 
 object BandTableGsm {
@@ -24,7 +25,7 @@ object BandTableGsm {
         BandEntity(306..340, "480", 480),
         BandEntity(512..810, NUMBER_UNKNOWN.toString(), NUMBER_UNKNOWN),
         BandEntity(811..885, "1800", 1800),
-        BandEntity(955..1023, "900", 900)
+        BandEntity(955..1_023, "900", 900)
     )
 
     /**
@@ -42,7 +43,7 @@ object BandTableGsm {
         "352", "372", "360", "712"
     )
 
-    internal fun get(arfcn: Int, mcc: String): BandEntity? {
+    internal fun get(arfcn: Int, mcc: String): IBandEntity? {
         val band = bands.firstOrNull { it.channelRange.contains(arfcn) }
 
         return if (band != null && band.number == NUMBER_UNKNOWN) {
@@ -67,10 +68,7 @@ object BandTableGsm {
 
     internal fun map(arfcn: Int, mcc: String) : BandGsm? {
         val raw = get(arfcn, mcc)
-        return raw?.let {
-            // TODO Calculation of downlink & uplink for select bands
-            BandGsm(arfcn, null, null, it.name, it.number)
-        }
+        return BandGsm(arfcn, name = raw?.name, number = raw?.number)
     }
 
 

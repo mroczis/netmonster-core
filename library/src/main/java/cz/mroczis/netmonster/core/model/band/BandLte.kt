@@ -38,14 +38,19 @@ data class BandLte(
         const val BANDWIDTH_MAX = 100_000L
 
         /**
-         * @see BandTableLte.DOWNLINK_MIN
+         * LTE min, default is 0.
+         * Changed to 1 cause Samsung phones report 0 when data are incorrect.
+         *
+         * Source: [3GPP 36.101](https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=2411),
+         * 5.7.3 Carrier frequency and EARFCN
          */
-        const val DOWNLINK_EARFCN_MIN = BandTableLte.DOWNLINK_MIN.toLong()
+        const val DOWNLINK_EARFCN_MIN = 1L
 
         /**
-         * @see BandTableLte.DOWNLINK_MAX
+         * Source: [3GPP 36.101](https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=2411),
+         * 5.7.3 Carrier frequency and EARFCN
          */
-        const val DOWNLINK_EARFCN_MAX = BandTableLte.DOWNLINK_MAX.toLong()
+        const val DOWNLINK_EARFCN_MAX = 262_143L
 
         internal val DOWNLINK_EARFCN_RANGE = DOWNLINK_EARFCN_MIN..DOWNLINK_EARFCN_MAX
         internal val BANDWIDTH_RANGE = BANDWIDTH_MIN..BANDWIDTH_MAX

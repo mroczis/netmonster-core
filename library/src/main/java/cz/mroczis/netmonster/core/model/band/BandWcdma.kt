@@ -2,7 +2,6 @@ package cz.mroczis.netmonster.core.model.band
 
 import android.os.Build
 import androidx.annotation.IntRange
-import cz.mroczis.netmonster.core.db.BandTableWcdma
 import cz.mroczis.netmonster.core.model.annotation.SinceSdk
 
 @SinceSdk(Build.VERSION_CODES.N)
@@ -23,14 +22,14 @@ data class BandWcdma(
     companion object {
 
         /**
-         * @see BandTableWcdma.DOWNLINK_MIN
+         * Minimal UARFCN
          */
-        const val DOWNLINK_UARFCN_MIN = BandTableWcdma.DOWNLINK_MIN.toLong()
+        const val DOWNLINK_UARFCN_MIN = 0L
 
         /**
-         * @see BandTableWcdma.DOWNLINK_MAX
+         * UARFCN is 14-bit number. This value represents 2^14 - 1
          */
-        const val DOWNLINK_UARFCN_MAX = BandTableWcdma.DOWNLINK_MAX.toLong()
+        const val DOWNLINK_UARFCN_MAX = 16_383L
 
         internal val DOWNLINK_UARFCN_RANGE = DOWNLINK_UARFCN_MIN..DOWNLINK_UARFCN_MAX
     }

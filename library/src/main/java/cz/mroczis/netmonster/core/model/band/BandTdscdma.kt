@@ -16,14 +16,14 @@ data class BandTdscdma(
     companion object {
 
         /**
-         * @see BandTableTdscdma.DOWNLINK_MIN
+         * Minimal UARFCN
          */
-        const val DOWNLINK_UARFCN_MIN = BandTableTdscdma.DOWNLINK_MIN.toLong()
+        const val DOWNLINK_UARFCN_MIN = 0
 
         /**
-         * @see BandTableTdscdma.DOWNLINK_MAX
+         * UARFCN is 14-bit number. This value represents 2^14 - 1
          */
-        const val DOWNLINK_UARFCN_MAX = BandTableTdscdma.DOWNLINK_MAX.toLong()
+        const val DOWNLINK_UARFCN_MAX = 16_383L
 
         internal val DOWNLINK_UARFCN_RANGE = DOWNLINK_UARFCN_MIN..DOWNLINK_UARFCN_MAX
     }
