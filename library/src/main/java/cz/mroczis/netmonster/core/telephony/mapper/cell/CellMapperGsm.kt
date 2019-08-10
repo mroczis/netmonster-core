@@ -23,7 +23,12 @@ import cz.mroczis.netmonster.core.util.inRangeOrNull
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 internal fun CellSignalStrengthGsm.mapSignal(): SignalGsm {
     val rssi = dbm.inRangeOrNull(SignalGsm.RSSI_RANGE)
-    val bitError = bitErrorRate.inRangeOrNull(SignalGsm.BIT_ERROR_RATE_RANGE)
+    val bitError = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        bitErrorRate.inRangeOrNull(SignalGsm.BIT_ERROR_RATE_RANGE)
+    } else Reflection.intFieldOrNull(Reflection.GSM_BIT_ERROR_RATE, this)
+        ?.inRangeOrNull(SignalGsm.BIT_ERROR_RATE_RANGE)
+
+
     val ta = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
             timingAdvance.inRangeOrNull(SignalGsm.TIMING_ADVANCE_RANGE)
@@ -56,7 +61,7 @@ internal fun CellIdentityGsm.mapCell(connection: IConnection, signal: SignalGsm)
         bsic.inRangeOrNull(CellGsm.BSIC_RANGE)
     } else null
 
-    val arfcn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    val arfcn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         arfcn.inRangeOrNull(BandGsm.ARFCN_RANGE)
     } else null
 

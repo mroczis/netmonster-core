@@ -3,6 +3,7 @@ package cz.mroczis.netmonster.core.util
 object Reflection {
 
     // CellSignalStrengthGsm
+    const val GSM_BIT_ERROR_RATE = "mBitErrorRate"
     const val GSM_TIMING_ADVANCE = "mTimingAdvance" // Standard Android API
     const val GSM_TA = "mTa" // Sony Xperia
 

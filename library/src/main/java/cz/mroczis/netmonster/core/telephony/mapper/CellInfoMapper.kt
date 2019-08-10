@@ -14,11 +14,11 @@ import cz.mroczis.netmonster.core.telephony.mapper.cell.mapSignal
  * Transforms result of [TelephonyManager.getAllCellInfo] into our list
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-class CellInfoMapper : ICellMapper<List<CellInfo>> {
+class CellInfoMapper : ICellMapper<List<CellInfo>?> {
 
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-    override fun map(model: List<CellInfo>): List<ICell> =
-        model.mapNotNull {
+    override fun map(model: List<CellInfo>?): List<ICell> =
+        model?.mapNotNull {
             if (it is CellInfoGsm) {
                 mapGsm(it)
             } else if (it is CellInfoLte) {
@@ -32,7 +32,7 @@ class CellInfoMapper : ICellMapper<List<CellInfo>> {
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && it is CellInfoNr) {
                 mapNr(it)
             } else null
-        }
+        } ?: emptyList()
 
 
     private fun mapGsm(model: CellInfoGsm): ICell? {

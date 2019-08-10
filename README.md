@@ -46,6 +46,27 @@ Here's small comparison for each of voice / data network you can meet.
 |CQI         |O (26)         |I (14)                  |
 |SNR         |O (26)         |I (14)                  |
 |TA          |O (26)         |I (14)                  |
+|Band        |-              |N (24)                  |  
+
+
+### Usage
+
+NetMonster Core focuses on mapping of two AOSP's ways to fetch current cell information:
+ - [TelephonyManager.getAllCellInfo()](https://developer.android.com/reference/android/telephony/TelephonyManager#getAllCellInfo())
+ - [TelephonyManager.getCellLocation()](https://developer.android.com/reference/android/telephony/TelephonyManager.html#getCellLocation()) (deprecated in AOSP)
+
+Whilst using NetMonster Core you just need to retrieve instance of `TelephonyManagerCompat` and
+call method whose name corresponds to AOSP's one.
+
+```kotlin
+TelephonyManagerCompat.getInstance(this).apply {
+    getAllCellInfo { cellList : List<ICell> ->
+        
+    }
+
+    val cellLocation : List<ICell> = getCellLocation()
+}
+```
     
 License
 -------

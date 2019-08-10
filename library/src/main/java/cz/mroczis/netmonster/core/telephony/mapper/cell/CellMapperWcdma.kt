@@ -82,7 +82,7 @@ internal fun CellIdentityWcdma.mapCell(connection: IConnection, signal: SignalWc
     val lac = lac.inRangeOrNull(CellWcdma.LAC_RANGE)
     val psc = psc.inRangeOrNull(CellWcdma.PSC_RANGE)
 
-    val uarfcn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    val uarfcn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         uarfcn.inRangeOrNull(BandWcdma.DOWNLINK_UARFCN_RANGE)
     } else null
 

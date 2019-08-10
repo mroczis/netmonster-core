@@ -28,7 +28,7 @@ internal fun CellIdentityLte.mapCell(connection: IConnection, signal: SignalLte)
     val tac = tac.inRangeOrNull(CellLte.TAC_RANGE)
     val pci = pci.inRangeOrNull(CellLte.PCI_RANGE)
 
-    val earfcn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    val earfcn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         earfcn.inRangeOrNull(BandLte.DOWNLINK_EARFCN_RANGE)
     } else null
 
