@@ -106,19 +106,19 @@ class CellLocationMapper(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             telephony.signalStrength
         } else {
-            val await = CountDownLatch(1)
+            val asyncLock = CountDownLatch(1)
             var signal: SignalStrength? = null
             val signalListener = SignalListener(subId) {
                 // Invoked when data are updated for the 1st time
                 signal = it
-                await.countDown()
+                asyncLock.countDown()
             }
 
             telephony.listen(signalListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS)
 
             // This usually takes +/- 20 ms to complete
             try {
-                await.await(500, TimeUnit.MILLISECONDS)
+                asyncLock.await(500, TimeUnit.MILLISECONDS)
             } catch (e: InterruptedException) {
                 // System was not able to deliver SignalStrength in this time slot
             }

@@ -1,11 +1,14 @@
 package cz.mroczis.netmonster.core.telephony
 
 import android.Manifest
+import android.os.Build
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
 import cz.mroczis.netmonster.core.callback.CellCallbackError
 import cz.mroczis.netmonster.core.callback.CellCallbackSuccess
+import cz.mroczis.netmonster.core.model.annotation.SinceSdk
+import cz.mroczis.netmonster.core.model.annotation.TillSdk
 import cz.mroczis.netmonster.core.model.cell.ICell
 
 interface ITelephonyManagerCompat {
@@ -26,6 +29,7 @@ interface ITelephonyManagerCompat {
      */
     @WorkerThread
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    @SinceSdk(Build.VERSION_CODES.JELLY_BEAN_MR1)
     fun getAllCellInfo(
         onSuccess: CellCallbackSuccess
     )
@@ -46,6 +50,7 @@ interface ITelephonyManagerCompat {
      */
     @WorkerThread
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    @SinceSdk(Build.VERSION_CODES.JELLY_BEAN_MR1)
     fun getAllCellInfo(
         onSuccess: CellCallbackSuccess,
         onError: CellCallbackError?
@@ -75,4 +80,25 @@ interface ITelephonyManagerCompat {
         allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE]
     )
     fun getCellLocation() : List<ICell>
+
+
+    /**
+     * Returns the neighboring cell information for GSM (CID, LAC, RSSI) and WCDMA networks (PSC, RSSI).
+     * Other networks are not supported. To get more information use [getAllCellInfo].
+     *
+     * Supports only [ICell] subset:
+     *  - [cz.mroczis.netmonster.core.model.cell.CellGsm]
+     *  - [cz.mroczis.netmonster.core.model.cell.CellWcdma]
+     *
+     * Based on:
+     *  - [TelephonyManager.getNeighboringCellInfo]
+     *  - [TelephonyManager.getNetworkOperator]
+     */
+    @WorkerThread
+    @RequiresPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+    @TillSdk(
+        sdkInt = Build.VERSION_CODES.Q,
+        fallbackBehaviour = "On Q+ returns empty list since method was removed from SDK"
+    )
+    fun getNeighbouringCells() : List<ICell>
 }

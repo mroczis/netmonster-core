@@ -4,11 +4,10 @@ import android.os.Build
 
 /**
  * Detonates that given feature is available in NetMonster Core, however it will always return
- * invalid value / null (depending on return value of function or field nullability) till current
+ * invalid value / null (depending on return value of function or field nullability) when current
  * [Build.VERSION.SDK_INT] if greater or equal to [sdkInt].
  *
- * If this annotation is applied to a type then it means that not a single instance of it will appear
- * till device has at least [sdkInt].
+ * Look to [fallbackBehaviour] description to find out what'll happen on those unsupported SDK versions.
  */
 @Retention(AnnotationRetention.SOURCE)
 @Target(
@@ -17,4 +16,4 @@ import android.os.Build
     AnnotationTarget.FUNCTION,
     AnnotationTarget.PROPERTY
 )
-annotation class SinceSdk(val sdkInt: Int)
+annotation class TillSdk(val sdkInt: Int, val fallbackBehaviour: String)

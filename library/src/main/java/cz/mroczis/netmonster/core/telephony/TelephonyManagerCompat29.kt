@@ -9,6 +9,7 @@ import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
 import cz.mroczis.netmonster.core.callback.CellCallbackError
 import cz.mroczis.netmonster.core.callback.CellCallbackSuccess
+import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.telephony.mapper.CellInfoCallbackMapper
 import cz.mroczis.netmonster.core.util.DirectExecutor
 
@@ -40,6 +41,9 @@ internal open class TelephonyManagerCompat29(
             }
         ))
     }
+
+    @RequiresPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+    override fun getNeighbouringCells(): List<ICell> = emptyList()
 
 
 }
