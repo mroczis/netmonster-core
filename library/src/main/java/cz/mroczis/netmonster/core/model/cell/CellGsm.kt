@@ -69,6 +69,8 @@ data class CellGsm(
             "${network.toPlmn()}${lac.toString().padStart(5, '0')}${cid.toString().padStart(5, '0')}"
         } else null
 
+    override fun <T> let(processor: ICellProcessor<T>): T = processor.processGsm(this)
+
     companion object {
 
         /**

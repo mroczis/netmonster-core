@@ -64,6 +64,7 @@ data class CellWcdma(
             "${network.toPlmn()}${lac.toString().padStart(5, '0')}${cid.toString().padStart(5, '0')}"
         } else null
 
+    override fun <T> let(processor: ICellProcessor<T>): T = processor.processWcdma(this)
 
     companion object {
 

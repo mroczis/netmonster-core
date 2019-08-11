@@ -61,6 +61,7 @@ data class CellLte(
             "${network.toPlmn()}${eci.toString().padStart(10, '0')}"
         } else null
 
+    override fun <T> let(processor: ICellProcessor<T>): T = processor.processLte(this)
 
     companion object {
 

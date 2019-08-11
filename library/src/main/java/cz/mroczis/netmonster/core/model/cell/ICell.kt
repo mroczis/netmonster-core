@@ -23,4 +23,15 @@ interface ICell {
      * Signal of this cell
      */
     val signal: ISignal?
+
+    /**
+     * Using visitor pattern invokes one method of [processor]
+     * with proper [ICell] instance.
+     *
+     * Use this to map NetMonster's instances into yours.
+     *
+     * @param processor class that manages transformation from this object to another
+     */
+    fun <T> let(processor: ICellProcessor<T>) : T
+
 }

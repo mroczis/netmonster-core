@@ -43,6 +43,8 @@ data class CellNr(
     override val connectionStatus: IConnection
 ) : ICell {
 
+    override fun <T> let(processor: ICellProcessor<T>): T = processor.processNr(this)
+
     companion object {
 
         const val CID_MIN = 0L

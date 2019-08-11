@@ -54,6 +54,8 @@ data class CellCdma(
      */
     override val band: IBand? = null
 
+    override fun <T> let(processor: ICellProcessor<T>): T = processor.processCdma(this)
+
     companion object {
 
         const val NID_MIN = 0L
