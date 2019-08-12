@@ -51,22 +51,54 @@ Here's small comparison for each of voice / data network you can meet.
 
 ### Usage
 
+There are basically two ways you can use this library - as a validation library that will sanitize
+data from AOSP cause lots of manufacturers modify source code and do not follow public documentation.
+In that case you'll only need `ITelephonyManagerCompat` to retrieve AOSP-like models that are properly
+validated.
+
+The second option is to use advantages of additional postprocessing of NetMonster Core. As a result
+you'll get more data but correctness is not 100 % guaranteed. 
+
+#### Without additional postprocessing
+
 NetMonster Core focuses on mapping of two AOSP's ways to fetch current cell information:
  - [TelephonyManager.getAllCellInfo()](https://developer.android.com/reference/android/telephony/TelephonyManager#getAllCellInfo())
  - [TelephonyManager.getCellLocation()](https://developer.android.com/reference/android/telephony/TelephonyManager.html#getCellLocation()) (deprecated in AOSP)
+ - TelephonyManager.getNeighbouringCells() (removed from AOSP)
 
-Whilst using NetMonster Core you just need to retrieve instance of `TelephonyManagerCompat` and
-call method whose name corresponds to AOSP's one.
+Note that some of those methods are deprecated or even removed from AOSP - for more info see documentation of each method.
 
 ```kotlin
-TelephonyManagerCompat.getInstance(this).apply {
-    getAllCellInfo { cellList : List<ICell> ->
-        
-    }
-
+NetMonsterFactory.getTelephony(context, SUBSCRIPTION_ID).apply {
+    val allCellInfo : List<ICell> = getAllCellInfo() 
     val cellLocation : List<ICell> = getCellLocation()
+    val neighbouringCells : List<ICell> = getNeighbouringCells()
 }
 ```
+
+#### Postprocessing
+
+In this case you'll need to interact with `INetMonster` class. Here's list of problems 
+that this library solves.
+
+##### Merging data from multiple sources
+Issue:
+ - Android offers multiple ways how to get cell information.
+ - Not all devices support one unified way how to access all the data.
+
+Solution:
+ - NetMonster Core grabs data from sources you specify, validates and merges them.
+
+```kotlin
+NetMonsterFactory.get(context, SUBSCRIPTION_ID).apply {
+    val allSources : List<ICell> = getCells() // all sources
+    val subset : List<ICell> = getCells( // subset of available sources
+        CellSource.ALL_CELL_INFO, 
+        CellSource.CELL_LOCATION
+    ) 
+}
+```
+
     
 License
 -------

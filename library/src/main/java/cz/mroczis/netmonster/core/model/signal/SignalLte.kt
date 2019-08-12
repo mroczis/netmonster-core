@@ -116,7 +116,7 @@ data class SignalLte(
         const val RSRP_MIN = -140.0
 
         const val RSRQ_MAX = -3.0
-        const val RSRQ_MIN = -19.5
+        const val RSRQ_MIN = -20.0
 
         const val CQI_MAX = 15L
         const val CQI_MIN = 1L

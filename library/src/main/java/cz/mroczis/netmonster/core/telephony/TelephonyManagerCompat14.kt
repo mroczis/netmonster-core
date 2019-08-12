@@ -14,6 +14,8 @@ import cz.mroczis.netmonster.core.model.model.CellError
 import cz.mroczis.netmonster.core.telephony.mapper.CellInfoMapper
 import cz.mroczis.netmonster.core.telephony.mapper.CellLocationMapper
 import cz.mroczis.netmonster.core.telephony.mapper.NeighbouringCellInfoMapper
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 /**
  * Modifies some functionalities of [TelephonyManager] and unifies access to
@@ -21,7 +23,7 @@ import cz.mroczis.netmonster.core.telephony.mapper.NeighbouringCellInfoMapper
  */
 internal open class TelephonyManagerCompat14(
     private val context: Context,
-    private val subId: Int = Integer.MAX_VALUE
+    private val subId: Int
 ) : ITelephonyManagerCompat {
 
     protected val telephony: TelephonyManager
@@ -54,6 +56,25 @@ internal open class TelephonyManagerCompat14(
             onSuccess.invoke(emptyList())
         }
 
+    @WorkerThread
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    override fun getAllCellInfo(timeoutMilliseconds: Long): List<ICell> {
+        var result = emptyList<ICell>()
+        val asyncLock = CountDownLatch(1)
+
+        getAllCellInfo { data ->
+            result = data
+            asyncLock.countDown()
+        }
+
+        try {
+            asyncLock.await(timeoutMilliseconds, TimeUnit.MILLISECONDS)
+        } catch (ignored: InterruptedException) {
+
+        }
+
+        return result
+    }
 
     @Suppress("DEPRECATION")
     @WorkerThread

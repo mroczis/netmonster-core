@@ -1,4 +1,4 @@
-package cz.mroczis.netmonster.core.telephony.merger
+package cz.mroczis.netmonster.core.feature.merge
 
 import cz.mroczis.netmonster.core.model.cell.CellGsm
 import cz.mroczis.netmonster.core.model.cell.CellWcdma
@@ -20,7 +20,7 @@ import cz.mroczis.netmonster.core.util.removeFirstOrNull
  */
 class CellMergerNotPrimary : ICellMerger {
 
-    override fun merge(oldApi: List<ICell>, newApi: List<ICell>): List<ICell> =
+    override fun merge(oldApi: List<ICell>, newApi: List<ICell>, displayOn: Boolean): List<ICell> =
         if (oldApi.isEmpty()) {
             newApi
         } else if (newApi.isEmpty()) {
@@ -44,7 +44,7 @@ class CellMergerNotPrimary : ICellMerger {
                 }
             }.toMutableList()
 
-            // Append the rest of old API if there are no sibling in new api
+            // Append the rest of old API if there are no siblings left in new api
             if (oldCopy.isNotEmpty()) {
                 merged.addAll(oldCopy)
             }
@@ -76,14 +76,12 @@ class CellMergerNotPrimary : ICellMerger {
      *
      * What can be improved:
      *  - RSSI
-     *  - LAC
      */
     private fun mergeGsm(new: CellGsm, old: CellGsm) : CellGsm {
         val rssi = pickBetterRssi(new.signal.rssi, old.signal.rssi, SignalGsm.RSSI_MIN.toInt())
-        val lac = old.lac ?: new.lac // favouring old API
 
-        return if (rssi != new.signal.rssi || lac != new.lac) {
-            new.copy(lac = lac, signal = new.signal.copy(rssi = rssi))
+        return if (rssi != new.signal.rssi) {
+            new.copy(signal = new.signal.copy(rssi = rssi))
         } else {
             new
         }

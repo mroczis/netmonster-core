@@ -1,4 +1,4 @@
-package cz.mroczis.netmonster.core.telephony.merger
+package cz.mroczis.netmonster.core.feature.merge
 
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.telephony.ITelephonyManagerCompat
@@ -15,8 +15,8 @@ interface ICellMerger {
      *
      * @param oldApi data from [ITelephonyManagerCompat.getNeighbouringCells] and / or [ITelephonyManagerCompat.getCellLocation]
      * @param newApi data from [ITelephonyManagerCompat.getAllCellInfo]
-     *
+     * @param displayOn true is any display of current device is on
      */
-    fun merge(oldApi: List<ICell>, newApi: List<ICell>) : List<ICell>
+    fun merge(oldApi: List<ICell>, newApi: List<ICell>, displayOn: Boolean) : List<ICell>
 
 }

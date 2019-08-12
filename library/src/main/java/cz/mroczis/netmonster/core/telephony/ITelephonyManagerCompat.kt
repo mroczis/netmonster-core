@@ -21,7 +21,8 @@ interface ITelephonyManagerCompat {
      * and process the data (reflection is involved here).
      *
      * This method always invokes request to RIL so returned data are as fresh as possible.
-     * If any error occurs during processing then [onSuccess] is invoked with empty list of cells.
+     * If any error occurs during processing then [onSuccess] is invoked with latest valid
+     * data. If none are present then expect empty list.
      *
      * Based on:
      *  - [TelephonyManager.getAllCellInfo]
@@ -55,6 +56,20 @@ interface ITelephonyManagerCompat {
         onSuccess: CellCallbackSuccess,
         onError: CellCallbackError?
     )
+
+    /**
+     * Works as other [getAllCellInfo] methods but intentionally BLOCKS current thread
+     * till data are not retrieved from system and post-processed.
+     *
+     * This method always does not block current thread for longer than [timeoutMilliseconds].
+     * In case of timeout empty list is returned, no exceptions are thrown here.
+     *
+     * @return freshest data possible, if error occurs then latest valid data or eventually empty list
+     */
+    @WorkerThread
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    @SinceSdk(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    fun getAllCellInfo(timeoutMilliseconds: Long = 500) : List<ICell>
 
     /**
      * Attempts to retrieve cell information using older telephony methods.

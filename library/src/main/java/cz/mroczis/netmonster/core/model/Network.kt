@@ -37,7 +37,7 @@ data class Network internal constructor(
         const val MCC_MIN = 1
         const val MCC_MAX = 999
 
-        const val MNC_MIN = 1
+        const val MNC_MIN = 0
         const val MNC_MAX = 99
 
         internal val MCC_RANGE = MCC_MIN..MCC_MAX
