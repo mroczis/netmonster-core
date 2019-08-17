@@ -2,6 +2,8 @@ package cz.mroczis.netmonster.core.telephony.mapper
 
 import android.Manifest
 import android.os.Build
+import android.os.Handler
+import android.os.HandlerThread
 import android.telephony.CellLocation
 import android.telephony.PhoneStateListener
 import android.telephony.SignalStrength
@@ -50,7 +52,12 @@ class CellLocationMapper(
          * Async executor so can await data from [PhoneStateListener] when device has older
          * Android device.
          */
-        private val asyncExecutor by lazy { Executors.newFixedThreadPool(1) }
+        private val asyncExecutor by lazy {
+            val thread = HandlerThread("CellLocationMapper").apply {
+                start()
+            }
+            Handler(thread.looper)
+        }
     }
 
     /**
@@ -106,16 +113,25 @@ class CellLocationMapper(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             telephony.signalStrength
         } else {
-            val asyncLock = CountDownLatch(1)
             var signal: SignalStrength? = null
-            val signalListener = SignalListener(subId) {
-                // Invoked when data are updated for the 1st time
-                signal = it
-                asyncLock.countDown()
+            val asyncLock = CountDownLatch(1)
+
+            // And we must wait for the data on an another thread to avoid deadlocks
+            asyncExecutor.post {
+                // We must construct signal listener on custom thread
+                // cause it takes Looper from it -> results will be delivered there
+                val signalListener = SignalListener(subId) {
+                    // Invoked when data are updated for the 1st time
+                    signal = it
+                    telephony.listen(this, PhoneStateListener.LISTEN_NONE)
+                    asyncLock.countDown()
+                }
+
+                telephony.listen(signalListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS)
             }
 
-            telephony.listen(signalListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS)
-
+            // And we also must block original thread
+            // It'll get unblocked once we receive required data
             // This usually takes +/- 20 ms to complete
             try {
                 asyncLock.await(500, TimeUnit.MILLISECONDS)
@@ -123,18 +139,18 @@ class CellLocationMapper(
                 // System was not able to deliver SignalStrength in this time slot
             }
 
-            telephony.listen(signalListener, PhoneStateListener.LISTEN_NONE)
             signal
         }
 
     private class SignalListener(
         subId: Int?,
-        private val callback: (signal: SignalStrength?) -> Unit
-    ) : PhoneStateListenerPort(asyncExecutor, subId) {
+        private val callback: SignalListener.(signal: SignalStrength?) -> Unit
+    ) : PhoneStateListenerPort(subId) {
         override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {
             super.onSignalStrengthsChanged(signalStrength)
-            callback.invoke(signalStrength)
+            callback.invoke(this, signalStrength)
         }
     }
+
 
 }

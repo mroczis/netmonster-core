@@ -15,13 +15,12 @@ import cz.mroczis.netmonster.core.model.connection.SecondaryConnection
 internal fun CellInfo.mapConnection(): IConnection =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         when(cellConnectionStatus) {
-            CellInfo.CONNECTION_NONE ->
-                NoneConnection()
             CellInfo.CONNECTION_PRIMARY_SERVING ->
                 PrimaryConnection()
             CellInfo.CONNECTION_SECONDARY_SERVING ->
                 SecondaryConnection(isGuess = false)
             else ->
+                // Xiaomi Mi A1 returns CellInfo.CONNECTION_NONE & isRegistered = true
                 if (isRegistered) {
                     PrimaryConnection()
                 } else {

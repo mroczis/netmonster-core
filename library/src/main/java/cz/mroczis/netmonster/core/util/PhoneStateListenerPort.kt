@@ -2,6 +2,7 @@ package cz.mroczis.netmonster.core.util
 
 import android.os.Build
 import android.telephony.PhoneStateListener
+import cz.mroczis.netmonster.core.model.annotation.SinceSdk
 import java.util.concurrent.Executor
 
 /**
@@ -10,13 +11,9 @@ import java.util.concurrent.Executor
  *
  * Does not work well for Samsung phones -> random data are reported so this function is blocked for them.
  */
-open class PhoneStateListenerPort : PhoneStateListener {
+open class PhoneStateListenerPort(subId: Int?) : PhoneStateListener() {
 
-    constructor(executor: Executor, subId: Int?) : super(executor) {
-        init(subId)
-    }
-
-    constructor(subId: Int?) : super() {
+    init {
         init(subId)
     }
 
@@ -29,7 +26,7 @@ open class PhoneStateListenerPort : PhoneStateListener {
                     isAccessible = true
                     set(this, subId)
                 }
-            } catch (ignored: Exception) {
+            } catch (ignored: Throwable) {
                 // When it does not work, it does not work...
             }
         }

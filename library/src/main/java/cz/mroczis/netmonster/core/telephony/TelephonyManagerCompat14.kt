@@ -3,8 +3,7 @@ package cz.mroczis.netmonster.core.telephony
 import android.Manifest
 import android.content.Context
 import android.os.Build
-import android.telephony.NeighboringCellInfo
-import android.telephony.TelephonyManager
+import android.telephony.*
 import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
 import cz.mroczis.netmonster.core.callback.CellCallbackError
@@ -89,7 +88,7 @@ internal open class TelephonyManagerCompat14(
     @RequiresPermission(
         allOf = [Manifest.permission.ACCESS_COARSE_LOCATION]
     )
-    override fun getNeighbouringCells(): List<ICell> =
+    override fun getNeighboringCellInfo(): List<ICell> =
         try {
             // Reflection required cause we compile against SDK 29+ where this method
             // was removed

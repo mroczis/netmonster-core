@@ -43,7 +43,7 @@ internal open class TelephonyManagerCompat29(
     }
 
     @RequiresPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
-    override fun getNeighbouringCells(): List<ICell> = emptyList()
+    override fun getNeighboringCellInfo(): List<ICell> = emptyList()
 
 
 }

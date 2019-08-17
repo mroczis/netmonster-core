@@ -115,5 +115,5 @@ interface ITelephonyManagerCompat {
         sdkInt = Build.VERSION_CODES.Q,
         fallbackBehaviour = "On Q+ returns empty list since method was removed from SDK"
     )
-    fun getNeighbouringCells() : List<ICell>
+    fun getNeighboringCellInfo() : List<ICell>
 }

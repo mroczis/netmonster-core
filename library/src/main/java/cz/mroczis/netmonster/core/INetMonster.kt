@@ -28,19 +28,13 @@ interface INetMonster {
      * For more information see documentation of each method that might be involved:
      *
      *  @see ITelephonyManagerCompat.getCellLocation
-     *  @see ITelephonyManagerCompat.getNeighbouringCells
+     *  @see ITelephonyManagerCompat.getNeighboringCellInfo
      *  @see ITelephonyManagerCompat.getAllCellInfo
      */
     @WorkerThread
     @RequiresPermission(
         allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE]
     )
-    fun getCells(
-        vararg sources: CellSource = arrayOf(
-            CellSource.ALL_CELL_INFO,
-            CellSource.NEIGHBOURING_CELLS,
-            CellSource.CELL_LOCATION
-        )
-    ): List<ICell>
+    fun getCells(vararg sources: CellSource = CellSource.values()): List<ICell>
 
 }

@@ -15,6 +15,7 @@ import android.os.Build
     AnnotationTarget.CLASS,
     AnnotationTarget.FIELD,
     AnnotationTarget.FUNCTION,
-    AnnotationTarget.PROPERTY
+    AnnotationTarget.PROPERTY,
+    AnnotationTarget.CONSTRUCTOR
 )
 annotation class SinceSdk(val sdkInt: Int)

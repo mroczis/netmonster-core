@@ -28,7 +28,7 @@ internal class NetMonster(
             }
 
             if (sources.contains(CellSource.NEIGHBOURING_CELLS)) {
-                addAll(telephony.getNeighbouringCells())
+                addAll(telephony.getNeighboringCellInfo())
             }
         }
 

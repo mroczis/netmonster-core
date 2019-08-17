@@ -12,7 +12,7 @@ import cz.mroczis.netmonster.core.util.removeFirstOrNull
 
 /**
  * Merges not primary cells (with [NoneConnection], [SecondaryConnection] as connection) from two sources:
- *  - [ITelephonyManagerCompat.getNeighbouringCells]
+ *  - [ITelephonyManagerCompat.getNeighboringCellInfo]
  *  - [ITelephonyManagerCompat.getAllCellInfo]
  * into one list without duplicities.
  */
@@ -120,37 +120,33 @@ class CellMergerPrimary : ICellMerger {
             new.psc ?: old.psc
         }
 
-        // Same behaviour works well for LAC
-        val lac = old.lac ?: new.lac
-
-        return if (rssi != new.signal.rssi) {
-            new.copy(
-                lac = lac,
-                psc = psc,
-                signal = new.signal.copy(
-                    rssi = rssi,
-                    rscp = new.signal.rscp ?: old.signal.rscp,
-                    ecio = new.signal.ecio ?: old.signal.ecio,
-                    bitErrorRate = new.signal.bitErrorRate ?: old.signal.bitErrorRate
-                ))
-        } else {
-            new
-        }
+        return new.copy(
+            lac = old.lac ?: new.lac,
+            psc = psc,
+            signal = new.signal.copy(
+                rssi = rssi,
+                rscp = new.signal.rscp ?: old.signal.rscp,
+                ecio = new.signal.ecio ?: old.signal.ecio,
+                bitErrorRate = new.signal.bitErrorRate ?: old.signal.bitErrorRate
+            )
+        )
     }
 
     /**
      * GSM merging for primary cells:
-     * - [old] contains CID, LAC and RSSI
+     * - [old] contains CID, LAC, RSSI and BER
      * - [new] same as old + BSIC, band
      *
      * What can be improved:
      *  - RSSI
+     *  - BER
      */
     private fun mergeGsm(new: CellGsm, old: CellGsm): CellGsm {
         val rssi = pickBetterRssi(new.signal.rssi, old.signal.rssi, SignalGsm.RSSI_MIN.toInt())
+        val ber = new.signal.bitErrorRate ?: old.signal.bitErrorRate
 
-        return if (rssi != new.signal.rssi) {
-            new.copy(signal = new.signal.copy(rssi = rssi))
+        return if (rssi != new.signal.rssi || ber != new.signal.bitErrorRate) {
+            new.copy(signal = new.signal.copy(rssi = rssi, bitErrorRate = ber))
         } else {
             new
         }

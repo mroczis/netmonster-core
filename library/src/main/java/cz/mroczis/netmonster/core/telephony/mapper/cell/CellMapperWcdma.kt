@@ -16,6 +16,8 @@ import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 import cz.mroczis.netmonster.core.model.signal.SignalGsm
 import cz.mroczis.netmonster.core.model.signal.SignalWcdma
 import cz.mroczis.netmonster.core.util.Reflection
+import cz.mroczis.netmonster.core.util.toDbm
+import cz.mroczis.netmonster.core.util.getGsmRssi
 import cz.mroczis.netmonster.core.util.inRangeOrNull
 
 private val REGEX_BIT_ERROR = "ber=([^ ]*)".toRegex()
@@ -39,7 +41,7 @@ internal fun CellSignalStrengthWcdma.mapSignal(): SignalWcdma {
     } else {
         // Some older phones reported inadequate values when it came to ASU and DBM sources
         // We must decide what happens if values do not fit
-        val rssiFromAsu = (-113 + 2 * asuLevel).inRangeOrNull(SignalWcdma.RSSI_RANGE) // ASU -> DBM
+        val rssiFromAsu = asuLevel.toDbm().inRangeOrNull(SignalWcdma.RSSI_RANGE) // ASU -> DBM
         val rssiFromDbm = dbm.inRangeOrNull(SignalWcdma.RSSI_RANGE)
         // In real world those two values must be equal
         if (rssiFromAsu != rssiFromAsu) {
@@ -128,7 +130,7 @@ internal fun GsmCellLocation.mapWcdma(signalStrength: SignalStrength?, network: 
     val lac = lac.inRangeOrNull(CellWcdma.LAC_RANGE)
     val psc = psc.inRangeOrNull(CellWcdma.PSC_RANGE)
 
-    val rssi = signalStrength?.gsmSignalStrength?.inRangeOrNull(SignalGsm.RSSI_RANGE)
+    val rssi = signalStrength?.getGsmRssi()?.inRangeOrNull(SignalGsm.RSSI_RANGE)
     val ber = signalStrength?.gsmBitErrorRate?.inRangeOrNull(SignalGsm.BIT_ERROR_RATE_RANGE)
     val ecio = Reflection.intFieldOrNull(Reflection.UMTS_ECIO, signalStrength)?.inRangeOrNull(SignalWcdma.ECIO_RANGE)
     val rscp = Reflection.intFieldOrNull(Reflection.UMTS_RSCP, signalStrength)?.inRangeOrNull(SignalWcdma.RSCP_RANGE)

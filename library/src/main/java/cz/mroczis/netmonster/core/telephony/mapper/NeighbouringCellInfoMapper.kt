@@ -13,6 +13,7 @@ import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.connection.NoneConnection
 import cz.mroczis.netmonster.core.model.signal.SignalGsm
 import cz.mroczis.netmonster.core.model.signal.SignalWcdma
+import cz.mroczis.netmonster.core.util.getGsmRssi
 import cz.mroczis.netmonster.core.util.inRangeOrNull
 
 /**
@@ -50,7 +51,7 @@ class NeighbouringCellInfoMapper(
     private fun processGsm(it: NeighboringCellInfo, plmn: Network?): ICell? {
         val cid = it.cid.inRangeOrNull(CellGsm.CID_RANGE)
         val lac = it.lac.inRangeOrNull(CellGsm.LAC_RANGE)
-        val rssi = it.rssi.inRangeOrNull(SignalGsm.RSSI_RANGE)
+        val rssi = it.getGsmRssi()?.inRangeOrNull(SignalGsm.RSSI_RANGE)
 
         return if (cid != null && lac != null) {
             CellGsm(

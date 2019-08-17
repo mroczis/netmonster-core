@@ -14,7 +14,9 @@ import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.connection.IConnection
 import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 import cz.mroczis.netmonster.core.model.signal.SignalLte
+import cz.mroczis.netmonster.core.util.RSSI_ASU_RANGE
 import cz.mroczis.netmonster.core.util.Reflection
+import cz.mroczis.netmonster.core.util.toDbm
 import cz.mroczis.netmonster.core.util.inRangeOrNull
 import kotlin.math.abs
 
@@ -58,8 +60,8 @@ internal fun CellSignalStrengthLte.mapSignal(): SignalLte {
     } else {
         Reflection.intFieldOrNull(Reflection.LTE_RSSI, this)?.let { main ->
             // Back in old days RSSI was a big mess...
-            if (main in 0..31) { // in ASU
-                -113 + 2 * main
+            if (main in RSSI_ASU_RANGE) { // in ASU
+                main.toDbm()
             } else if (main > 31 && main != 99) { // in RSRP ASU
                 -113 + main
             } else if (main >= -140 && main <= -40) { // in DBM
@@ -176,9 +178,13 @@ internal fun GsmCellLocation.mapLte(signalStrength: SignalStrength?, network: Ne
 
     // Some devices do report signal strength on LTE as GSM signal strength
     val rssi =
-        (if (signalGsm != null && (0..31).contains(signalGsm) && (signalMain == null || !(0..31).contains(signalMain))) {
-            -113 + 2 * signalGsm
-        } else signalMain)?.inRangeOrNull(SignalLte.RSSI_RANGE)
+        (if (signalGsm != null && signalGsm in RSSI_ASU_RANGE && (signalMain == null || signalMain !in RSSI_ASU_RANGE)) {
+            signalGsm.toDbm()
+        } else if (signalMain != null && signalMain in RSSI_ASU_RANGE) {
+            signalMain.toDbm()
+        } else {
+            signalMain
+        })?.inRangeOrNull(SignalLte.RSSI_RANGE)
 
     val rsrp = Reflection.intFieldOrNull(Reflection.SS_LTE_RSRP, signalStrength)?.toDouble()
         ?.inRangeOrNull(SignalLte.RSRP_RANGE)

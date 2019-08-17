@@ -15,6 +15,7 @@ import cz.mroczis.netmonster.core.model.connection.IConnection
 import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 import cz.mroczis.netmonster.core.model.signal.SignalGsm
 import cz.mroczis.netmonster.core.util.Reflection
+import cz.mroczis.netmonster.core.util.getGsmRssi
 import cz.mroczis.netmonster.core.util.inRangeOrNull
 
 /**
@@ -99,7 +100,7 @@ internal fun GsmCellLocation.mapGsm(signalStrength: SignalStrength?, network: Ne
     val cid = cid.inRangeOrNull(CellGsm.CID_RANGE)
     val lac = lac.inRangeOrNull(CellGsm.LAC_RANGE)
 
-    val rssi = signalStrength?.gsmSignalStrength?.inRangeOrNull(SignalGsm.RSSI_RANGE)
+    val rssi = signalStrength?.getGsmRssi()?.inRangeOrNull(SignalGsm.RSSI_RANGE)
     val ber = signalStrength?.gsmBitErrorRate?.inRangeOrNull(SignalGsm.BIT_ERROR_RATE_RANGE)
 
     return if (cid != null && lac != null) {
