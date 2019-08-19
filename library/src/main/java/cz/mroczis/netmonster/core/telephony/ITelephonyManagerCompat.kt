@@ -7,11 +7,17 @@ import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
 import cz.mroczis.netmonster.core.callback.CellCallbackError
 import cz.mroczis.netmonster.core.callback.CellCallbackSuccess
+import cz.mroczis.netmonster.core.db.model.NetworkType
 import cz.mroczis.netmonster.core.model.annotation.SinceSdk
 import cz.mroczis.netmonster.core.model.annotation.TillSdk
 import cz.mroczis.netmonster.core.model.cell.ICell
 
 interface ITelephonyManagerCompat {
+
+    /**
+     * Getter for AOSP's telephony manager that is used to obtain all info
+     */
+    fun getTelephonyManager() : TelephonyManager?
 
     /**
      * Requests all available cell information from all radios on the device including the
@@ -116,4 +122,13 @@ interface ITelephonyManagerCompat {
         fallbackBehaviour = "On Q+ returns empty list since method was removed from SDK"
     )
     fun getNeighboringCellInfo() : List<ICell>
+
+    /**
+     * Currently active network technology grabbed from AOSP and mapped to [NetworkType].
+     *
+     * Based on:
+     *  - [TelephonyManager.getNetworkType]
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+    fun getNetworkType(): NetworkType
 }

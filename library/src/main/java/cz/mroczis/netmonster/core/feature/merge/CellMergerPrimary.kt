@@ -21,7 +21,7 @@ class CellMergerPrimary : ICellMerger {
     override fun merge(oldApi: List<ICell>, newApi: List<ICell>, displayOn: Boolean): List<ICell> =
         if (newApi.isEmpty()) {
             oldApi
-        } else if (displayOn || newApi.size > 1) {
+        } else if (!displayOn || newApi.size > 1) {
             // 1. Old API does not refresh when display is off
             // 2. When new API reports multiple primary cells then we've got dual SIM phone
             //    and it's better to avoid old API which in most cases return mixed data

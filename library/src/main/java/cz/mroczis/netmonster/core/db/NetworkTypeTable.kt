@@ -27,12 +27,15 @@ object NetworkTypeTable {
         put(16, NetworkType.Gsm(NetworkType.GSM))
         put(17, NetworkType.Tdscdma(NetworkType.TD_SCDMA))
         put(18, NetworkType.Lte(NetworkType.IWLAN))
-        put(19, NetworkType.Lte(NetworkType.LTE_CA))
         put(20, NetworkType.Nr(NetworkType.NR))
+
+        // Not in AOSP / not public in AOSP
+        put(NetworkType.LTE_CA, NetworkType.Lte(NetworkType.LTE_CA))
+        put(NetworkType.HSPA_DC, NetworkType.Wcdma(NetworkType.HSPA_DC))
     }
 
 
-    fun get(networkType: Int) = bands.getOrElse(networkType) { bands[0] }
+    fun get(networkType: Int) : NetworkType = bands.getOrElse(networkType) { bands.getValue(0) }
 
 
 }

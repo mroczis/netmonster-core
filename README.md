@@ -64,7 +64,7 @@ you'll get more data but correctness is not 100 % guaranteed.
 NetMonster Core focuses on mapping of two AOSP's ways to fetch current cell information:
  - [TelephonyManager.getAllCellInfo()](https://developer.android.com/reference/android/telephony/TelephonyManager#getAllCellInfo())
  - [TelephonyManager.getCellLocation()](https://developer.android.com/reference/android/telephony/TelephonyManager.html#getCellLocation()) (deprecated in AOSP)
- - TelephonyManager.getNeighbouringCells() (removed from AOSP)
+ - TelephonyManager.getNeighbouringCellInfo() (removed from AOSP)
 
 Note that some of those methods are deprecated or even removed from AOSP - for more info see documentation of each method.
 
@@ -72,7 +72,7 @@ Note that some of those methods are deprecated or even removed from AOSP - for m
 NetMonsterFactory.getTelephony(context, SUBSCRIPTION_ID).apply {
     val allCellInfo : List<ICell> = getAllCellInfo() 
     val cellLocation : List<ICell> = getCellLocation()
-    val neighbouringCells : List<ICell> = getNeighbouringCells()
+    val neighbouringCells : List<ICell> = getNeighbouringCellInfo()
 }
 ```
 
@@ -99,7 +99,32 @@ NetMonsterFactory.get(context, SUBSCRIPTION_ID).apply {
 }
 ```
 
+##### Detection of LTE-A & HSPA+42
+Issue:
+ - AOSP cannot detect HSPA+42, only HSPA+.
+ - AOSP does not offer a way to distinguish whether current network is using carrier aggregation or not.
+
+Solution:
+ - NetMonster Core attempts to guess HSPA+ 42 availability.
+ - LTE-CA presence can be guessed based on cell info or detected using hidden APIs.
+
+Using `getNetworkType(vararg detectors: INetworkDetector)` you can specify which `INetworkDetector` to use
+when detecting current network type.
+
+```kotlin
+NetMonsterFactory.get(context, SUBSCRIPTION_ID).apply {
+    // All detectors that are bundled in NetMonster Core
+    val networkType : NetworkType = getNetworkType() 
     
+    // Only HSPA+42 (guess, not from RIL)
+    val isHspaDc: NetworkType? = getNetworkType(DetectorHspaDc()) 
+    // LTE-A from CellInfo (guess, not from RIL)
+    val isLteCa: NetworkType? = getNetworkType(DetectorLteAdvancedCellInfo()) 
+    // LTE-A from ServiceState (from RIL)
+    val isLteCaB: NetworkType? = getNetworkType(DetectorLteAdvancedServiceState()) 
+}
+```
+
 License
 -------
 

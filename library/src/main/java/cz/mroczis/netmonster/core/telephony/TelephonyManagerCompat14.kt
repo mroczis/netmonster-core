@@ -8,6 +8,8 @@ import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
 import cz.mroczis.netmonster.core.callback.CellCallbackError
 import cz.mroczis.netmonster.core.callback.CellCallbackSuccess
+import cz.mroczis.netmonster.core.db.NetworkTypeTable
+import cz.mroczis.netmonster.core.db.model.NetworkType
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.model.CellError
 import cz.mroczis.netmonster.core.telephony.mapper.CellInfoMapper
@@ -36,6 +38,8 @@ internal open class TelephonyManagerCompat14(
     protected val cellInfoMapper = CellInfoMapper()
     private val cellLocationMapper = CellLocationMapper(telephony, subId)
     private val neighbouringCellInfoMapper = NeighbouringCellInfoMapper(telephony)
+
+    override fun getTelephonyManager(): TelephonyManager? = telephony
 
     @WorkerThread
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
@@ -99,5 +103,10 @@ internal open class TelephonyManagerCompat14(
             emptyList()
         }
 
+    @RequiresPermission(
+        allOf = [Manifest.permission.READ_PHONE_STATE]
+    )
+    override fun getNetworkType(): NetworkType =
+        NetworkTypeTable.get(telephony.networkType)
 
 }
