@@ -81,7 +81,9 @@ class CellMergerNotPrimary : ICellMerger {
         val rssi = pickBetterRssi(new.signal.rssi, old.signal.rssi, SignalGsm.RSSI_MIN.toInt())
 
         return if (rssi != new.signal.rssi) {
-            new.copy(signal = new.signal.copy(rssi = rssi))
+            new.copy(
+                lac = old.lac ?: new.lac,
+                signal = new.signal.copy(rssi = rssi))
         } else {
             new
         }

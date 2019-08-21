@@ -47,6 +47,7 @@ class DetectorLteAdvancedCellInfo : INetworkDetector {
                 val secondary = lteCells
                     .filter { it.connectionStatus !is PrimaryConnection }
                     .map { it.band }
+                    .distinct()
                     .toMutableList().apply {
                         // Remove all bands that are already present in primary cells
                         // This in most cases enhances correctness (however some providers might own fragmented spectrum)

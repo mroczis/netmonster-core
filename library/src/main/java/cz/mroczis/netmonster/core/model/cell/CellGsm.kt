@@ -19,14 +19,14 @@ data class CellGsm(
      * in range from [CID_MIN] to [CID_MAX], null if unavailable
      */
     @IntRange(from = CID_MIN, to = CID_MAX)
-    val cid: Int,
+    val cid: Int?,
 
     /**
      * 16-bit Location Area Code
      * in range from [LAC_MIN] to [LAC_MAX], null if unavailable
      */
     @IntRange(from = LAC_MIN, to = LAC_MAX)
-    val lac: Int,
+    val lac: Int?,
 
     /**
      * 6-bit Base Station Identity Code

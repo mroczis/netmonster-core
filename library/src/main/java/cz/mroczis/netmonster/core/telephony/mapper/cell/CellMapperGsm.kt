@@ -66,18 +66,21 @@ internal fun CellIdentityGsm.mapCell(connection: IConnection, signal: SignalGsm)
         arfcn.inRangeOrNull(BandGsm.ARFCN_RANGE)
     } else null
 
-    val band = if (arfcn != null && network != null) {
-        BandTableGsm.map(arfcn, network.mcc)
+    val band = if (arfcn != null) {
+        BandTableGsm.map(arfcn, network?.mcc)
     } else null
 
-    return if (cid != null && lac != null) {
+    return if ((cid != null && lac != null) || arfcn != null || bsic != null) {
         CellGsm(
             network = network,
             cid = cid,
             lac = lac,
             bsic = bsic,
             connectionStatus = connection,
-            signal = signal,
+            signal = if (cid == null && lac == null && signal.rssi == SignalGsm.RSSI_MIN.toInt()) {
+                // When LTE is serving phones show neighbouring GSM cells but with invalid -113 dBm RSSI
+                signal.copy(rssi = null)
+            } else signal,
             band = band
         )
     } else null

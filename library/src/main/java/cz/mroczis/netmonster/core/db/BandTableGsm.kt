@@ -23,7 +23,7 @@ object BandTableGsm {
         BandEntity(128..251, "850", 850),
         BandEntity(259..293, "450", 450),
         BandEntity(306..340, "480", 480),
-        BandEntity(512..810, NUMBER_UNKNOWN.toString(), NUMBER_UNKNOWN),
+        BandEntity(512..810, "1800/1900", NUMBER_UNKNOWN),
         BandEntity(811..885, "1800", 1800),
         BandEntity(955..1_023, "900", 900)
     )
@@ -43,16 +43,18 @@ object BandTableGsm {
         "352", "372", "360", "712"
     )
 
-    internal fun get(arfcn: Int, mcc: String): IBandEntity? {
+    internal fun get(arfcn: Int, mcc: String?): IBandEntity? {
         val band = bands.firstOrNull { it.channelRange.contains(arfcn) }
 
         return if (band != null && band.number == NUMBER_UNKNOWN) {
             // PSC, DSC situation here -> result depends on country
-            if (mcc.startsWith(MCC_PREFIX_NORTH_AMERICA) || mcc.startsWith(MCC_PREFIX_SOUTH_AMERICA)) {
+            if (mcc == null) {
+                band
+            } else if (mcc.startsWith(MCC_PREFIX_NORTH_AMERICA) || mcc.startsWith(MCC_PREFIX_SOUTH_AMERICA)) {
                 // And it gets even more complicated cause those rules are not universal
                 when {
                     PCS_AND_DCS_AMERICAS.contains(mcc) ->
-                        band.copy(name = "1800/1900", number = NUMBER_UNKNOWN)
+                        band
                     DCS_AMERICAS.contains(mcc) ->
                         band.copy(name = "1800", number = 1800)
                     else ->
@@ -66,7 +68,7 @@ object BandTableGsm {
         }
     }
 
-    internal fun map(arfcn: Int, mcc: String) : BandGsm? {
+    internal fun map(arfcn: Int, mcc: String?) : BandGsm? {
         val raw = get(arfcn, mcc)
         return BandGsm(arfcn, name = raw?.name, number = raw?.number)
     }
