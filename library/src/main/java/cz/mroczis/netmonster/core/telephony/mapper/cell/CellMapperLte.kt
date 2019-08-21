@@ -192,8 +192,17 @@ internal fun GsmCellLocation.mapLte(signalStrength: SignalStrength?, network: Ne
     val rsrq = Reflection.intFieldOrNull(Reflection.SS_LTE_RSRQ, signalStrength)?.toDouble()
         ?.inRangeOrNull(SignalLte.RSRQ_RANGE)
 
-    val snr = Reflection.intFieldOrNull(Reflection.SS_LTE_SNR, signalStrength)?.toDouble()
-        ?.inRangeOrNull(SignalLte.SNR_RANGE)
+    val snr = Reflection.intFieldOrNull(Reflection.SS_LTE_SNR, signalStrength)
+        ?.let {
+            // SNR in range from 0 to 3 means basically no signal and occurs rarely on Android devices
+            // On older devices (ASUS_Z00AD) this value has 1 decimal place
+            var snr = it.toDouble()
+            if (snr > 30) {
+                snr /= 10
+            }
+
+            snr
+        }?.inRangeOrNull(SignalLte.SNR_RANGE)
 
     val cqi = Reflection.intFieldOrNull(Reflection.SS_LTE_CQI, signalStrength)
         ?.inRangeOrNull(SignalLte.CQI_RANGE)
