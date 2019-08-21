@@ -28,7 +28,6 @@ import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
 import cz.mroczis.netmonster.core.util.Reflection
 import cz.mroczis.netmonster.core.util.inRangeOrNull
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 /**
@@ -65,16 +64,16 @@ class CellLocationMapper(
      * This method is blocking and processing might take ~500 ms on devices with Android O and older.
      * The processing is a bit faster on other devices with Android P+ and newer.
      */
-    @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION])
     @WorkerThread
+    @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION])
     override fun map(model: CellLocation?): List<ICell> {
-        val signalStrength = getSignal()
+        val scanResult = getUpdatedLocationAndSignal()
 
         return mutableListOf<ICell>().apply {
-            if (model is GsmCellLocation) {
-                map(model, signalStrength)?.let { add(it) }
-            } else if (model is CdmaCellLocation) {
-                model.mapCdma(signalStrength)?.let { add(it) }
+            if (scanResult?.location is GsmCellLocation) {
+                map(scanResult.location, scanResult.signal)?.let { add(it) }
+            } else if (scanResult?.location is CdmaCellLocation) {
+                scanResult.location.mapCdma(scanResult.signal)?.let { add(it) }
             }
         }
     }
@@ -109,46 +108,103 @@ class CellLocationMapper(
      * OS version.
      */
     @WorkerThread
-    private fun getSignal(): SignalStrength? =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            telephony.signalStrength
-        } else {
-            var signal: SignalStrength? = null
-            val asyncLock = CountDownLatch(1)
+    @Suppress("DEPRECATION")
+    @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION])
+    private fun getUpdatedLocationAndSignal(): ScanResult? {
+        var signal: SignalStrength? = null
+        var location: CellLocation? = null
+        val asyncLock = CountDownLatch(2) // CellLocation + SignalStrengths
 
-            // And we must wait for the data on an another thread to avoid deadlocks
-            asyncExecutor.post {
-                // We must construct signal listener on custom thread
-                // cause it takes Looper from it -> results will be delivered there
-                val signalListener = SignalListener(subId) {
-                    // Invoked when data are updated for the 1st time
-                    signal = it
-                    telephony.listen(this, PhoneStateListener.LISTEN_NONE)
-                    asyncLock.countDown()
+        // Lets start listening for fresh data first
+        asyncExecutor.post {
+            // We must construct signal listener on custom thread
+            // cause it takes Looper from it -> results will be delivered there
+            val signalListener = SignalListener(
+                subId = subId,
+                signalCallback = { newSignal, firstShot ->
+                    signal = newSignal
+
+                    if (firstShot) {
+                        asyncLock.countDown()
+                    }
+
+                    if (asyncLock.count == 0L) {
+                        telephony.listen(this, PhoneStateListener.LISTEN_NONE)
+                    }
+
+                },
+                locationCallback = { newLocation, firstShot ->
+                    location = newLocation
+
+                    if (firstShot) {
+                        asyncLock.countDown()
+                    }
+
+                    if (asyncLock.count == 0L) {
+                        telephony.listen(this, PhoneStateListener.LISTEN_NONE)
+                    }
                 }
 
-                telephony.listen(signalListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS)
-            }
+            )
 
-            // And we also must block original thread
-            // It'll get unblocked once we receive required data
-            // This usually takes +/- 20 ms to complete
-            try {
-                asyncLock.await(500, TimeUnit.MILLISECONDS)
-            } catch (e: InterruptedException) {
-                // System was not able to deliver SignalStrength in this time slot
-            }
+            telephony.listen(signalListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS or PhoneStateListener.LISTEN_CELL_LOCATION)
+        }
 
+        // And we also must block original thread
+        // It'll get unblocked once we receive required data
+        // This usually takes +/- 20 ms to complete
+        try {
+            asyncLock.await(500, TimeUnit.MILLISECONDS)
+        } catch (e: InterruptedException) {
+            // System was not able to deliver SignalStrength in this time slot
+        }
+
+        // We want the freshest data possible, however on P+ we can grab also cached
+        val finalSignal = if (signal == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            telephony.signalStrength
+        } else {
             signal
         }
 
+        val finalLocation = if (location == null) {
+            telephony.cellLocation
+        } else {
+            location
+        }
+
+        return ScanResult(finalLocation, finalSignal)
+    }
+
+    /**
+     * Wrapper for two instances we need to construct [ICell]
+     */
+    private data class ScanResult(
+        val location: CellLocation?,
+        val signal: SignalStrength?
+    )
+
+    /**
+     * Kotlin friendly PhoneStateListener
+     */
     private class SignalListener(
         subId: Int?,
-        private val callback: SignalListener.(signal: SignalStrength?) -> Unit
+        private val signalCallback: SignalListener.(signal: SignalStrength?, first: Boolean) -> Unit,
+        private val locationCallback: SignalListener.(location: CellLocation?, first: Boolean) -> Unit
     ) : PhoneStateListenerPort(subId) {
+
+        private var signalReceived = false
+        private var locationReceived = false
+
         override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {
             super.onSignalStrengthsChanged(signalStrength)
-            callback.invoke(this, signalStrength)
+            signalCallback.invoke(this, signalStrength, !signalReceived)
+            signalReceived = true
+        }
+
+        override fun onCellLocationChanged(location: CellLocation?) {
+            super.onCellLocationChanged(location)
+            locationCallback.invoke(this, location, !locationReceived)
+            locationReceived = true
         }
     }
 
