@@ -6,10 +6,12 @@ import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
 import cz.mroczis.netmonster.core.db.NetworkTypeTable
 import cz.mroczis.netmonster.core.db.model.NetworkType
+import cz.mroczis.netmonster.core.feature.config.PhysicalChannelConfigSource
 import cz.mroczis.netmonster.core.feature.detect.*
 import cz.mroczis.netmonster.core.feature.merge.CellMerger
 import cz.mroczis.netmonster.core.feature.merge.CellSource
 import cz.mroczis.netmonster.core.model.cell.ICell
+import cz.mroczis.netmonster.core.model.config.PhysicalChannelConfig
 import cz.mroczis.netmonster.core.telephony.ITelephonyManagerCompat
 import cz.mroczis.netmonster.core.util.isDisplayOn
 
@@ -19,6 +21,7 @@ internal class NetMonster(
 ) : INetMonster {
 
     private val merger = CellMerger()
+    private val physicalChannelSource by lazy { PhysicalChannelConfigSource() }
 
     @WorkerThread
     @RequiresPermission(
@@ -56,6 +59,7 @@ internal class NetMonster(
     override fun getNetworkType(): NetworkType = getNetworkType(
         DetectorHspaDc(),
         DetectorLteAdvancedServiceState(),
+        DetectorLteAdvancedPhysicalChannel(),
         DetectorLteAdvancedCellInfo(),
         DetectorAosp() // best to keep last when all other strategies fail
     ) ?: NetworkTypeTable.get(NetworkType.UNKNOWN)
@@ -69,5 +73,11 @@ internal class NetMonster(
 
         return null
     }
+
+    override fun getPhysicalChannelConfiguration(): List<PhysicalChannelConfig> =
+        telephony.getTelephonyManager()?.let {
+            physicalChannelSource.get(it, telephony.getSubscriberId())
+        } ?: emptyList()
+
 
 }

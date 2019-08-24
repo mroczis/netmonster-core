@@ -1,13 +1,17 @@
 package cz.mroczis.netmonster.core
 
 import android.Manifest
+import android.os.Build
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
 import cz.mroczis.netmonster.core.db.model.NetworkType
-import cz.mroczis.netmonster.core.feature.detect.INetworkDetector
+import cz.mroczis.netmonster.core.feature.detect.*
+import cz.mroczis.netmonster.core.feature.config.*
 import cz.mroczis.netmonster.core.feature.merge.CellSource
+import cz.mroczis.netmonster.core.model.annotation.SinceSdk
 import cz.mroczis.netmonster.core.model.cell.ICell
+import cz.mroczis.netmonster.core.model.config.PhysicalChannelConfig
 import cz.mroczis.netmonster.core.telephony.ITelephonyManagerCompat
 
 /**
@@ -78,9 +82,33 @@ interface INetMonster {
      * Detectors are used in an sequential order and first valid instance of [NetworkType] is returned so
      * order in which they are passed is important.
      *
+     * You might write your own [INetworkDetector] or use subset of bundled ones:
+     *  - [DetectorHspaDc] (experimental, works since [Build.VERSION_CODES.N])
+     *  - [DetectorLteAdvancedServiceState] (stable, works since [Build.VERSION_CODES.Q])
+     *  - [DetectorLteAdvancedPhysicalChannel] (stable, works since [Build.VERSION_CODES.P])
+     *  - [DetectorLteAdvancedCellInfo] (experimental, works since [Build.VERSION_CODES.N])
+     *  - [DetectorAosp] (legacy AOSP)
+     *
      * If [detectors] are empty or all of them return null then you'll get also null.
      */
     @WorkerThread
     fun getNetworkType(vararg detectors: INetworkDetector) : NetworkType?
+
+    /**
+     * Obtains synchronously currently active configurations for physical channel.
+     *
+     * This method is not publicly accessible in AOSP and can be used to detect multiple
+     * active active carriers when LTE is active.
+     *
+     * Works since [Build.VERSION_CODES.P] on some phones. Look to [PhysicalChannelConfig] for
+     * more details.
+     *
+     * @see PhysicalChannelConfig
+     * @see DetectorLteAdvancedPhysicalChannel
+     * @see PhysicalChannelConfigSource
+     */
+    @WorkerThread
+    @SinceSdk(Build.VERSION_CODES.P)
+    fun getPhysicalChannelConfiguration() : List<PhysicalChannelConfig>
 
 }

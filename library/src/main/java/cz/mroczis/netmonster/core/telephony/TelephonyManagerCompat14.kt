@@ -41,6 +41,8 @@ internal open class TelephonyManagerCompat14(
 
     override fun getTelephonyManager(): TelephonyManager? = telephony
 
+    override fun getSubscriberId(): Int = subId
+
     @WorkerThread
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun getAllCellInfo(

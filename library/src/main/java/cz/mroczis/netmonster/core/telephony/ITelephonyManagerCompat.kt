@@ -20,6 +20,11 @@ interface ITelephonyManagerCompat {
     fun getTelephonyManager() : TelephonyManager?
 
     /**
+     * Current subscriber id, [Int.MAX_VALUE] if invalid or unspecified
+     */
+    fun getSubscriberId() : Int
+
+    /**
      * Requests all available cell information from all radios on the device including the
      * camped/registered, serving, and neighboring cells.
      *
