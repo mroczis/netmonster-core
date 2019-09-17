@@ -35,11 +35,11 @@ internal fun CellIdentityLte.mapCell(connection: IConnection, signal: SignalLte)
     } else null
 
     val bandwidth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        bandwidth.inRangeOrNull(BandLte.BANDWIDTH_RANGE)
+        bandwidth.inRangeOrNull(CellLte.BANDWIDTH_RANGE)
     } else null
 
     val band = if (earfcn != null) {
-        BandTableLte.map(earfcn, bandwidth)
+        BandTableLte.map(earfcn)
     } else null
 
     return CellLte(
@@ -47,6 +47,7 @@ internal fun CellIdentityLte.mapCell(connection: IConnection, signal: SignalLte)
         eci = ci,
         tac = tac,
         pci = pci,
+        bandwidth = bandwidth,
         connectionStatus = connection,
         signal = signal,
         band = band
@@ -214,6 +215,7 @@ internal fun GsmCellLocation.mapLte(signalStrength: SignalStrength?, network: Ne
             tac = tac,
             pci = null,
             band = null,
+            bandwidth = null,
             signal = SignalLte(
                 rssi = rssi,
                 rsrp = rsrp,

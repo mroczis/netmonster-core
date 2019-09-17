@@ -1,6 +1,7 @@
 package cz.mroczis.netmonster.core.model.cell
 
 import android.os.Build
+import androidx.annotation.IntRange
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.annotation.SinceSdk
 import cz.mroczis.netmonster.core.model.band.BandLte
@@ -34,6 +35,15 @@ data class CellLte(
 
     @SinceSdk(Build.VERSION_CODES.N)
     override val band: BandLte?,
+
+    /**
+     * Bandwidth in kHz or null if unavailable
+     *
+     * Unit: kHz
+     */
+    @SinceSdk(Build.VERSION_CODES.P)
+    @IntRange(from = BANDWIDTH_MIN, to = BANDWIDTH_MAX)
+    val bandwidth: Int?,
 
     override val signal: SignalLte,
     override val connectionStatus: IConnection
@@ -84,9 +94,16 @@ data class CellLte(
         const val PCI_MIN = 0L
         const val PCI_MAX = 503L
 
+        /**
+         * Smallest possible bandwidth for LTE - 1.4 MHz
+         */
+        const val BANDWIDTH_MIN = 1_400L
+        const val BANDWIDTH_MAX = 100_000L
+
         internal val CID_RANGE = CID_MIN..CID_MAX
         internal val TAC_RANGE = TAC_MIN..TAC_MAX
         internal val PCI_RANGE = PCI_MIN..PCI_MAX
+        internal val BANDWIDTH_RANGE = BANDWIDTH_MIN..BANDWIDTH_MAX
     }
 
 }

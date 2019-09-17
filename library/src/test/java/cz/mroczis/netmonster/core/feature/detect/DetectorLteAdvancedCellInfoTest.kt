@@ -28,7 +28,8 @@ class DetectorLteAdvancedCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 eci = 345672,
                 tac = 1,
                 pci = 1,
-                band = BandTableLte.map(6_200, 10_000),
+                band = BandTableLte.map(6_200),
+                bandwidth = 10_000,
                 signal = SignalLte(null, null, null, null, null, null),
                 connectionStatus = PrimaryConnection()
             )
@@ -55,7 +56,8 @@ class DetectorLteAdvancedCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 eci = 345672,
                 tac = 1,
                 pci = 1,
-                band = BandTableLte.map(6_200, 10_000),
+                band = BandTableLte.map(6_200),
+                bandwidth = 10_000,
                 signal = SignalLte(null, null, null, null, null, null),
                 connectionStatus = PrimaryConnection()
             )
@@ -64,7 +66,8 @@ class DetectorLteAdvancedCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 eci = null,
                 tac = null,
                 pci = 2,
-                band = BandTableLte.map(6_300, 10_000),
+                band = BandTableLte.map(6_300),
+                bandwidth = 10_000,
                 connectionStatus = NoneConnection()
             )
 
@@ -82,7 +85,8 @@ class DetectorLteAdvancedCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 eci = 345672,
                 tac = 1,
                 pci = 1,
-                band = BandTableLte.map(6_200, 10_000),
+                band = BandTableLte.map(6_200),
+                bandwidth = 10_000,
                 signal = SignalLte(null, null, null, null, null, null),
                 connectionStatus = PrimaryConnection()
             )
@@ -91,7 +95,8 @@ class DetectorLteAdvancedCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 eci = null,
                 tac = null,
                 pci = 2,
-                band = BandTableLte.map(1_849, 15_000),
+                band = BandTableLte.map(1_849),
+                bandwidth = 15_000,
                 connectionStatus = NoneConnection()
             )
 
@@ -109,7 +114,8 @@ class DetectorLteAdvancedCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 eci = 345672,
                 tac = 1,
                 pci = 1,
-                band = BandTableLte.map(6_200, 10_000),
+                band = BandTableLte.map(6_200),
+                bandwidth = 10_000,
                 signal = SignalLte(null, null, null, null, null, null),
                 connectionStatus = PrimaryConnection()
             )
@@ -119,7 +125,8 @@ class DetectorLteAdvancedCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 eci = null,
                 tac = null,
                 pci = 2,
-                band = BandTableLte.map(1_849, 15_000),
+                band = BandTableLte.map(1_849),
+                bandwidth = 15_000,
                 connectionStatus = NoneConnection()
             )
 
@@ -148,7 +155,8 @@ class DetectorLteAdvancedCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 eci = 345672,
                 tac = 1,
                 pci = 1,
-                band = BandTableLte.map(6_200, 10_000),
+                band = BandTableLte.map(6_200),
+                bandwidth = 10_000,
                 signal = SignalLte(null, null, null, null, null, null),
                 connectionStatus = PrimaryConnection()
             )
@@ -158,6 +166,7 @@ class DetectorLteAdvancedCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 tac = null,
                 pci = 3,
                 band = null,
+                bandwidth = null,
                 connectionStatus = NoneConnection()
             )
 

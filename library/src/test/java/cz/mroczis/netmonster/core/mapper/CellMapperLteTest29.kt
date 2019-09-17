@@ -49,6 +49,7 @@ class CellMapperLteTest29 : SdkTest(Build.VERSION_CODES.Q) {
                 tac shouldBe TAC
                 pci shouldBe PCI
                 ecgi shouldBe "230110000523524"
+                bandwidth shouldBe BANDWIDTH
                 network shouldBe Network.map(MCC, MNC)
                 connectionStatus shouldBe PrimaryConnection()
 
@@ -56,7 +57,6 @@ class CellMapperLteTest29 : SdkTest(Build.VERSION_CODES.Q) {
                     downlinkEarfcn shouldBe EARFCN
                     name shouldBe "800"
                     number shouldBe 20
-                    bandwidth shouldBe BANDWIDTH
                 }
 
                 signal.apply {

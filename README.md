@@ -122,7 +122,7 @@ NetMonsterFactory.get(context, SUBSCRIPTION_ID).apply {
     val isLteCaCellInfo: NetworkType? = getNetworkType(DetectorLteAdvancedCellInfo())
     // LTE-A from ServiceState (from RIL, Android P+)
     val isLteCaServiceState: NetworkType? = getNetworkType(DetectorLteAdvancedServiceState())
-    // LTE-A from ServiceState (from RIL, Android Q+)
+    // LTE-A from PhysicalChannel (from RIL, Android Q+)
     val isLteCaPhysicalChannel: NetworkType? = getNetworkType(DetectorLteAdvancedPhysicalChannel())
 }
 ```

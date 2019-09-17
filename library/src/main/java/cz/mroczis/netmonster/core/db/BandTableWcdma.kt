@@ -40,7 +40,11 @@ object BandTableWcdma {
         bands.firstOrNull { it.channelRange.contains(uarfcn) }
 
 
-    internal fun map(uarfcn: Int): BandWcdma? {
+    /**
+     * Attempts to find current band information depending on [uarfcn].
+     * Returns null if no such band exists or it's not part of NetMonster Core database.
+     */
+    fun map(uarfcn: Int): BandWcdma? {
         val raw = get(uarfcn)
         return BandWcdma(
             downlinkUarfcn = uarfcn,

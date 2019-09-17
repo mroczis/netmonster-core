@@ -84,13 +84,16 @@ object BandTableLte {
         bands.firstOrNull { it.channelRange.contains(earfcn) }
 
 
-    internal fun map(earfcn: Int, bandwidth: Int?): BandLte? {
+    /**
+     * Attempts to find current band information depending on [earfcn].
+     * Returns null if no such band exists or it's not part of NetMonster Core database.
+     */
+    fun map(earfcn: Int): BandLte? {
         val raw = get(earfcn)
         return BandLte(
             downlinkEarfcn = earfcn,
             number = raw?.number,
-            name = raw?.name,
-            bandwidth = bandwidth
+            name = raw?.name
         )
     }
 

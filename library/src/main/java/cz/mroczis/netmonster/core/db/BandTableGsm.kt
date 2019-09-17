@@ -68,7 +68,14 @@ object BandTableGsm {
         }
     }
 
-    internal fun map(arfcn: Int, mcc: String?) : BandGsm? {
+    /**
+     * Attempts to find current band information depending on [arfcn] and [mcc].
+     * Returns null if no such band exists or it's not part of NetMonster Core database.
+     *
+     * In case of PCS/DCS uses [mcc] to better identify current band. If result is ambiguous
+     * then "1800/1900" band name is returned.
+     */
+    fun map(arfcn: Int, mcc: String?) : BandGsm? {
         val raw = get(arfcn, mcc)
         return BandGsm(arfcn, name = raw?.name, number = raw?.number)
     }
