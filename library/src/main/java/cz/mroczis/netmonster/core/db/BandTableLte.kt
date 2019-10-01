@@ -86,9 +86,9 @@ object BandTableLte {
 
     /**
      * Attempts to find current band information depending on [earfcn].
-     * Returns null if no such band exists or it's not part of NetMonster Core database.
+     * If no such band is found then result [BandLte] will contain only [BandLte.downlinkEarfcn].
      */
-    fun map(earfcn: Int): BandLte? {
+    fun map(earfcn: Int): BandLte {
         val raw = get(earfcn)
         return BandLte(
             downlinkEarfcn = earfcn,

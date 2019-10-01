@@ -8,7 +8,7 @@ import cz.mroczis.netmonster.core.model.band.BandWcdma
  * Source:
  * [3GPP 25.101](https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=1151)
  */
-object BandTableWcdma {
+object  BandTableWcdma {
 
     private val bands = arrayOf(
         BandEntity(412..687, "1900", 2),
@@ -42,9 +42,9 @@ object BandTableWcdma {
 
     /**
      * Attempts to find current band information depending on [uarfcn].
-     * Returns null if no such band exists or it's not part of NetMonster Core database.
+     * If no such band is found then result [BandWcdma] will contain only [BandWcdma.downlinkUarfcn].
      */
-    fun map(uarfcn: Int): BandWcdma? {
+    fun map(uarfcn: Int): BandWcdma {
         val raw = get(uarfcn)
         return BandWcdma(
             downlinkUarfcn = uarfcn,

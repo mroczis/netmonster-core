@@ -98,9 +98,9 @@ object BandTableNr {
 
     /**
      * Attempts to find current band information depending on [arfcn].
-     * Returns null if no such band exists or it's not part of NetMonster Core database.
+     * If no such band is found then result [BandNr] will contain only [BandNr.downlinkArfcn].
      */
-    fun map(arfcn: Int): BandNr? {
+    fun map(arfcn: Int): BandNr {
         val raw = get(arfcn)
         return BandNr(
             downlinkArfcn = arfcn,

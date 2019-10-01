@@ -24,7 +24,7 @@ class BandTableNrTest : FreeSpec() {
                 number shouldBe 28
             }
 
-            BandTableNr.map(159_600).applyNonNull {
+            BandTableNr.map(159_600).apply {
                 name shouldBe "700"
                 number shouldBe 28
                 downlinkFrequency shouldBe 798_000 // kHz

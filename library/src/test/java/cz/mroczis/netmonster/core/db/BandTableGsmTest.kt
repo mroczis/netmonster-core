@@ -17,7 +17,7 @@ class BandTableGsmTest : FreeSpec() {
                 number shouldBe 900
             }
 
-            BandTableGsm.map(0, "230").applyNonNull {
+            BandTableGsm.map(0, "230").apply {
                 arfcn shouldBe 0
                 channelNumber shouldBe 0
                 name shouldBe "900"

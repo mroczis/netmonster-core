@@ -39,9 +39,9 @@ object BandTableTdscdma {
 
     /**
      * Attempts to find current band information depending on [uarfcn] and [mcc].
-     * Returns null if no such band exists or it's not part of NetMonster Core database.
+     * If no such band is found then result [BandTdscdma] will contain only [BandTdscdma.downlinkUarfcn].
      */
-    fun map(uarfcn: Int, mcc: String?): BandTdscdma? {
+    fun map(uarfcn: Int, mcc: String?): BandTdscdma {
         val raw = get(uarfcn, mcc)
         return BandTdscdma(
             downlinkUarfcn = uarfcn,
