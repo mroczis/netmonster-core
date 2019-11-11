@@ -30,7 +30,6 @@ data class PhysicalChannelConfig(
 
     /**
      * Bandwidth in kHz
-     * @see BandLte.bandwidth
      */
     val bandwidth: Int?,
 

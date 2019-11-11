@@ -8,6 +8,7 @@ interface IBand {
      *  - WCDMA: downlink UARFCN
      *  - LTE: downlink EARFCN
      *  - TD-SCDMA: downlink UARFCN
+     *  - NR: downlink ARFCN
      */
     val channelNumber: Int
 
