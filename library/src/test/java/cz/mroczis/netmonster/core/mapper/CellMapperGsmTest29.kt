@@ -79,7 +79,7 @@ class CellMapperGsmTest29 : SdkTest(Build.VERSION_CODES.Q) {
                     Integer.MAX_VALUE // AOSP
                 ).forEach { cid ->
                     every { it.identity.cid } returns cid
-                    it.identity.mapCell(it.info.mapConnection(), it.signal.mapSignal()) shouldBe null
+                    it.identity.mapCell(it.info.mapConnection(), it.signal.mapSignal())!!.cid shouldBe null
                 }
             }
         }
@@ -93,7 +93,7 @@ class CellMapperGsmTest29 : SdkTest(Build.VERSION_CODES.Q) {
                     Integer.MAX_VALUE // AOSP
                 ).forEach { lac ->
                     every { it.identity.lac } returns lac
-                    it.identity.mapCell(it.info.mapConnection(), it.signal.mapSignal()) shouldBe null
+                    it.identity.mapCell(it.info.mapConnection(), it.signal.mapSignal())!!.lac shouldBe null
                 }
             }
         }

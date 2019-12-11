@@ -5,7 +5,7 @@ import io.kotlintest.specs.FreeSpec
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 
-open class SdkTest(
+abstract class SdkTest(
     sdkInt: Int
 ) : FreeSpec() {
 
