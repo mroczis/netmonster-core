@@ -4,6 +4,7 @@ import android.os.Build
 import cz.mroczis.netmonster.core.INetMonster
 import cz.mroczis.netmonster.core.db.NetworkTypeTable
 import cz.mroczis.netmonster.core.db.model.NetworkType
+import cz.mroczis.netmonster.core.model.annotation.SinceSdk
 import cz.mroczis.netmonster.core.model.connection.SecondaryConnection
 import cz.mroczis.netmonster.core.telephony.ITelephonyManagerCompat
 
@@ -16,6 +17,7 @@ import cz.mroczis.netmonster.core.telephony.ITelephonyManagerCompat
  */
 class DetectorLteAdvancedPhysicalChannel : INetworkDetector {
 
+    @SinceSdk(Build.VERSION_CODES.P)
     override fun detect(netmonster: INetMonster, telephony: ITelephonyManagerCompat): NetworkType? =
         netmonster.getPhysicalChannelConfiguration().let { pcc ->
             if (pcc.size > 1 && pcc.firstOrNull { it.connectionStatus is SecondaryConnection } != null) {

@@ -37,7 +37,7 @@ dependencies {
     implementation 'androidx.annotation:annotation:1.1.0'
 
     testImplementation 'junit:junit:4.12'
-    testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.0'
+    testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.2'
     testImplementation 'io.mockk:mockk:1.9.1'
 
     androidTestImplementation 'androidx.test:runner:1.2.0'
