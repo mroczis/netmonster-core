@@ -10,6 +10,8 @@ import cz.mroczis.netmonster.core.feature.config.PhysicalChannelConfigSource
 import cz.mroczis.netmonster.core.feature.detect.*
 import cz.mroczis.netmonster.core.feature.merge.CellMerger
 import cz.mroczis.netmonster.core.feature.merge.CellSource
+import cz.mroczis.netmonster.core.feature.postprocess.ICellPostprocessor
+import cz.mroczis.netmonster.core.feature.postprocess.PrimaryCellPostprocessor
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.config.PhysicalChannelConfig
 import cz.mroczis.netmonster.core.telephony.ITelephonyManagerCompat
@@ -22,6 +24,13 @@ internal class NetMonster(
 
     private val merger = CellMerger()
     private val physicalChannelSource by lazy { PhysicalChannelConfigSource() }
+
+    /**
+     * Postprocessors that try to fix / add behaviour to [ITelephonyManagerCompat.getAllCellInfo]
+     */
+    private val postprocessors = mutableListOf<ICellPostprocessor>().apply {
+        PrimaryCellPostprocessor()
+    }
 
     @WorkerThread
     @RequiresPermission(
@@ -47,7 +56,9 @@ internal class NetMonster(
         }
 
         val newApi = if (sources.contains(CellSource.ALL_CELL_INFO)) {
-            telephony.getAllCellInfo()
+            var allCells = telephony.getAllCellInfo()
+            postprocessors.forEach { allCells = it.postprocess(allCells) }
+            allCells
         } else emptyList()
 
         return merger.merge(oldApi, newApi, context.isDisplayOn())

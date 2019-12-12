@@ -5,12 +5,10 @@ import android.annotation.TargetApi
 import android.os.Build
 import android.telephony.*
 import androidx.annotation.RequiresPermission
-import cz.mroczis.netmonster.core.model.cell.*
-import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
+import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.telephony.mapper.cell.mapCell
 import cz.mroczis.netmonster.core.telephony.mapper.cell.mapConnection
 import cz.mroczis.netmonster.core.telephony.mapper.cell.mapSignal
-import cz.mroczis.netmonster.core.util.CellProcessors
 
 /**
  * Transforms result of [TelephonyManager.getAllCellInfo] into our list
@@ -19,8 +17,8 @@ import cz.mroczis.netmonster.core.util.CellProcessors
 class CellInfoMapper : ICellMapper<List<CellInfo>?> {
 
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-    override fun map(model: List<CellInfo>?): List<ICell> {
-        val processed = model?.mapNotNull {
+    override fun map(model: List<CellInfo>?): List<ICell> =
+        model?.mapNotNull {
             if (it is CellInfoGsm) {
                 mapGsm(it)
             } else if (it is CellInfoLte) {
@@ -35,26 +33,6 @@ class CellInfoMapper : ICellMapper<List<CellInfo>?> {
                 mapNr(it)
             } else null
         } ?: emptyList()
-
-        return if (processed.firstOrNull { it.connectionStatus is PrimaryConnection } != null) {
-            processed
-        } else {
-            // No Primary connection found -> in this case phone might be in emergency calls
-            // mode only. Which means that Android is connected to some cell as primary
-            // but it does not admit the fact.
-            // In case of NR, LTE and WCDMA networks it's easy to find the cell - CID is filled
-            // only for serving cells. In case of GSM we grab 1st cell.
-
-            processed.firstOrNull {
-                it.let(CellProcessors.CAN_BE_PRIMARY_CONNECTION)
-            }?.let { primaryCell ->
-                processed.toMutableList().apply {
-                    remove(primaryCell)
-                    add(0, primaryCell.let(CellProcessors.SWITCH_TO_PRIMARY_CONNECTION))
-                }
-            } ?: processed
-        }
-    }
 
 
     private fun mapGsm(model: CellInfoGsm): ICell? {

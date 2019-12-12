@@ -120,23 +120,7 @@ class CellMapperLteTest29 : SdkTest(Build.VERSION_CODES.Q) {
                 it.identity.mapCell(it.info.mapConnection(), it.signal.mapSignal())?.signal?.snr shouldBe 26.3
             }
         }
-        
 
-        "Detection of possible primary serving cell" {
-            val input = mutableListOf<CellInfo>().apply {
-                val cellInfo = mockValidCell().info
-
-                // Force none connection though inner data are correct
-                every { cellInfo.cellConnectionStatus } returns CellInfo.CONNECTION_NONE
-                every { cellInfo.isRegistered } returns false
-
-                add(cellInfo)
-            }
-
-            val output = CellInfoMapper().map(input)
-            output.size shouldBe 1
-            output[0].connectionStatus shouldBe PrimaryConnection()
-        }
     }
 
     @Suppress("DEPRECATION")
