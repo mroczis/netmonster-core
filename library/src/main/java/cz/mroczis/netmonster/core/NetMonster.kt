@@ -11,6 +11,7 @@ import cz.mroczis.netmonster.core.feature.detect.*
 import cz.mroczis.netmonster.core.feature.merge.CellMerger
 import cz.mroczis.netmonster.core.feature.merge.CellSource
 import cz.mroczis.netmonster.core.feature.postprocess.ICellPostprocessor
+import cz.mroczis.netmonster.core.feature.postprocess.PlmnPostprocessor
 import cz.mroczis.netmonster.core.feature.postprocess.PrimaryCellPostprocessor
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.config.PhysicalChannelConfig
@@ -29,7 +30,8 @@ internal class NetMonster(
      * Postprocessors that try to fix / add behaviour to [ITelephonyManagerCompat.getAllCellInfo]
      */
     private val postprocessors = mutableListOf<ICellPostprocessor>().apply {
-        PrimaryCellPostprocessor()
+        add(PrimaryCellPostprocessor())
+        add(PlmnPostprocessor())
     }
 
     @WorkerThread
