@@ -76,28 +76,28 @@ class PlmnPostprocessor : ICellPostprocessor {
                     cell
                 }
             }
-        } ?: cell
+        } ?: getFirstPlmnIfOnly(cell) { cell.copy(network = it)}
 
         override fun processLte(cell: CellLte) =
             findByChannel(NetworkGeneration.LTE, cell.band?.channelNumber)?.let {
                 cell.copy(network = it)
-            } ?: cell
+            } ?: getFirstPlmnIfOnly(cell) { cell.copy(network = it)}
 
         override fun processNr(cell: CellNr) =
             findByChannel(NetworkGeneration.NR, cell.band?.channelNumber)?.let {
                 cell.copy(network = it)
-            } ?: cell
+            } ?: getFirstPlmnIfOnly(cell) { cell.copy(network = it)}
 
         override fun processTdscdma(cell: CellTdscdma) =
             findByChannel(NetworkGeneration.TDSCDMA, cell.band?.channelNumber)?.let {
                 cell.copy(network = it)
-            } ?: cell
+            } ?: getFirstPlmnIfOnly(cell) { cell.copy(network = it)}
 
 
-        override fun processWcdma(cell: CellWcdma)=
+        override fun processWcdma(cell: CellWcdma) =
             findByChannel(NetworkGeneration.WCDMA, cell.band?.channelNumber)?.let {
                 cell.copy(network = it)
-            } ?: cell
+            } ?: getFirstPlmnIfOnly(cell) { cell.copy(network = it)}
 
         private fun findByChannel(gen: NetworkGeneration, channel: Int?): Network? =
             dictionary[gen]?.let { plmns ->
@@ -107,6 +107,14 @@ class PlmnPostprocessor : ICellPostprocessor {
                     plmns.firstOrNull { it.channelNumber == channel }?.network
                 }
             }
+
+        /**
+         * Takes 1st PLMN if it's the only one in [dictionary].
+         */
+        private fun getFirstPlmnIfOnly(cell: ICell, callback: (Network) -> ICell) : ICell  =
+            if (dictionary.size == 1 && dictionary.values.first().size == 1) {
+                callback.invoke(dictionary.values.first()[0].network)
+            } else cell
     }
 
     /**
