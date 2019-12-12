@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ntm_green">#0FBA71</color>
+    <color name="ntm_green_dark">#0C945A</color>
+
+    <color name="window_background">#F6F6F6</color>
+    <color name="status_bar_background">#CCCCCC</color>
+    <color name="primary_text">#171c1d</color>
+</resources>
