@@ -127,6 +127,10 @@ NetMonsterFactory.get(context, SUBSCRIPTION_ID).apply {
 }
 ```
 
+##### Other features
+ - Detection of serving cells in 'emergency calls only' mode.
+ - PLMN addition to non-serving cells in GSM, WCDMA, LTE, TDS-CDMA and NR networks.
+
 License
 -------
 
