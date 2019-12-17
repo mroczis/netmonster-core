@@ -30,7 +30,7 @@ class CellView @JvmOverloads constructor(
 
             cell.signal.let { signal ->
                 signal.rssi?.let { addView("RSSI", it) }
-                signal.rsrp?.let { addView("RSSI", it) }
+                signal.rsrp?.let { addView("RSRP", it) }
                 signal.rsrq?.let { addView("RSRQ", it) }
                 signal.cqi?.let { addView("CQI", it) }
                 signal.timingAdvance?.let { addView("TA", it) }
