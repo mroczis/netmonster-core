@@ -5,9 +5,9 @@ import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 
 /**
  * Attempts to find one primary cell if none of cells is marked as primary.
- * Marks first cells that matches pre-conditions to be primarily serving.
+ * Marks first cell that matches pre-conditions to be primarily serving.
  *
- * 100 % reliable for WCDMA, LTE, TDS-CDMA, NR
+ * 100 % reliable for WCDMA, LTE, TD-SCDMA, NR
  */
 class PrimaryCellPostprocessor : ICellPostprocessor {
 

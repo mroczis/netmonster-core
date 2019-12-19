@@ -3,6 +3,7 @@ package cz.mroczis.netmonster.core.telephony.mapper.cell
 import android.annotation.TargetApi
 import android.os.Build
 import android.telephony.CellIdentityWcdma
+import android.telephony.CellSignalStrengthGsm
 import android.telephony.CellSignalStrengthWcdma
 import android.telephony.SignalStrength
 import android.telephony.gsm.GsmCellLocation
@@ -130,10 +131,26 @@ internal fun GsmCellLocation.mapWcdma(signalStrength: SignalStrength?, network: 
     val lac = lac.inRangeOrNull(CellWcdma.LAC_RANGE)
     val psc = psc.inRangeOrNull(CellWcdma.PSC_RANGE)
 
-    val rssi = signalStrength?.getGsmRssi()?.inRangeOrNull(SignalGsm.RSSI_RANGE)
-    val ber = signalStrength?.gsmBitErrorRate?.inRangeOrNull(SignalGsm.BIT_ERROR_RATE_RANGE)
-    val ecio = Reflection.intFieldOrNull(Reflection.UMTS_ECIO, signalStrength)?.inRangeOrNull(SignalWcdma.ECIO_RANGE)
-    val rscp = Reflection.intFieldOrNull(Reflection.UMTS_RSCP, signalStrength)?.inRangeOrNull(SignalWcdma.RSCP_RANGE)
+    val signal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        signalStrength?.getCellSignalStrengths(CellSignalStrengthWcdma::class.java)
+            ?.firstOrNull()
+            ?.mapSignal() ?: SignalWcdma(null, null, null, null, null)
+    } else {
+        val rssi = signalStrength?.getGsmRssi()?.inRangeOrNull(SignalGsm.RSSI_RANGE)
+        val ber = signalStrength?.gsmBitErrorRate?.inRangeOrNull(SignalGsm.BIT_ERROR_RATE_RANGE)
+        val ecio = Reflection.intFieldOrNull(Reflection.UMTS_ECIO, signalStrength)
+            ?.inRangeOrNull(SignalWcdma.ECIO_RANGE)
+        val rscp = Reflection.intFieldOrNull(Reflection.UMTS_RSCP, signalStrength)
+            ?.inRangeOrNull(SignalWcdma.RSCP_RANGE)
+
+        SignalWcdma(
+            rssi = rssi,
+            bitErrorRate = ber,
+            ecio = ecio,
+            rscp = rscp,
+            ecno = null
+        )
+    }
 
     return if (cid != null && lac != null) {
         CellWcdma(
@@ -141,13 +158,7 @@ internal fun GsmCellLocation.mapWcdma(signalStrength: SignalStrength?, network: 
             lac = lac,
             psc = psc,
             band = null,
-            signal = SignalWcdma(
-                rssi = rssi,
-                bitErrorRate = ber,
-                ecio = ecio,
-                rscp = rscp,
-                ecno = null
-            ),
+            signal = signal,
             network = network,
             connectionStatus = PrimaryConnection()
         )

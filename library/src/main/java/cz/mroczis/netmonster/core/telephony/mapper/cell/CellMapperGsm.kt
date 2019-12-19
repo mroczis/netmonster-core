@@ -103,8 +103,20 @@ internal fun GsmCellLocation.mapGsm(signalStrength: SignalStrength?, network: Ne
     val cid = cid.inRangeOrNull(CellGsm.CID_RANGE)
     val lac = lac.inRangeOrNull(CellGsm.LAC_RANGE)
 
-    val rssi = signalStrength?.getGsmRssi()?.inRangeOrNull(SignalGsm.RSSI_RANGE)
-    val ber = signalStrength?.gsmBitErrorRate?.inRangeOrNull(SignalGsm.BIT_ERROR_RATE_RANGE)
+    val signal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        signalStrength?.getCellSignalStrengths(CellSignalStrengthGsm::class.java)
+            ?.firstOrNull()
+            ?.mapSignal() ?: SignalGsm(null, null, null)
+    } else {
+        val rssi = signalStrength?.getGsmRssi()?.inRangeOrNull(SignalGsm.RSSI_RANGE)
+        val ber = signalStrength?.gsmBitErrorRate?.inRangeOrNull(SignalGsm.BIT_ERROR_RATE_RANGE)
+
+        SignalGsm(
+            rssi = rssi,
+            bitErrorRate = ber,
+            timingAdvance = null
+        )
+    }
 
     return if (cid != null && lac != null) {
         return CellGsm(
@@ -112,11 +124,7 @@ internal fun GsmCellLocation.mapGsm(signalStrength: SignalStrength?, network: Ne
             lac = lac,
             bsic = null,
             band = null,
-            signal = SignalGsm(
-                rssi = rssi,
-                bitErrorRate = ber,
-                timingAdvance = null
-            ),
+            signal = signal,
             network = network,
             connectionStatus = PrimaryConnection()
         )

@@ -36,7 +36,7 @@ internal open class TelephonyManagerCompat14(
         }
 
     protected val cellInfoMapper = CellInfoMapper()
-    private val cellLocationMapper = CellLocationMapper(telephony, subId)
+    private val cellLocationMapper = CellLocationMapper(telephony)
     private val neighbouringCellInfoMapper = NeighbouringCellInfoMapper(telephony)
 
     override fun getTelephonyManager(): TelephonyManager? = telephony
@@ -87,7 +87,7 @@ internal open class TelephonyManagerCompat14(
         allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE]
     )
     override fun getCellLocation(): List<ICell> =
-        cellLocationMapper.map(telephony.cellLocation)
+        cellLocationMapper.map(subId)
 
     @Suppress("DEPRECATION", "UNCHECKED_CAST")
     @WorkerThread

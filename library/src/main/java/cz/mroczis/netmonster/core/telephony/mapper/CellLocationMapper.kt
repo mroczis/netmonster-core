@@ -4,10 +4,7 @@ import android.Manifest
 import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
-import android.telephony.CellLocation
-import android.telephony.PhoneStateListener
-import android.telephony.SignalStrength
-import android.telephony.TelephonyManager
+import android.telephony.*
 import android.telephony.cdma.CdmaCellLocation
 import android.telephony.gsm.GsmCellLocation
 import androidx.annotation.RequiresPermission
@@ -41,9 +38,8 @@ import java.util.concurrent.TimeUnit
  * newer -> it's better to rely on [CellInfoMapper].
  */
 class CellLocationMapper(
-    private val telephony: TelephonyManager,
-    private val subId: Int? = null
-) : ICellMapper<CellLocation?> {
+    private val telephony: TelephonyManager
+) : ICellMapper<Int> {
 
     companion object {
 
@@ -66,8 +62,8 @@ class CellLocationMapper(
      */
     @WorkerThread
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION])
-    override fun map(model: CellLocation?): List<ICell> {
-        val scanResult = getUpdatedLocationAndSignal()
+    override fun map(model: Int): List<ICell> {
+        val scanResult = getUpdatedLocationAndSignal(model)
 
         return mutableListOf<ICell>().apply {
             if (scanResult?.location is GsmCellLocation) {
@@ -83,9 +79,21 @@ class CellLocationMapper(
         val cid = model.cid
         val plmn = Network.map(telephony.networkOperator)
 
-        val rsrp = Reflection.intFieldOrNull(Reflection.SS_LTE_RSRP, signalStrength)
-            ?.toDouble()?.inRangeOrNull(SignalLte.RSRP_RANGE)
-        val wcdma = Reflection.intFieldOrNull(Reflection.UMTS_RSCP, signalStrength)?.toLong()
+        val rsrp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            signalStrength?.getCellSignalStrengths(CellSignalStrengthLte::class.java)
+                ?.firstOrNull()
+                ?.rsrp?.toDouble()?.inRangeOrNull(SignalLte.RSRP_RANGE)
+        } else {
+            Reflection.intFieldOrNull(Reflection.SS_LTE_RSRP, signalStrength)
+                ?.toDouble()?.inRangeOrNull(SignalLte.RSRP_RANGE)
+        }
+        val wcdma = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            signalStrength?.getCellSignalStrengths(CellSignalStrengthWcdma::class.java)
+                ?.firstOrNull()
+                ?.dbm?.toLong()
+        } else {
+            Reflection.intFieldOrNull(Reflection.UMTS_RSCP, signalStrength)?.toLong()
+        }
 
         return if (rsrp != null && network is NetworkType.Lte && !CellGsm.CID_RANGE.contains(cid)) {
             model.mapLte(signalStrength, plmn)
@@ -110,7 +118,7 @@ class CellLocationMapper(
     @WorkerThread
     @Suppress("DEPRECATION")
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION])
-    private fun getUpdatedLocationAndSignal(): ScanResult? {
+    private fun getUpdatedLocationAndSignal(subId : Int?): ScanResult? {
         var signal: SignalStrength? = null
         var location: CellLocation? = null
         val asyncLock = CountDownLatch(2) // CellLocation + SignalStrengths

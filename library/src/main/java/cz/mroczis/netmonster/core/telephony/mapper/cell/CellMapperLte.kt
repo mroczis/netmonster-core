@@ -1,5 +1,6 @@
 package cz.mroczis.netmonster.core.telephony.mapper.cell
 
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.os.Build
 import android.telephony.CellIdentityLte
@@ -174,39 +175,54 @@ internal fun GsmCellLocation.mapLte(signalStrength: SignalStrength?, network: Ne
     val ci = cid.inRangeOrNull(CellLte.CID_RANGE)
     val tac = lac.inRangeOrNull(CellLte.TAC_RANGE)
 
-    val signalMain = Reflection.intFieldOrNull(Reflection.SS_LTE_RSSI, signalStrength)
-    val signalGsm = signalStrength?.gsmSignalStrength
+    val signal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        signalStrength?.getCellSignalStrengths(CellSignalStrengthLte::class.java)
+            ?.firstOrNull()
+            ?.mapSignal() ?: SignalLte(null, null, null, null, null, null)
+    } else {
+        val signalMain = Reflection.intFieldOrNull(Reflection.SS_LTE_RSSI, signalStrength)
+        val signalGsm = signalStrength?.gsmSignalStrength
 
-    // Some devices do report signal strength on LTE as GSM signal strength
-    val rssi =
-        (if (signalGsm != null && signalGsm in RSSI_ASU_RANGE && (signalMain == null || signalMain !in RSSI_ASU_RANGE)) {
-            signalGsm.toDbm()
-        } else if (signalMain != null && signalMain in RSSI_ASU_RANGE) {
-            signalMain.toDbm()
-        } else {
-            signalMain
-        })?.inRangeOrNull(SignalLte.RSSI_RANGE)
+        // Some devices do report signal strength on LTE as GSM signal strength
+        val rssi =
+            (if (signalGsm != null && signalGsm in RSSI_ASU_RANGE && (signalMain == null || signalMain !in RSSI_ASU_RANGE)) {
+                signalGsm.toDbm()
+            } else if (signalMain != null && signalMain in RSSI_ASU_RANGE) {
+                signalMain.toDbm()
+            } else {
+                signalMain
+            })?.inRangeOrNull(SignalLte.RSSI_RANGE)
 
-    val rsrp = Reflection.intFieldOrNull(Reflection.SS_LTE_RSRP, signalStrength)?.toDouble()
-        ?.inRangeOrNull(SignalLte.RSRP_RANGE)
+        val rsrp = Reflection.intFieldOrNull(Reflection.SS_LTE_RSRP, signalStrength)?.toDouble()
+            ?.inRangeOrNull(SignalLte.RSRP_RANGE)
 
-    val rsrq = Reflection.intFieldOrNull(Reflection.SS_LTE_RSRQ, signalStrength)?.toDouble()
-        ?.inRangeOrNull(SignalLte.RSRQ_RANGE)
+        val rsrq = Reflection.intFieldOrNull(Reflection.SS_LTE_RSRQ, signalStrength)?.toDouble()
+            ?.inRangeOrNull(SignalLte.RSRQ_RANGE)
 
-    val snr = Reflection.intFieldOrNull(Reflection.SS_LTE_SNR, signalStrength)
-        ?.let {
-            // SNR in range from 0 to 3 means basically no signal and occurs rarely on Android devices
-            // On older devices (ASUS_Z00AD) this value has 1 decimal place
-            var snr = it.toDouble()
-            if (snr > 30) {
-                snr /= 10
-            }
+        val snr = Reflection.intFieldOrNull(Reflection.SS_LTE_SNR, signalStrength)
+            ?.let {
+                // SNR in range from 0 to 3 means basically no signal and occurs rarely on Android devices
+                // On older devices (ASUS_Z00AD) this value has 1 decimal place
+                var snr = it.toDouble()
+                if (snr > 30) {
+                    snr /= 10
+                }
 
-            snr
-        }?.inRangeOrNull(SignalLte.SNR_RANGE)
+                snr
+            }?.inRangeOrNull(SignalLte.SNR_RANGE)
 
-    val cqi = Reflection.intFieldOrNull(Reflection.SS_LTE_CQI, signalStrength)
-        ?.inRangeOrNull(SignalLte.CQI_RANGE)
+        val cqi = Reflection.intFieldOrNull(Reflection.SS_LTE_CQI, signalStrength)
+            ?.inRangeOrNull(SignalLte.CQI_RANGE)
+
+        SignalLte(
+            rssi = rssi,
+            rsrp = rsrp,
+            rsrq = rsrq,
+            cqi = cqi,
+            snr = snr,
+            timingAdvance = null
+        )
+    }
 
     return if (ci != null) {
         CellLte(
@@ -216,14 +232,7 @@ internal fun GsmCellLocation.mapLte(signalStrength: SignalStrength?, network: Ne
             pci = null,
             band = null,
             bandwidth = null,
-            signal = SignalLte(
-                rssi = rssi,
-                rsrp = rsrp,
-                rsrq = rsrq,
-                cqi = cqi,
-                snr = snr,
-                timingAdvance = null
-            ),
+            signal = signal,
             connectionStatus = PrimaryConnection()
         )
     } else null
