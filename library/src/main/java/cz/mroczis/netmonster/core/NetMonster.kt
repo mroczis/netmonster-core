@@ -2,10 +2,12 @@ package cz.mroczis.netmonster.core
 
 import android.Manifest
 import android.content.Context
+import android.telephony.SubscriptionManager
 import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
 import cz.mroczis.netmonster.core.db.NetworkTypeTable
 import cz.mroczis.netmonster.core.db.model.NetworkType
+import cz.mroczis.netmonster.core.factory.NetMonsterFactory
 import cz.mroczis.netmonster.core.feature.config.PhysicalChannelConfigSource
 import cz.mroczis.netmonster.core.feature.detect.*
 import cz.mroczis.netmonster.core.feature.merge.CellMerger
@@ -15,12 +17,14 @@ import cz.mroczis.netmonster.core.feature.postprocess.PlmnPostprocessor
 import cz.mroczis.netmonster.core.feature.postprocess.PrimaryCellPostprocessor
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.config.PhysicalChannelConfig
+import cz.mroczis.netmonster.core.subscription.ISubscriptionManagerCompat
 import cz.mroczis.netmonster.core.telephony.ITelephonyManagerCompat
 import cz.mroczis.netmonster.core.util.isDisplayOn
 
 internal class NetMonster(
     private val context: Context,
-    private val telephony: ITelephonyManagerCompat
+    private val telephony: ITelephonyManagerCompat,
+    private val subscription: ISubscriptionManagerCompat
 ) : INetMonster {
 
     private val merger = CellMerger()
@@ -49,11 +53,19 @@ internal class NetMonster(
     override fun getCells(vararg sources: CellSource): List<ICell> {
         val oldApi = mutableListOf<ICell>().apply {
             if (sources.contains(CellSource.CELL_LOCATION)) {
-                addAll(telephony.getCellLocation())
+                val serving = subscription.getActiveSubscriptionIds().map { subId ->
+                    NetMonsterFactory.getTelephony(context, subId).getCellLocation()
+                }.flatten().toSet()
+
+                addAll(serving)
             }
 
             if (sources.contains(CellSource.NEIGHBOURING_CELLS)) {
-                addAll(telephony.getNeighboringCellInfo())
+                val neighbouring = subscription.getActiveSubscriptionIds().map { subId ->
+                    NetMonsterFactory.getTelephony(context, subId).getNeighboringCellInfo()
+                }.flatten().toSet()
+
+                addAll(neighbouring)
             }
         }
 

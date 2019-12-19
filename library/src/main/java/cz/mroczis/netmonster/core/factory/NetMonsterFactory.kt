@@ -4,6 +4,9 @@ import android.content.Context
 import android.os.Build
 import cz.mroczis.netmonster.core.INetMonster
 import cz.mroczis.netmonster.core.NetMonster
+import cz.mroczis.netmonster.core.subscription.ISubscriptionManagerCompat
+import cz.mroczis.netmonster.core.subscription.SubscriptionManagerCompat14
+import cz.mroczis.netmonster.core.subscription.SubscriptionManagerCompat22
 import cz.mroczis.netmonster.core.telephony.ITelephonyManagerCompat
 import cz.mroczis.netmonster.core.telephony.TelephonyManagerCompat14
 import cz.mroczis.netmonster.core.telephony.TelephonyManagerCompat17
@@ -25,10 +28,16 @@ object NetMonsterFactory {
             else -> TelephonyManagerCompat14(context, subId)
         }
 
+    fun getSubscription(context: Context) : ISubscriptionManagerCompat =
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1 -> SubscriptionManagerCompat22(context)
+            else -> SubscriptionManagerCompat14(context)
+        }
+
     /**
      * Creates new instance of [INetMonster].
      */
     fun get(context: Context, subId: Int = Integer.MAX_VALUE) : INetMonster =
-        NetMonster(context, getTelephony(context, subId))
+        NetMonster(context, getTelephony(context, subId), getSubscription(context))
 
 }
