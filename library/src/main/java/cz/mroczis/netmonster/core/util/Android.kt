@@ -63,3 +63,6 @@ fun NeighboringCellInfo.getGsmRssi() : Int? =
  * Converts ASU to dBm
  */
 fun Int.toDbm() = -113 + 2 * this
+
+fun isHuawei() = Build.MANUFACTURER.equals("huawei", ignoreCase = true)
+fun isSamsung() = Build.MANUFACTURER.equals("samsung", ignoreCase = true)

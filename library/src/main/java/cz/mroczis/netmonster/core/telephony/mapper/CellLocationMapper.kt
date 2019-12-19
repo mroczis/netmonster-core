@@ -24,6 +24,8 @@ import cz.mroczis.netmonster.core.telephony.mapper.cell.mapWcdma
 import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
 import cz.mroczis.netmonster.core.util.Reflection
 import cz.mroczis.netmonster.core.util.inRangeOrNull
+import cz.mroczis.netmonster.core.util.isHuawei
+import java.lang.reflect.Method
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -67,17 +69,17 @@ class CellLocationMapper(
 
         return mutableListOf<ICell>().apply {
             if (scanResult?.location is GsmCellLocation) {
-                map(scanResult.location, scanResult.signal)?.let { add(it) }
+                map(scanResult.location, scanResult.signal, model)?.let { add(it) }
             } else if (scanResult?.location is CdmaCellLocation) {
                 scanResult.location.mapCdma(scanResult.signal)?.let { add(it) }
             }
         }
     }
 
-    private fun map(model: GsmCellLocation, signalStrength: SignalStrength?): ICell? {
+    private fun map(model: GsmCellLocation, signalStrength: SignalStrength?, subId: Int): ICell? {
         val network = NetworkTypeTable.get(telephony.networkType)
         val cid = model.cid
-        val plmn = Network.map(telephony.networkOperator)
+        val plmn = getNetworkOperator(subId)
 
         val rsrp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             signalStrength?.getCellSignalStrengths(CellSignalStrengthLte::class.java)
@@ -112,13 +114,46 @@ class CellLocationMapper(
     }
 
     /**
+     * Obtains network operator considering provided [subId].
+     */
+    private fun getNetworkOperator(subId: Int) : Network? {
+        val oldWay = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N || isHuawei()){
+            // Indirect reflection way that works on older APIs
+            // Also must be used on Huawei devices that have N+ cause SDK methods
+            // return constant PLMN no matter what subId is used
+            arrayOf(
+                "getNetworkOperatorForSubscription",
+                "getNetworkOperator"
+            ).mapNotNull { methodName ->
+                try {
+                    val method: Method = TelephonyManager::class.java.getDeclaredMethod(
+                        methodName, Int::class.javaPrimitiveType
+                    ).apply { isAccessible = true }
+                    val plmn = method.invoke(telephony, subId) as String
+                    Network.map(plmn)
+                } catch (ignored: Throwable) {
+                    null
+                }
+            }.firstOrNull()
+        } else null
+
+        return if (oldWay != null) {
+            oldWay
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // Direct way through Android API as fallback, even for Huawei
+            val subPlmn = telephony.createForSubscriptionId(subId).networkOperator
+            Network.map(subPlmn ?: telephony.networkOperator)
+        } else null
+    }
+
+    /**
      * Attempts to fetch [SignalStrength] from system. Which might take a while depending on current
      * OS version.
      */
     @WorkerThread
     @Suppress("DEPRECATION")
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION])
-    private fun getUpdatedLocationAndSignal(subId : Int?): ScanResult? {
+    private fun getUpdatedLocationAndSignal(subId: Int?): ScanResult? {
         var signal: SignalStrength? = null
         var location: CellLocation? = null
         val asyncLock = CountDownLatch(2) // CellLocation + SignalStrengths
@@ -155,7 +190,10 @@ class CellLocationMapper(
 
             )
 
-            telephony.listen(signalListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS or PhoneStateListener.LISTEN_CELL_LOCATION)
+            telephony.listen(
+                signalListener,
+                PhoneStateListener.LISTEN_SIGNAL_STRENGTHS or PhoneStateListener.LISTEN_CELL_LOCATION
+            )
         }
 
         // And we also must block original thread

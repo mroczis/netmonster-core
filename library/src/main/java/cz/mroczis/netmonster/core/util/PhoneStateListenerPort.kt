@@ -16,9 +16,7 @@ open class PhoneStateListenerPort(subId: Int?) : PhoneStateListener() {
     }
 
     private fun init(subId: Int?) {
-        if (subId != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
-            !Build.MANUFACTURER.equals("samsung", ignoreCase = true)
-        ) {
+        if (subId != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && !isSamsung()) {
             try {
                 PhoneStateListener::class.java.getDeclaredField("mSubId").apply {
                     isAccessible = true
