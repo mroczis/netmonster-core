@@ -69,8 +69,8 @@ internal fun CellSignalStrengthLte.mapSignal(): SignalLte {
             } else if (main >= -140 && main <= -40) { // in DBM
                 main
             } else null
-        }?.inRangeOrNull(SignalLte.RSSI_RANGE)
-    }
+        }
+    }?.inRangeOrNull(SignalLte.RSSI_RANGE)
 
     val rsrp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         rsrp
