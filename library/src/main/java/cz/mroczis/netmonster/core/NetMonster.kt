@@ -23,7 +23,6 @@ import cz.mroczis.netmonster.core.util.isDisplayOn
 
 internal class NetMonster(
     private val context: Context,
-    private val telephony: ITelephonyManagerCompat,
     private val subscription: ISubscriptionManagerCompat
 ) : INetMonster {
 
@@ -51,9 +50,10 @@ internal class NetMonster(
         allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE]
     )
     override fun getCells(vararg sources: CellSource): List<ICell> {
+        val subscriptions = subscription.getActiveSubscriptionIds()
         val oldApi = mutableListOf<ICell>().apply {
             if (sources.contains(CellSource.CELL_LOCATION)) {
-                val serving = subscription.getActiveSubscriptionIds().map { subId ->
+                val serving = subscriptions.map { subId ->
                     NetMonsterFactory.getTelephony(context, subId).getCellLocation()
                 }.flatten().toSet()
 
@@ -61,7 +61,7 @@ internal class NetMonster(
             }
 
             if (sources.contains(CellSource.NEIGHBOURING_CELLS)) {
-                val neighbouring = subscription.getActiveSubscriptionIds().map { subId ->
+                val neighbouring = subscriptions.map { subId ->
                     NetMonsterFactory.getTelephony(context, subId).getNeighboringCellInfo()
                 }.flatten().toSet()
 
@@ -70,7 +70,10 @@ internal class NetMonster(
         }
 
         val newApi = if (sources.contains(CellSource.ALL_CELL_INFO)) {
-            var allCells = telephony.getAllCellInfo()
+            var allCells = subscriptions.map { subId ->
+                NetMonsterFactory.getTelephony(context, subId).getAllCellInfo()
+            }.flatten().toSet().toList()
+
             postprocessors.forEach { allCells = it.postprocess(allCells) }
             allCells
         } else emptyList()
@@ -81,7 +84,8 @@ internal class NetMonster(
     @RequiresPermission(
         allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE]
     )
-    override fun getNetworkType(): NetworkType = getNetworkType(
+    override fun getNetworkType(subId: Int): NetworkType = getNetworkType(
+        subId,
         DetectorHspaDc(),
         DetectorLteAdvancedServiceState(),
         DetectorLteAdvancedPhysicalChannel(),
@@ -89,7 +93,8 @@ internal class NetMonster(
         DetectorAosp() // best to keep last when all other strategies fail
     ) ?: NetworkTypeTable.get(NetworkType.UNKNOWN)
 
-    override fun getNetworkType(vararg detectors: INetworkDetector): NetworkType? {
+    override fun getNetworkType(subId: Int, vararg detectors: INetworkDetector): NetworkType? {
+        val telephony = getTelephony(subId)
         for (detector in detectors) {
             detector.detect(this, telephony)?.let {
                 return it
@@ -99,10 +104,14 @@ internal class NetMonster(
         return null
     }
 
-    override fun getPhysicalChannelConfiguration(): List<PhysicalChannelConfig> =
-        telephony.getTelephonyManager()?.let {
-            physicalChannelSource.get(it, telephony.getSubscriberId())
+    override fun getPhysicalChannelConfiguration(subId : Int): List<PhysicalChannelConfig> =
+        getTelephony(subId).getTelephonyManager()?.let {
+            it.simState
+            physicalChannelSource.get(it, subId)
         } ?: emptyList()
 
+    private infix fun getTelephony(subId: Int) : ITelephonyManagerCompat {
+        return NetMonsterFactory.getTelephony(context, subId)
+    }
 
 }

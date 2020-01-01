@@ -19,7 +19,7 @@ class DetectorLteAdvancedPhysicalChannel : INetworkDetector {
 
     @SinceSdk(Build.VERSION_CODES.P)
     override fun detect(netmonster: INetMonster, telephony: ITelephonyManagerCompat): NetworkType? =
-        netmonster.getPhysicalChannelConfiguration().let { pcc ->
+        netmonster.getPhysicalChannelConfiguration(telephony.getSubscriberId()).let { pcc ->
             if (pcc.size > 1 && pcc.firstOrNull { it.connectionStatus is SecondaryConnection } != null) {
                 NetworkTypeTable.get(NetworkType.LTE_CA)
             } else null

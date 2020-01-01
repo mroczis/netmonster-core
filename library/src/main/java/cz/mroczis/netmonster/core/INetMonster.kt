@@ -68,6 +68,8 @@ interface INetMonster {
      *
      * If none are present then falls back to AOSP's implementation.
      *
+     * @param subId - subscription id as unique identifier for SIM/eSIM card
+     *
      * @see TelephonyManager.getNetworkType
      * @see INetworkDetector
      */
@@ -75,7 +77,7 @@ interface INetMonster {
     @RequiresPermission(
         allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE]
     )
-    fun getNetworkType() : NetworkType
+    fun getNetworkType(subId: Int) : NetworkType
 
     /**
      * Attempts to detect current network type using selected [detectors].
@@ -90,9 +92,12 @@ interface INetMonster {
      *  - [DetectorAosp] (legacy AOSP)
      *
      * If [detectors] are empty or all of them return null then you'll get also null.
+     *
+     * @param subId - subscription id as unique identifier for SIM/eSIM card
+     * @param detectors - set of detectors that are used to determine [NetworkType]
      */
     @WorkerThread
-    fun getNetworkType(vararg detectors: INetworkDetector) : NetworkType?
+    fun getNetworkType(subId: Int, vararg detectors: INetworkDetector) : NetworkType?
 
     /**
      * Obtains synchronously currently active configurations for physical channel.
@@ -103,12 +108,14 @@ interface INetMonster {
      * Works since [Build.VERSION_CODES.P] on some phones. Look to [PhysicalChannelConfig] for
      * more details.
      *
+     * @param subId - subscription id as unique identifier for SIM/eSIM card
+     *
      * @see PhysicalChannelConfig
      * @see DetectorLteAdvancedPhysicalChannel
      * @see PhysicalChannelConfigSource
      */
     @WorkerThread
     @SinceSdk(Build.VERSION_CODES.P)
-    fun getPhysicalChannelConfiguration() : List<PhysicalChannelConfig>
+    fun getPhysicalChannelConfiguration(subId: Int) : List<PhysicalChannelConfig>
 
 }

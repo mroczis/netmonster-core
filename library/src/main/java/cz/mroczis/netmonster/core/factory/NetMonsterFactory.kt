@@ -37,7 +37,7 @@ object NetMonsterFactory {
     /**
      * Creates new instance of [INetMonster].
      */
-    fun get(context: Context, subId: Int = Integer.MAX_VALUE) : INetMonster =
-        NetMonster(context, getTelephony(context, subId), getSubscription(context))
+    fun get(context: Context) : INetMonster =
+        NetMonster(context, getSubscription(context))
 
 }
