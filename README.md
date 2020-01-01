@@ -90,7 +90,7 @@ Solution:
  - NetMonster Core grabs data from sources you specify, validates and merges them.
 
 ```kotlin
-NetMonsterFactory.get(context, SUBSCRIPTION_ID).apply {
+NetMonsterFactory.get(context).apply {
     val allSources : List<ICell> = getCells() // all sources
     val subset : List<ICell> = getCells( // subset of available sources
         CellSource.ALL_CELL_INFO, 
@@ -112,18 +112,18 @@ Using `getNetworkType(vararg detectors: INetworkDetector)` you can specify which
 when detecting current network type.
 
 ```kotlin
-NetMonsterFactory.get(context, SUBSCRIPTION_ID).apply {
+NetMonsterFactory.get(context).apply {
     // All detectors that are bundled in NetMonster Core
-    val networkType : NetworkType = getNetworkType() 
+    val networkType : NetworkType = getNetworkType(SUBSCRIPTION_ID)
     
     // Only HSPA+42 (guess, not from RIL)
-    val isHspaDc: NetworkType? = getNetworkType(DetectorHspaDc()) 
+    val isHspaDc: NetworkType? = getNetworkType(SUBSCRIPTION_ID, DetectorHspaDc())
     // LTE-A from CellInfo (guess, not from RIL)
-    val isLteCaCellInfo: NetworkType? = getNetworkType(DetectorLteAdvancedCellInfo())
+    val isLteCaCellInfo: NetworkType? = getNetworkType(SUBSCRIPTION_ID, DetectorLteAdvancedCellInfo())
     // LTE-A from ServiceState (from RIL, Android P+)
-    val isLteCaServiceState: NetworkType? = getNetworkType(DetectorLteAdvancedServiceState())
+    val isLteCaServiceState: NetworkType? = getNetworkType(SUBSCRIPTION_ID, DetectorLteAdvancedServiceState())
     // LTE-A from PhysicalChannel (from RIL, Android Q+)
-    val isLteCaPhysicalChannel: NetworkType? = getNetworkType(DetectorLteAdvancedPhysicalChannel())
+    val isLteCaPhysicalChannel: NetworkType? = getNetworkType(SUBSCRIPTION_ID, DetectorLteAdvancedPhysicalChannel())
 }
 ```
 
