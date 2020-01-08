@@ -122,14 +122,14 @@ NetMonsterFactory.get(context).apply {
     val isLteCaCellInfo: NetworkType? = getNetworkType(SUBSCRIPTION_ID, DetectorLteAdvancedCellInfo())
     // LTE-A from ServiceState (from RIL, Android P+)
     val isLteCaServiceState: NetworkType? = getNetworkType(SUBSCRIPTION_ID, DetectorLteAdvancedServiceState())
-    // LTE-A from PhysicalChannel (from RIL, Android Q+)
+    // LTE-A from PhysicalChannel (from RIL, Android P+)
     val isLteCaPhysicalChannel: NetworkType? = getNetworkType(SUBSCRIPTION_ID, DetectorLteAdvancedPhysicalChannel())
 }
 ```
 
 ##### Other features
  - Detection of serving cells in 'emergency calls only' mode.
- - PLMN addition to non-serving cells in GSM, WCDMA, LTE, TDS-CDMA and NR networks.
+ - PLMN addition to non-serving cells in GSM, WCDMA, LTE, TD-SCDMA and NR networks.
 
 License
 -------
