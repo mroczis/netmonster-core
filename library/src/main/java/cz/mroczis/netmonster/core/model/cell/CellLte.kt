@@ -79,7 +79,10 @@ data class CellLte(
          * Correct min CID value is 0. Some Samsung phones use it as N/A value.
          */
         const val CID_MIN = 1L
-        const val CID_MAX = 268_435_455L
+        /**
+         * Correct max CID is 268 435 455. MIUI phones use that value as N/A value.
+         */
+        const val CID_MAX = 268_435_454L
 
         /**
          * Correct min LAC value is 0. Some Samsung phones use it as N/A value.
@@ -104,6 +107,7 @@ data class CellLte(
         internal val TAC_RANGE = TAC_MIN..TAC_MAX
         internal val PCI_RANGE = PCI_MIN..PCI_MAX
         internal val BANDWIDTH_RANGE = BANDWIDTH_MIN..BANDWIDTH_MAX
+
     }
 
 }
