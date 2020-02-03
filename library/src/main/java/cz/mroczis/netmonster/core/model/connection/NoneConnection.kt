@@ -10,4 +10,7 @@ class NoneConnection : IConnection {
         return "NoneConnection()"
     }
 
+    override fun equals(other: Any?) = other?.javaClass == javaClass
+    override fun hashCode() = toString().hashCode()
+
 }
