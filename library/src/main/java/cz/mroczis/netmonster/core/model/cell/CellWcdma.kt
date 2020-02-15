@@ -12,10 +12,7 @@ import cz.mroczis.netmonster.core.model.connection.IConnection
 import cz.mroczis.netmonster.core.model.signal.SignalWcdma
 
 data class CellWcdma(
-    /**
-     * Current network operator or null if unknown
-     */
-    val network: Network?,
+    override val network: Network?,
 
     /**
      * 28-bit WCDMA Cell Identity
@@ -39,7 +36,8 @@ data class CellWcdma(
     override val band: BandWcdma?,
 
     override val signal: SignalWcdma,
-    override val connectionStatus: IConnection
+    override val connectionStatus: IConnection,
+    override val subscriptionId: Int
 ) : ICell {
 
     /**

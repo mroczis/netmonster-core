@@ -9,10 +9,7 @@ import cz.mroczis.netmonster.core.model.connection.IConnection
 import cz.mroczis.netmonster.core.model.signal.SignalLte
 
 data class CellLte(
-    /**
-     * Current network operator or null if unknown
-     */
-    val network: Network?,
+    override val network: Network?,
 
     /**
      * 28-bit E-UTRAN Cell Identifier
@@ -46,7 +43,8 @@ data class CellLte(
     val bandwidth: Int?,
 
     override val signal: SignalLte,
-    override val connectionStatus: IConnection
+    override val connectionStatus: IConnection,
+    override val subscriptionId: Int
 ) : ICell {
 
     /**

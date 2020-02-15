@@ -15,10 +15,7 @@ import cz.mroczis.netmonster.core.model.signal.SignalTdscdma
 
 @SinceSdk(Build.VERSION_CODES.Q)
 data class CellTdscdma(
-    /**
-     * Current network operator or null if unknown
-     */
-    val network: Network?,
+    override val network: Network?,
 
     /**
      * 28-bit WCDMA Cell Identity
@@ -42,7 +39,8 @@ data class CellTdscdma(
     override val band: BandTdscdma?,
 
     override val signal: SignalTdscdma,
-    override val connectionStatus: IConnection
+    override val connectionStatus: IConnection,
+    override val subscriptionId: Int
 ) : ICell {
 
     /**

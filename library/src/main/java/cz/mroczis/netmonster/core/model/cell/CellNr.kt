@@ -15,10 +15,7 @@ import cz.mroczis.netmonster.core.model.signal.SignalNr
 
 @SinceSdk(Build.VERSION_CODES.Q)
 data class CellNr(
-    /**
-     * Current network operator or null if unknown
-     */
-    val network: Network?,
+    override val network: Network?,
 
     /**
      * 36-bit NR Cell Identity
@@ -40,7 +37,8 @@ data class CellNr(
 
     override val band: BandNr?,
     override val signal: SignalNr,
-    override val connectionStatus: IConnection
+    override val connectionStatus: IConnection,
+    override val subscriptionId: Int
 ) : ICell {
 
     override fun <T> let(processor: ICellProcessor<T>): T = processor.processNr(this)

@@ -59,7 +59,7 @@ data class Network internal constructor(
 
         fun map(plmn: String?): Network? =
             if (plmn != null && plmn.length >= 5) {
-                map(plmn.substring(0, 3), plmn.substring(3, 5))
+                map(plmn.substring(0, 3), plmn.substring(3))
             } else null
 
     }

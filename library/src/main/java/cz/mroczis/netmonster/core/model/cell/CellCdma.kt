@@ -1,6 +1,7 @@
 package cz.mroczis.netmonster.core.model.cell
 
 import androidx.annotation.IntRange
+import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.annotation.DoubleRange
 import cz.mroczis.netmonster.core.model.band.IBand
 import cz.mroczis.netmonster.core.model.connection.IConnection
@@ -46,7 +47,9 @@ data class CellCdma(
     val lon: Double?,
 
     override val signal: SignalCdma,
-    override val connectionStatus: IConnection
+    override val connectionStatus: IConnection,
+    override val subscriptionId: Int,
+    override val network: Network? = null
 ) : ICell {
 
     /**

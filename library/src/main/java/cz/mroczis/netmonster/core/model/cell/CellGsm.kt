@@ -9,10 +9,7 @@ import cz.mroczis.netmonster.core.model.connection.IConnection
 import cz.mroczis.netmonster.core.model.signal.SignalGsm
 
 data class CellGsm(
-    /**
-     * Current network operator or null if unknown
-     */
-    val network: Network?,
+    override val network: Network?,
 
     /**
      * 16-bit GSM Cell Identity
@@ -44,7 +41,8 @@ data class CellGsm(
     override val band: BandGsm?,
 
     override val signal: SignalGsm,
-    override val connectionStatus: IConnection
+    override val connectionStatus: IConnection,
+    override val subscriptionId: Int
 ) : ICell {
 
     /**
