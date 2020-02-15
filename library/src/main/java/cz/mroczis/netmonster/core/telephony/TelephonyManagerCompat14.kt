@@ -10,6 +10,7 @@ import cz.mroczis.netmonster.core.callback.CellCallbackError
 import cz.mroczis.netmonster.core.callback.CellCallbackSuccess
 import cz.mroczis.netmonster.core.db.NetworkTypeTable
 import cz.mroczis.netmonster.core.db.model.NetworkType
+import cz.mroczis.netmonster.core.feature.config.ServiceStateSource
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.model.CellError
 import cz.mroczis.netmonster.core.telephony.mapper.CellInfoMapper
@@ -38,6 +39,7 @@ internal open class TelephonyManagerCompat14(
     protected val cellInfoMapper = CellInfoMapper()
     private val cellLocationMapper = CellLocationMapper(telephony)
     private val neighbouringCellInfoMapper = NeighbouringCellInfoMapper(telephony)
+    private val serviceStateSource = ServiceStateSource()
 
     override fun getTelephonyManager(): TelephonyManager? = telephony
 
@@ -110,5 +112,9 @@ internal open class TelephonyManagerCompat14(
     )
     override fun getNetworkType(): NetworkType =
         NetworkTypeTable.get(telephony.networkType)
+
+    @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
+    override fun getServiceState(): ServiceState? =
+        serviceStateSource.get(telephony, subId)
 
 }

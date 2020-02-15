@@ -2,6 +2,8 @@ package cz.mroczis.netmonster.core.telephony
 
 import android.Manifest
 import android.os.Build
+import android.telephony.PhoneStateListener
+import android.telephony.ServiceState
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
@@ -17,12 +19,12 @@ interface ITelephonyManagerCompat {
     /**
      * Getter for AOSP's telephony manager that is used to obtain all info
      */
-    fun getTelephonyManager() : TelephonyManager?
+    fun getTelephonyManager(): TelephonyManager?
 
     /**
      * Current subscriber id, [Int.MAX_VALUE] if invalid or unspecified
      */
-    fun getSubscriberId() : Int
+    fun getSubscriberId(): Int
 
     /**
      * Requests all available cell information from all radios on the device including the
@@ -80,7 +82,7 @@ interface ITelephonyManagerCompat {
     @WorkerThread
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     @SinceSdk(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    fun getAllCellInfo(timeoutMilliseconds: Long = 500) : List<ICell>
+    fun getAllCellInfo(timeoutMilliseconds: Long = 500): List<ICell>
 
     /**
      * Attempts to retrieve cell information using older telephony methods.
@@ -105,7 +107,7 @@ interface ITelephonyManagerCompat {
     @RequiresPermission(
         allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE]
     )
-    fun getCellLocation() : List<ICell>
+    fun getCellLocation(): List<ICell>
 
 
     /**
@@ -126,7 +128,7 @@ interface ITelephonyManagerCompat {
         sdkInt = Build.VERSION_CODES.Q,
         fallbackBehaviour = "On Q+ returns empty list since method was removed from SDK"
     )
-    fun getNeighboringCellInfo() : List<ICell>
+    fun getNeighboringCellInfo(): List<ICell>
 
     /**
      * Currently active network technology grabbed from AOSP and mapped to [NetworkType].
@@ -136,4 +138,19 @@ interface ITelephonyManagerCompat {
      */
     @RequiresPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
     fun getNetworkType(): NetworkType
+
+
+    /**
+     * Obtains synchronously current [ServiceState].
+     *
+     * This information was available since SDK 1, however till
+     * SDK 26 registering of [PhoneStateListener] was required to obtain the data.
+     * This method just simplifies access to the data.
+     *
+     * Based on:
+     *  - [TelephonyManager.getServiceState]
+     */
+    @WorkerThread
+    @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
+    fun getServiceState(): ServiceState?
 }
