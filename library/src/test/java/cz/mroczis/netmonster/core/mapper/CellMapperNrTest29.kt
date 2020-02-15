@@ -39,7 +39,7 @@ class CellMapperNrTest29 : SdkTest(Build.VERSION_CODES.Q) {
     init {
         "Standard LTE cell" {
             val cell = mockValidCell().let {
-                it.identity.mapCell(it.info.mapConnection(), it.signal.mapSignal())
+                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal())
             }
 
             cell.applyNonNull {

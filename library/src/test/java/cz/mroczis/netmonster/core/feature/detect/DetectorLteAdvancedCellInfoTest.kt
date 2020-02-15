@@ -31,7 +31,8 @@ class DetectorLteAdvancedCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 band = BandTableLte.map(6_200),
                 bandwidth = 10_000,
                 signal = SignalLte(null, null, null, null, null, null),
-                connectionStatus = PrimaryConnection()
+                connectionStatus = PrimaryConnection(),
+                subscriptionId = 0
             )
 
             val secondary = primary.copy(
@@ -59,7 +60,8 @@ class DetectorLteAdvancedCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 band = BandTableLte.map(6_200),
                 bandwidth = 10_000,
                 signal = SignalLte(null, null, null, null, null, null),
-                connectionStatus = PrimaryConnection()
+                connectionStatus = PrimaryConnection(),
+                subscriptionId = 0
             )
 
             val secondary = primary.copy(
@@ -68,7 +70,8 @@ class DetectorLteAdvancedCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 pci = 2,
                 band = BandTableLte.map(6_300),
                 bandwidth = 10_000,
-                connectionStatus = NoneConnection()
+                connectionStatus = NoneConnection(),
+                subscriptionId = 0
             )
 
             val cells = mutableListOf<ICell>().apply {
@@ -88,7 +91,8 @@ class DetectorLteAdvancedCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 band = BandTableLte.map(6_200),
                 bandwidth = 10_000,
                 signal = SignalLte(null, null, null, null, null, null),
-                connectionStatus = PrimaryConnection()
+                connectionStatus = PrimaryConnection(),
+                subscriptionId = 0
             )
 
             val secondary = primary.copy(
@@ -97,7 +101,8 @@ class DetectorLteAdvancedCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 pci = 2,
                 band = BandTableLte.map(1_849),
                 bandwidth = 15_000,
-                connectionStatus = NoneConnection()
+                connectionStatus = NoneConnection(),
+                subscriptionId = 0
             )
 
             val cells = mutableListOf<ICell>().apply {
@@ -117,7 +122,8 @@ class DetectorLteAdvancedCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 band = BandTableLte.map(6_200),
                 bandwidth = 10_000,
                 signal = SignalLte(null, null, null, null, null, null),
-                connectionStatus = PrimaryConnection()
+                connectionStatus = PrimaryConnection(),
+                subscriptionId = 0
             )
 
             // Classic in Android N+
@@ -158,7 +164,8 @@ class DetectorLteAdvancedCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 band = BandTableLte.map(6_200),
                 bandwidth = 10_000,
                 signal = SignalLte(null, null, null, null, null, null),
-                connectionStatus = PrimaryConnection()
+                connectionStatus = PrimaryConnection(),
+                subscriptionId = 0
             )
 
             val secondary = primary.copy(

@@ -39,7 +39,7 @@ class CellMapperCdmaTest29 : SdkTest(Build.VERSION_CODES.Q) {
     init {
         "Standard CDMA cell" {
             val cell = mockValidCell().let {
-                it.identity.mapCell(it.info.mapConnection(), it.signal.mapSignal())
+                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal())
             }
 
             cell.applyNonNull {
@@ -71,7 +71,7 @@ class CellMapperCdmaTest29 : SdkTest(Build.VERSION_CODES.Q) {
                 every { it.identity.networkId } returns 65535
                 every { it.identity.systemId } returns 65535
                 every { it.identity.basestationId } returns 0
-                it.identity.mapCell(it.info.mapConnection(), it.signal.mapSignal()) shouldBe null
+                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal()) shouldBe null
             }
         }
     }

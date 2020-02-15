@@ -27,7 +27,8 @@ class DetectorHspaDcTest : SdkTest(Build.VERSION_CODES.N) {
                 psc = 1,
                 band = BandTableWcdma.map(10_838),
                 signal = SignalWcdma(null, null, null, null, null),
-                connectionStatus = PrimaryConnection()
+                connectionStatus = PrimaryConnection(),
+                subscriptionId = 0
             )
 
             val secondary = CellWcdma(
@@ -37,7 +38,8 @@ class DetectorHspaDcTest : SdkTest(Build.VERSION_CODES.N) {
                 psc = 1,
                 band = BandTableWcdma.map(10_588),
                 signal = SignalWcdma(null, null, null, null, null),
-                connectionStatus = NoneConnection()
+                connectionStatus = NoneConnection(),
+                subscriptionId = 0
             )
 
             val cells = mutableListOf<ICell>().apply {
@@ -58,7 +60,8 @@ class DetectorHspaDcTest : SdkTest(Build.VERSION_CODES.N) {
                 psc = 1,
                 band = BandTableWcdma.map(2_937),
                 signal = SignalWcdma(null, null, null, null, null),
-                connectionStatus = PrimaryConnection()
+                connectionStatus = PrimaryConnection(),
+                subscriptionId = 0
             )
 
             val secondary = CellWcdma(
@@ -68,7 +71,8 @@ class DetectorHspaDcTest : SdkTest(Build.VERSION_CODES.N) {
                 psc = 1,
                 band = BandTableWcdma.map(10_588),
                 signal = SignalWcdma(null, null, null, null, null),
-                connectionStatus = NoneConnection()
+                connectionStatus = NoneConnection(),
+                subscriptionId = 0
             )
 
             val cells = mutableListOf<ICell>().apply {
@@ -88,7 +92,8 @@ class DetectorHspaDcTest : SdkTest(Build.VERSION_CODES.N) {
                 psc = 1,
                 band = BandTableWcdma.map(2_937),
                 signal = SignalWcdma(null, null, null, null, null),
-                connectionStatus = PrimaryConnection()
+                connectionStatus = PrimaryConnection(),
+                subscriptionId = 0
             )
 
             val secondary = primary.copy(

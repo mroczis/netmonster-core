@@ -40,7 +40,7 @@ class CellMapperGsmTest29 : SdkTest(Build.VERSION_CODES.Q) {
     init {
         "Standard GSM cell" {
             val cell = mockValidCell().let {
-                it.identity.mapCell(it.info.mapConnection(), it.signal.mapSignal())
+                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal())
             }
 
             cell.applyNonNull {
@@ -79,7 +79,7 @@ class CellMapperGsmTest29 : SdkTest(Build.VERSION_CODES.Q) {
                     Integer.MAX_VALUE // AOSP
                 ).forEach { cid ->
                     every { it.identity.cid } returns cid
-                    it.identity.mapCell(it.info.mapConnection(), it.signal.mapSignal())!!.cid shouldBe null
+                    it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal())!!.cid shouldBe null
                 }
             }
         }
@@ -93,7 +93,7 @@ class CellMapperGsmTest29 : SdkTest(Build.VERSION_CODES.Q) {
                     Integer.MAX_VALUE // AOSP
                 ).forEach { lac ->
                     every { it.identity.lac } returns lac
-                    it.identity.mapCell(it.info.mapConnection(), it.signal.mapSignal())!!.lac shouldBe null
+                    it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal())!!.lac shouldBe null
                 }
             }
         }
@@ -106,7 +106,7 @@ class CellMapperGsmTest29 : SdkTest(Build.VERSION_CODES.Q) {
                     Integer.MAX_VALUE // AOSP
                 ).forEach { bsic ->
                     every { it.identity.bsic } returns bsic
-                    it.identity.mapCell(it.info.mapConnection(), it.signal.mapSignal()).letNonNull { cell ->
+                    it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal()).letNonNull { cell ->
                         cell.bsic shouldBe null
                     }
                 }

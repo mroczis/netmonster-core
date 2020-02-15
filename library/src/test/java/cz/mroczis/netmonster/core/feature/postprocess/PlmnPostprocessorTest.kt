@@ -26,7 +26,8 @@ class PlmnPostprocessorTest : FreeSpec({
                     band = null,
                     bandwidth = null,
                     signal = SignalLte(-51, -87.0, null, null, null, null),
-                    connectionStatus = NoneConnection()
+                    connectionStatus = NoneConnection(),
+                    subscriptionId = 0
                 )
             )
 
@@ -39,7 +40,8 @@ class PlmnPostprocessorTest : FreeSpec({
                     band = null,
                     bandwidth = null,
                     signal = SignalLte(-63, -101.0, null, null, null, null),
-                    connectionStatus = NoneConnection()
+                    connectionStatus = NoneConnection(),
+                    subscriptionId = 0
                 )
             )
         }
@@ -64,7 +66,8 @@ class PlmnPostprocessorTest : FreeSpec({
                     bsic = 1,
                     band = null,
                     signal = SignalGsm(-51, null, null),
-                    connectionStatus = PrimaryConnection()
+                    connectionStatus = PrimaryConnection(),
+                    subscriptionId = 0
                 )
             )
 
@@ -76,7 +79,8 @@ class PlmnPostprocessorTest : FreeSpec({
                     bsic = 55,
                     band = null,
                     signal = SignalGsm(-51, null, null),
-                    connectionStatus = PrimaryConnection()
+                    connectionStatus = PrimaryConnection(),
+                    subscriptionId = 0
                 )
             )
 
@@ -89,7 +93,8 @@ class PlmnPostprocessorTest : FreeSpec({
                     bsic = 2,
                     band = null,
                     signal = SignalGsm(-51, null, null),
-                    connectionStatus = NoneConnection()
+                    connectionStatus = NoneConnection(),
+                    subscriptionId = 0
                 )
             )
 
@@ -101,7 +106,8 @@ class PlmnPostprocessorTest : FreeSpec({
                     bsic = 2,
                     band = null,
                     signal = SignalGsm(-51, null, null),
-                    connectionStatus = NoneConnection()
+                    connectionStatus = NoneConnection(),
+                    subscriptionId = 0
                 )
             )
         }
