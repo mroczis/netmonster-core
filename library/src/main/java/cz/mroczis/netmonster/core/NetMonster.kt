@@ -12,9 +12,7 @@ import cz.mroczis.netmonster.core.feature.config.PhysicalChannelConfigSource
 import cz.mroczis.netmonster.core.feature.detect.*
 import cz.mroczis.netmonster.core.feature.merge.CellMerger
 import cz.mroczis.netmonster.core.feature.merge.CellSource
-import cz.mroczis.netmonster.core.feature.postprocess.ICellPostprocessor
-import cz.mroczis.netmonster.core.feature.postprocess.PlmnPostprocessor
-import cz.mroczis.netmonster.core.feature.postprocess.PrimaryCellPostprocessor
+import cz.mroczis.netmonster.core.feature.postprocess.*
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.config.PhysicalChannelConfig
 import cz.mroczis.netmonster.core.subscription.ISubscriptionManagerCompat
@@ -33,8 +31,10 @@ internal class NetMonster(
      * Postprocessors that try to fix / add behaviour to [ITelephonyManagerCompat.getAllCellInfo]
      */
     private val postprocessors = mutableListOf<ICellPostprocessor>().apply {
-        add(PrimaryCellPostprocessor())
-        add(PlmnPostprocessor())
+        add(MocnNetworkPostprocessor(subscription)) // fix PLMNs
+        add(InvalidCellsPostprocessor()) // get rid of false-positive cells
+        add(PrimaryCellPostprocessor()) // mark 1st cell as Primary if required
+        add(PlmnPostprocessor()) // guess PLMNs when channels match
     }
 
     @WorkerThread
@@ -106,7 +106,6 @@ internal class NetMonster(
 
     override fun getPhysicalChannelConfiguration(subId : Int): List<PhysicalChannelConfig> =
         getTelephony(subId).getTelephonyManager()?.let {
-            it.simState
             physicalChannelSource.get(it, subId)
         } ?: emptyList()
 
