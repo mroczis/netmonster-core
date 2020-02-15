@@ -36,9 +36,9 @@ internal open class TelephonyManagerCompat14(
             context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         }
 
-    protected val cellInfoMapper = CellInfoMapper()
+    protected val cellInfoMapper = CellInfoMapper(subId)
     private val cellLocationMapper = CellLocationMapper(telephony)
-    private val neighbouringCellInfoMapper = NeighbouringCellInfoMapper(telephony)
+    private val neighbouringCellInfoMapper = NeighbouringCellInfoMapper(telephony, subId)
     private val serviceStateSource = ServiceStateSource()
 
     override fun getTelephonyManager(): TelephonyManager? = telephony

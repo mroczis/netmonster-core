@@ -28,7 +28,7 @@ class PhysicalChannelConfigSource {
      * Async executor so can await data from [PhysicalChannelListener]
      */
     private val asyncExecutor by lazy {
-        val thread = HandlerThread("DetectorLteAdvancedPhysicalChannel").apply {
+        val thread = HandlerThread(this.javaClass.simpleName).apply {
             start()
         }
         Handler(thread.looper)

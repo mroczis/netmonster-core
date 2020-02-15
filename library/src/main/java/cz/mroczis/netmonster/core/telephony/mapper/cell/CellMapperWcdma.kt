@@ -79,10 +79,16 @@ internal fun CellSignalStrengthWcdma.mapSignal(): SignalWcdma {
  * [CellIdentityWcdma] -> [CellWcdma]
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-internal fun CellIdentityWcdma.mapCell(connection: IConnection, signal: SignalWcdma): CellWcdma? {
+internal fun CellIdentityWcdma.mapCell(subId: Int, connection: IConnection, signal: SignalWcdma): CellWcdma? {
     val network = mapNetwork()
-    val ci = cid.inRangeOrNull(CellWcdma.CID_RANGE)
     val lac = lac.inRangeOrNull(CellWcdma.LAC_RANGE)
+    val ci = if (lac == null && cid < 100) {
+        // Samsung phones (SM-G960F) tend to report LAC = 0 and sequence of CIs starting with 1 (step 1) for
+        // neighbouring cells. This check assumes there's less than 100 neighbouring cells
+        null
+    } else {
+        cid.inRangeOrNull(CellWcdma.CID_RANGE)
+    }
     val psc = psc.inRangeOrNull(CellWcdma.PSC_RANGE)
 
     val uarfcn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -93,11 +99,7 @@ internal fun CellIdentityWcdma.mapCell(connection: IConnection, signal: SignalWc
         BandTableWcdma.map(uarfcn)
     } else null
 
-    return if (lac == null && ci != null && ci < 100) {
-        // Samsung phones (SM-G960F) tend to report LAC = 0 and sequence of CIs starting with 1 (step 1) for
-        // neighbouring cells. This check assumes there's less than 100 neighbouring cells
-        null
-    } else if (ci == null && psc == null && uarfcn == null) {
+    return if (ci == null && psc == null && uarfcn == null) {
         // Generally invalid data that cannot be used
         null
     } else {
@@ -108,7 +110,8 @@ internal fun CellIdentityWcdma.mapCell(connection: IConnection, signal: SignalWc
             psc = psc,
             connectionStatus = connection,
             signal = signal,
-            band = band
+            band = band,
+            subscriptionId = subId
         )
     }
 }
@@ -126,7 +129,7 @@ internal fun CellIdentityWcdma.mapNetwork(): Network? =
     }
 
 @Suppress("DEPRECATION")
-internal fun GsmCellLocation.mapWcdma(signalStrength: SignalStrength?, network: Network?): ICell? {
+internal fun GsmCellLocation.mapWcdma(subId: Int, signalStrength: SignalStrength?, network: Network?): ICell? {
     val cid = cid.inRangeOrNull(CellWcdma.CID_RANGE)
     val lac = lac.inRangeOrNull(CellWcdma.LAC_RANGE)
     val psc = psc.inRangeOrNull(CellWcdma.PSC_RANGE)
@@ -160,7 +163,8 @@ internal fun GsmCellLocation.mapWcdma(signalStrength: SignalStrength?, network: 
             band = null,
             signal = signal,
             network = network,
-            connectionStatus = PrimaryConnection()
+            connectionStatus = PrimaryConnection(),
+            subscriptionId = subId
         )
     } else null
 }

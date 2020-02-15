@@ -15,17 +15,14 @@ import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.connection.IConnection
 import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 import cz.mroczis.netmonster.core.model.signal.SignalLte
-import cz.mroczis.netmonster.core.util.RSSI_ASU_RANGE
-import cz.mroczis.netmonster.core.util.Reflection
-import cz.mroczis.netmonster.core.util.toDbm
-import cz.mroczis.netmonster.core.util.inRangeOrNull
+import cz.mroczis.netmonster.core.util.*
 import kotlin.math.abs
 
 /**
  * [CellIdentityLte] -> [CellLte]
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-internal fun CellIdentityLte.mapCell(connection: IConnection, signal: SignalLte): CellLte? {
+internal fun CellIdentityLte.mapCell(subId: Int, connection: IConnection, signal: SignalLte): CellLte? {
     val network = mapNetwork()
     val ci = ci.inRangeOrNull(CellLte.CID_RANGE)
     val tac = tac.inRangeOrNull(CellLte.TAC_RANGE)
@@ -51,12 +48,13 @@ internal fun CellIdentityLte.mapCell(connection: IConnection, signal: SignalLte)
         bandwidth = bandwidth,
         connectionStatus = connection,
         signal = signal,
-        band = band
+        band = band,
+        subscriptionId = subId
     )
 }
 
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-internal fun CellSignalStrengthLte.mapSignal(): SignalLte {
+internal fun CellSignalStrengthLte.mapSignal(): SignalLte? {
     val rssi = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         rssi
     } else {
@@ -101,11 +99,13 @@ internal fun CellSignalStrengthLte.mapSignal(): SignalLte {
         rsrp
     }?.inRangeOrNull(SignalLte.RSRP_RANGE)
 
-    val rsrq = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    val rawRsrq = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         rsrq
     } else {
         Reflection.intFieldOrNull(Reflection.LTE_RSRQ, this)
-    }?.let {
+    }
+
+    val rsrq = rawRsrq?.let {
         var rsrq = it.toDouble()
         // Some devices (Sony E2003) report RSRQ with one decimal place -> division by 10 required
         // Usually RSRQ is in rage from -3 to -14 hence '25' starting bound
@@ -148,14 +148,21 @@ internal fun CellSignalStrengthLte.mapSignal(): SignalLte {
         Reflection.intFieldOrNull(Reflection.LTE_TA, this)
     }?.inRangeOrNull(SignalLte.TIMING_ADVANCE_RANGE)
 
-    return SignalLte(
-        rssi = rssi,
-        rsrp = rsrp,
-        rsrq = rsrq,
-        cqi = cqi,
-        snr = snr,
-        timingAdvance = ta
-    )
+    return if (rawRsrq == 225 && isSamsung()) {
+        // In this case Samsung devices report neighbouring cells that are not LTE cells
+        // but possibly WCDMA or GSM. We are not here to guess what's correct
+        // Let's just get rid of this cell.
+        null
+    } else {
+        SignalLte(
+            rssi = rssi,
+            rsrp = rsrp,
+            rsrq = rsrq,
+            cqi = cqi,
+            snr = snr,
+            timingAdvance = ta
+        )
+    }
 }
 
 /**
@@ -171,7 +178,7 @@ internal fun CellIdentityLte.mapNetwork(): Network? =
     }
 
 @Suppress("DEPRECATION")
-internal fun GsmCellLocation.mapLte(signalStrength: SignalStrength?, network: Network?): ICell? {
+internal fun GsmCellLocation.mapLte(subId: Int, signalStrength: SignalStrength?, network: Network?): ICell? {
     val ci = cid.inRangeOrNull(CellLte.CID_RANGE)
     val tac = lac.inRangeOrNull(CellLte.TAC_RANGE)
 
@@ -233,7 +240,8 @@ internal fun GsmCellLocation.mapLte(signalStrength: SignalStrength?, network: Ne
             band = null,
             bandwidth = null,
             signal = signal,
-            connectionStatus = PrimaryConnection()
+            connectionStatus = PrimaryConnection(),
+            subscriptionId = subId
         )
     } else null
 }

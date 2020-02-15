@@ -38,7 +38,7 @@ internal fun CellSignalStrengthCdma.mapSignal(): SignalCdma {
  * [CellIdentityCdma] -> [CellCdma]
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-internal fun CellIdentityCdma.mapCell(connection: IConnection, signal: SignalCdma): CellCdma? {
+internal fun CellIdentityCdma.mapCell(subId: Int, connection: IConnection, signal: SignalCdma): CellCdma? {
     val bid = basestationId.inRangeOrNull(CellCdma.BID_RANGE)
     val nid = networkId.inRangeOrNull(CellCdma.NID_RANGE)
     val sid = systemId.inRangeOrNull(CellCdma.SID_RANGE)
@@ -53,13 +53,14 @@ internal fun CellIdentityCdma.mapCell(connection: IConnection, signal: SignalCdm
             lat = lat,
             lon = lon,
             signal = signal,
-            connectionStatus = connection
+            connectionStatus = connection,
+            subscriptionId = subId
         )
     } else null
 }
 
 @Suppress("DEPRECATION")
-internal fun CdmaCellLocation.mapCdma(signal: SignalStrength?): ICell? {
+internal fun CdmaCellLocation.mapCdma(subId: Int, signal: SignalStrength?): ICell? {
     val bid = baseStationId.inRangeOrNull(CellCdma.BID_RANGE)
     val nid = networkId.inRangeOrNull(CellCdma.NID_RANGE)
     val sid = systemId.inRangeOrNull(CellCdma.SID_RANGE)
@@ -87,7 +88,8 @@ internal fun CdmaCellLocation.mapCdma(signal: SignalStrength?): ICell? {
                 evdoEcio = evdoEcio,
                 evdoSnr = evdoSnr
             ),
-            connectionStatus = PrimaryConnection()
+            connectionStatus = PrimaryConnection(),
+            subscriptionId = subId
         )
     } else null
 }

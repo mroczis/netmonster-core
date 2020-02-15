@@ -53,13 +53,18 @@ internal fun CellSignalStrengthGsm.mapSignal(): SignalGsm {
  * [CellIdentityGsm] -> [CellGsm]
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-internal fun CellIdentityGsm.mapCell(connection: IConnection, signal: SignalGsm): CellGsm? {
+internal fun CellIdentityGsm.mapCell(subId: Int, connection: IConnection, signal: SignalGsm): CellGsm? {
     val network = mapNetwork()
     val cid = cid.inRangeOrNull(CellGsm.CID_RANGE)
     val lac = lac.inRangeOrNull(CellGsm.LAC_RANGE)
 
     val bsic = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        bsic.inRangeOrNull(CellGsm.BSIC_RANGE)
+        // Huawei YAL-L41 reports constantly 0 as BSIC but only for serving cells
+        if (Build.MODEL == "YAL-L41" && connection is PrimaryConnection && arfcn == 0) {
+            Int.MAX_VALUE
+        } else {
+            bsic
+        }.inRangeOrNull(CellGsm.BSIC_RANGE)
     } else null
 
     val arfcn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -81,7 +86,8 @@ internal fun CellIdentityGsm.mapCell(connection: IConnection, signal: SignalGsm)
                 // When LTE is serving phones show neighbouring GSM cells but with invalid -113 dBm RSSI
                 signal.copy(rssi = null)
             } else signal,
-            band = band
+            band = band,
+            subscriptionId = subId
         )
     } else null
 }
@@ -99,7 +105,7 @@ internal fun CellIdentityGsm.mapNetwork(): Network? =
     }
 
 @Suppress("DEPRECATION")
-internal fun GsmCellLocation.mapGsm(signalStrength: SignalStrength?, network: Network?): ICell? {
+internal fun GsmCellLocation.mapGsm(subId: Int, signalStrength: SignalStrength?, network: Network?): ICell? {
     val cid = cid.inRangeOrNull(CellGsm.CID_RANGE)
     val lac = lac.inRangeOrNull(CellGsm.LAC_RANGE)
 
@@ -126,7 +132,8 @@ internal fun GsmCellLocation.mapGsm(signalStrength: SignalStrength?, network: Ne
             band = null,
             signal = signal,
             network = network,
-            connectionStatus = PrimaryConnection()
+            connectionStatus = PrimaryConnection(),
+            subscriptionId = subId
         )
     } else null
 }

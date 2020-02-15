@@ -14,7 +14,9 @@ import cz.mroczis.netmonster.core.telephony.mapper.cell.mapSignal
  * Transforms result of [TelephonyManager.getAllCellInfo] into our list
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-class CellInfoMapper : ICellMapper<List<CellInfo>?> {
+class CellInfoMapper(
+    private val subId: Int
+) : ICellMapper<List<CellInfo>?> {
 
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     override fun map(model: List<CellInfo>?): List<ICell> =
@@ -38,40 +40,41 @@ class CellInfoMapper : ICellMapper<List<CellInfo>?> {
     private fun mapGsm(model: CellInfoGsm): ICell? {
         val connection = model.mapConnection()
         val signal = model.cellSignalStrength.mapSignal()
-        return model.cellIdentity.mapCell(connection, signal)
+        return model.cellIdentity.mapCell(subId, connection, signal)
     }
 
     private fun mapLte(model: CellInfoLte): ICell? {
         val connection = model.mapConnection()
-        val signal = model.cellSignalStrength.mapSignal()
-        return model.cellIdentity.mapCell(connection, signal)
+        return model.cellSignalStrength.mapSignal()?.let { signal ->
+            model.cellIdentity.mapCell(subId, connection, signal)
+        }
     }
 
     private fun mapCdma(model: CellInfoCdma): ICell? {
         val connection = model.mapConnection()
         val signal = model.cellSignalStrength.mapSignal()
-        return model.cellIdentity.mapCell(connection, signal)
+        return model.cellIdentity.mapCell(subId, connection, signal)
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     private fun mapWcdma(model: CellInfoWcdma): ICell? {
         val connection = model.mapConnection()
         val signal = model.cellSignalStrength.mapSignal()
-        return model.cellIdentity.mapCell(connection, signal)
+        return model.cellIdentity.mapCell(subId, connection, signal)
     }
 
     @TargetApi(Build.VERSION_CODES.Q)
     private fun mapTdscdma(model: CellInfoTdscdma): ICell? {
         val connection = model.mapConnection()
         val signal = model.cellSignalStrength.mapSignal()
-        return model.cellIdentity.mapCell(connection, signal)
+        return model.cellIdentity.mapCell(subId, connection, signal)
     }
 
     @TargetApi(Build.VERSION_CODES.Q)
     private fun mapNr(model: CellInfoNr): ICell? {
         val connection = model.mapConnection()
         val signal = (model.cellSignalStrength as? CellSignalStrengthNr)?.mapSignal()
-        return (model.cellIdentity as? CellIdentityNr)?.mapCell(connection, signal)
+        return (model.cellIdentity as? CellIdentityNr)?.mapCell(subId, connection, signal)
     }
 
 }

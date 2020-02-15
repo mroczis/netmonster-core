@@ -71,7 +71,7 @@ class CellLocationMapper(
             if (scanResult?.location is GsmCellLocation) {
                 map(scanResult.location, scanResult.signal, model)?.let { add(it) }
             } else if (scanResult?.location is CdmaCellLocation) {
-                scanResult.location.mapCdma(scanResult.signal)?.let { add(it) }
+                scanResult.location.mapCdma(model, scanResult.signal)?.let { add(it) }
             }
         }
     }
@@ -98,15 +98,15 @@ class CellLocationMapper(
         }
 
         return if (rsrp != null && network is NetworkType.Lte && !CellGsm.CID_RANGE.contains(cid)) {
-            model.mapLte(signalStrength, plmn)
+            model.mapLte(subId, signalStrength, plmn)
         } else if (SignalWcdma.RSCP_RANGE.contains(wcdma) && network is NetworkType.Wcdma) {
-            model.mapWcdma(signalStrength, plmn)
+            model.mapWcdma(subId, signalStrength, plmn)
         } else if (CellGsm.CID_RANGE.contains(cid) && (!CellWcdma.PSC_RANGE.contains(model.psc) || network is NetworkType.Gsm)) {
-            model.mapGsm(signalStrength, plmn)
+            model.mapGsm(subId, signalStrength, plmn)
         } else if (network is NetworkType.Wcdma) {
-            model.mapWcdma(signalStrength, plmn)
+            model.mapWcdma(subId, signalStrength, plmn)
         } else if (network is NetworkType.Lte) {
-            model.mapLte(signalStrength, plmn)
+            model.mapLte(subId, signalStrength, plmn)
         } else {
             null
         }

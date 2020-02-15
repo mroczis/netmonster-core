@@ -30,7 +30,8 @@ import cz.mroczis.netmonster.core.util.inRangeOrNull
 )
 @Suppress("DEPRECATION")
 class NeighbouringCellInfoMapper(
-    private val telephony: TelephonyManager
+    private val telephony: TelephonyManager,
+    private val subId: Int
 ) : ICellMapper<List<NeighboringCellInfo>?> {
 
     override fun map(model: List<NeighboringCellInfo>?): List<ICell> {
@@ -61,7 +62,8 @@ class NeighbouringCellInfoMapper(
                 bsic = null,
                 band = null,
                 signal = SignalGsm(rssi, null, null),
-                connectionStatus = NoneConnection()
+                connectionStatus = NoneConnection(),
+                subscriptionId = subId
             )
         } else null
     }
@@ -78,7 +80,8 @@ class NeighbouringCellInfoMapper(
                 psc = psc,
                 band = null,
                 signal = SignalWcdma(rssi, null, null, null, null),
-                connectionStatus = NoneConnection()
+                connectionStatus = NoneConnection(),
+                subscriptionId = subId
             )
         } else null
     }
