@@ -54,7 +54,7 @@ internal class NetMonster(
         val oldApi = mutableListOf<ICell>().apply {
             if (sources.contains(CellSource.CELL_LOCATION)) {
                 val serving = subscriptions.map { subId ->
-                    NetMonsterFactory.getTelephony(context, subId).getCellLocation()
+                    getTelephony(subId).getCellLocation()
                 }.flatten().toSet()
 
                 addAll(serving)
@@ -62,7 +62,7 @@ internal class NetMonster(
 
             if (sources.contains(CellSource.NEIGHBOURING_CELLS)) {
                 val neighbouring = subscriptions.map { subId ->
-                    NetMonsterFactory.getTelephony(context, subId).getNeighboringCellInfo()
+                    getTelephony(subId).getNeighboringCellInfo()
                 }.flatten().toSet()
 
                 addAll(neighbouring)
@@ -71,7 +71,7 @@ internal class NetMonster(
 
         val newApi = if (sources.contains(CellSource.ALL_CELL_INFO)) {
             var allCells = subscriptions.map { subId ->
-                NetMonsterFactory.getTelephony(context, subId).getAllCellInfo()
+                getTelephony(subId).getAllCellInfo()
             }.flatten().toSet().toList()
 
             postprocessors.forEach { allCells = it.postprocess(allCells) }

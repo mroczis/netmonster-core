@@ -19,14 +19,17 @@ import java.util.concurrent.TimeUnit
  */
 class ServiceStateSource {
 
-    /**
-     * Async executor so can await data from [ServiceStateListener]
-     */
-    private val asyncExecutor by lazy {
-        val thread = HandlerThread(this.javaClass.simpleName).apply {
-            start()
+    companion object {
+
+        /**
+         * Async executor so can await data from [ServiceStateListener]
+         */
+        private val asyncExecutor by lazy {
+            val thread = HandlerThread("ServiceStateSource").apply {
+                start()
+            }
+            Handler(thread.looper)
         }
-        Handler(thread.looper)
     }
 
     /**

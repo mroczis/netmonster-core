@@ -22,16 +22,16 @@ class PhysicalChannelConfigSource {
     companion object {
         // Copied from SDK, this field is currently hidden
         const val LISTEN_PHYSICAL_CHANNEL_CONFIGURATION = 0x00100000
-    }
 
-    /**
-     * Async executor so can await data from [PhysicalChannelListener]
-     */
-    private val asyncExecutor by lazy {
-        val thread = HandlerThread(this.javaClass.simpleName).apply {
-            start()
+        /**
+         * Async executor so can await data from [PhysicalChannelListener]
+         */
+        private val asyncExecutor by lazy {
+            val thread = HandlerThread("PhysicalChannelConfigSource").apply {
+                start()
+            }
+            Handler(thread.looper)
         }
-        Handler(thread.looper)
     }
 
     /**
