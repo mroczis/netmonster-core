@@ -1,8 +1,8 @@
 package cz.mroczis.netmonster.core
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
-import android.telephony.SubscriptionManager
 import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
 import cz.mroczis.netmonster.core.db.NetworkTypeTable
@@ -30,11 +30,15 @@ internal class NetMonster(
     /**
      * Postprocessors that try to fix / add behaviour to [ITelephonyManagerCompat.getAllCellInfo]
      */
+    @SuppressLint("MissingPermission")
     private val postprocessors = mutableListOf<ICellPostprocessor>().apply {
         add(MocnNetworkPostprocessor(subscription)) // fix PLMNs
         add(InvalidCellsPostprocessor()) // get rid of false-positive cells
         add(PrimaryCellPostprocessor()) // mark 1st cell as Primary if required
         add(PlmnPostprocessor()) // guess PLMNs when channels match
+        add(SubDuplicitiesPostprocessor(subscription) { subId ->
+            getTelephony(subId).getNetworkOperator()
+        }) // filter out duplicities, only Dual SIMs
     }
 
     @WorkerThread
