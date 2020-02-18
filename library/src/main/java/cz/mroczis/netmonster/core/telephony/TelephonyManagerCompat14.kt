@@ -11,11 +11,13 @@ import cz.mroczis.netmonster.core.callback.CellCallbackSuccess
 import cz.mroczis.netmonster.core.db.NetworkTypeTable
 import cz.mroczis.netmonster.core.db.model.NetworkType
 import cz.mroczis.netmonster.core.feature.config.ServiceStateSource
+import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.model.CellError
 import cz.mroczis.netmonster.core.telephony.mapper.CellInfoMapper
 import cz.mroczis.netmonster.core.telephony.mapper.CellLocationMapper
 import cz.mroczis.netmonster.core.telephony.mapper.NeighbouringCellInfoMapper
+import cz.mroczis.netmonster.core.util.isHuawei
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -29,8 +31,9 @@ internal open class TelephonyManagerCompat14(
 ) : ITelephonyManagerCompat {
 
     protected val telephony: TelephonyManager
-        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N &&
-            !Build.MANUFACTURER.equals("huawei", ignoreCase = true)) {
+        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager).createForSubscriptionId(subId)
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !isHuawei()) {
             (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager).createForSubscriptionId(subId)
         } else {
             context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
@@ -116,5 +119,9 @@ internal open class TelephonyManagerCompat14(
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun getServiceState(): ServiceState? =
         serviceStateSource.get(telephony, subId)
+
+    @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
+    override fun getNetworkOperator(): Network? =
+        Network.map(telephony.networkOperator) ?: Network.map(getServiceState()?.operatorNumeric)
 
 }

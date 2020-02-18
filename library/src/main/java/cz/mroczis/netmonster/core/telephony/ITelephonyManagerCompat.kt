@@ -10,6 +10,7 @@ import androidx.annotation.WorkerThread
 import cz.mroczis.netmonster.core.callback.CellCallbackError
 import cz.mroczis.netmonster.core.callback.CellCallbackSuccess
 import cz.mroczis.netmonster.core.db.model.NetworkType
+import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.annotation.SinceSdk
 import cz.mroczis.netmonster.core.model.annotation.TillSdk
 import cz.mroczis.netmonster.core.model.cell.ICell
@@ -153,4 +154,18 @@ interface ITelephonyManagerCompat {
     @WorkerThread
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
     fun getServiceState(): ServiceState?
+
+    /**
+     * PLMN of currently registered network.
+     * Expect `null` in CDMA networks and when phone is not connected to networks.
+     * Some devices return valid values even when they are in 'Emergency calls only' mode.
+     *
+     * Based on:
+     *  - [TelephonyManager.getNetworkOperator]
+     *  - [TelephonyManager.getServiceState] (fallback if previous one returns `null`)
+     */
+    @WorkerThread
+    @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
+    fun getNetworkOperator(): Network?
+
 }
