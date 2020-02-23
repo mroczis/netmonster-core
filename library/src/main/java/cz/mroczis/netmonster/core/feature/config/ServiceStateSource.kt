@@ -63,7 +63,7 @@ class ServiceStateSource {
             // It'll get unblocked once we receive required data
             // This usually takes +/- 20 ms to complete
             try {
-                asyncLock.await(500, TimeUnit.MILLISECONDS)
+                asyncLock.await(100, TimeUnit.MILLISECONDS)
             } catch (e: InterruptedException) {
                 // System was not able to deliver PhysicalChannelConfig in this time slot
             }
