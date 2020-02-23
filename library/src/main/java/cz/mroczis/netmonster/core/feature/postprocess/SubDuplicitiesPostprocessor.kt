@@ -50,16 +50,30 @@ class SubDuplicitiesPostprocessor(
                     }
 
                     // Cell that has the same network & subscription id
-                    val matchingIndex = indexesOfPrimaryCells.indexOfFirst { index ->
+                    // Indexes in 'cells' variable where subscription id and operators match
+                    val matchingIndexes = indexesOfPrimaryCells.filter { index ->
                         cells[index].network == currentNetwork && cells[index].subscriptionId == subId
                     }
 
                     // Now let's get interval for sublist that we'll extract
                     // Start = place where is serving cell with correct network & sub id
                     // End = place where's next serving cell (exclusive) or end of the list if there's none
-                    val start: Int? = indexesOfPrimaryCells.getOrNull(matchingIndex)
+                    val start: Int? = when {
+                        matchingIndexes.size == 1 -> {
+                            // Usual situation, dual SIM, two different PLMNs
+                            matchingIndexes[0]
+                        }
+                        matchingIndexes.size > 1 -> {
+                            // Case: user has more SIM cards that are connected to same network
+                            // In this case we grab index of subscription that SHOULD match with position
+                            // of serving cell
+                            matchingIndexes.getOrNull(subscriptionsIds.indexOf(subId))
+                        }
+                        else -> null
+                    }
                     val end: Int? = if (start != null) {
-                        indexesOfPrimaryCells.getOrNull(matchingIndex + 1) ?: cells.size
+                        // End = where next serving cell is or at the end of the list
+                        indexesOfPrimaryCells.firstOrNull { it > start } ?: cells.size
                     } else {
                         null
                     }

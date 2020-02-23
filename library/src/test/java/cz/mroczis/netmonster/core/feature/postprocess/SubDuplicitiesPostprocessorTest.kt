@@ -127,6 +127,41 @@ class SubDuplicitiesPostprocessorTest : FreeSpec({
         result shouldBe cells
     }
 
+    "Two subscriptions - same PLMN" {
+        val cManager = object : ISubscriptionManagerCompat {
+            override fun getActiveSubscriptionIds(): List<Int> =
+                getActiveSubscriptions().map { it.subscriptionId }
+
+            override fun getActiveSubscriptions(): List<SubscribedNetwork> =
+                listOf(
+                    SubscribedNetwork(SUB_A, Network.map(800, 88)),
+                    SubscribedNetwork(SUB_B, Network.map(800, 88))
+                )
+        }
+
+        val postprocessor = SubDuplicitiesPostprocessor(cManager) { subId ->
+            cManager.getActiveSubscriptions().first { it.subscriptionId == subId }.network
+        }
+
+        val cells = mutableListOf<ICell>(
+            aServing1,
+            aNeighbour1,
+            aNeighbour2,
+            bServing1.copy(network = Network.map(800, 88)),
+            bNeighbour1
+        )
+
+        val subTo1 = SubscriptionModifier(SUB_A)
+        val subTo2 = SubscriptionModifier(SUB_B)
+        val input = listOf(
+            cells.map { it.let(subTo1) },
+            cells.map { it.let(subTo2) }
+        ).flatten()
+
+        val result = postprocessor.postprocess(input)
+        result shouldBe cells
+    }
+
 }) {
 
     companion object {
