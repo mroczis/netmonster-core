@@ -75,7 +75,7 @@ internal fun CellIdentityGsm.mapCell(subId: Int, connection: IConnection, signal
         BandTableGsm.map(arfcn, network?.mcc)
     } else null
 
-    return if ((cid != null && lac != null) || arfcn != null || bsic != null) {
+    return if ((cid != null && lac != null) || ((arfcn != null || bsic != null) && connection !is PrimaryConnection)) {
         CellGsm(
             network = network,
             cid = cid,
