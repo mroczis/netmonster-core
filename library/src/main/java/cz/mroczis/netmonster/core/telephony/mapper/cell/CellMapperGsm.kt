@@ -60,7 +60,7 @@ internal fun CellIdentityGsm.mapCell(subId: Int, connection: IConnection, signal
 
     val bsic = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         // Huawei YAL-L41 reports constantly 0 as BSIC but only for serving cells
-        if (Build.MODEL == "YAL-L41" && connection is PrimaryConnection && arfcn == 0) {
+        if (Build.MODEL == "YAL-L41" && connection is PrimaryConnection && bsic == 0) {
             Int.MAX_VALUE
         } else {
             bsic
