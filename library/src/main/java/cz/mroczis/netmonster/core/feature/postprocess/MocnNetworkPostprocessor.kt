@@ -26,10 +26,10 @@ class MocnNetworkPostprocessor(
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun postprocess(list: List<ICell>): List<ICell> {
         val subscriptions = subscription.getActiveSubscriptions().associateBy {
-            it.network
+            it.subscriptionId
         }
         return list.toMutableList().map { cell ->
-            val suggestedSub = subscriptions[cell.network]
+            val suggestedSub = subscriptions[cell.subscriptionId]
             if (suggestedSub?.network != null && suggestedSub.network != cell.network) {
                 cell.let(PlmnSwitcher(suggestedSub.network))
             } else {
