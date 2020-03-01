@@ -41,35 +41,44 @@ class ServiceStateSource {
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
     fun get(telephonyManager: TelephonyManager, subId: Int): ServiceState? =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            telephonyManager.serviceState
-        } else {
-            val asyncLock = CountDownLatch(1)
-            var simState: ServiceState? = null
-
-            asyncExecutor.post {
-                // We'll receive callbacks on thread that created instance of [listener] by default.
-                // Async processing is required otherwise deadlock would arise cause we block
-                // original thread
-                val listener = ServiceStateListener(subId) {
-                    simState = it
-                    asyncLock.countDown()
-                    telephonyManager.listen(this, PhoneStateListener.LISTEN_NONE)
-                }
-
-                telephonyManager.listen(listener, PhoneStateListener.LISTEN_SERVICE_STATE)
-            }
-
-            // And we also must block original thread
-            // It'll get unblocked once we receive required data
-            // This usually takes +/- 20 ms to complete
             try {
-                asyncLock.await(100, TimeUnit.MILLISECONDS)
-            } catch (e: InterruptedException) {
-                // System was not able to deliver PhysicalChannelConfig in this time slot
+                telephonyManager.serviceState
+            } catch (e: SecurityException) {
+                // Samsung Galaxy A80 throws SecurityException and requires `android.permission.MODIFY_PHONE_STATE` to access this field
+                getPreOreo(telephonyManager, subId)
+            }
+        } else {
+            getPreOreo(telephonyManager, subId)
+        }
+
+    fun getPreOreo(telephonyManager: TelephonyManager, subId: Int) : ServiceState? {
+        val asyncLock = CountDownLatch(1)
+        var simState: ServiceState? = null
+
+        asyncExecutor.post {
+            // We'll receive callbacks on thread that created instance of [listener] by default.
+            // Async processing is required otherwise deadlock would arise cause we block
+            // original thread
+            val listener = ServiceStateListener(subId) {
+                simState = it
+                asyncLock.countDown()
+                telephonyManager.listen(this, PhoneStateListener.LISTEN_NONE)
             }
 
-            simState
+            telephonyManager.listen(listener, PhoneStateListener.LISTEN_SERVICE_STATE)
         }
+
+        // And we also must block original thread
+        // It'll get unblocked once we receive required data
+        // This usually takes +/- 20 ms to complete
+        try {
+            asyncLock.await(100, TimeUnit.MILLISECONDS)
+        } catch (e: InterruptedException) {
+            // System was not able to deliver PhysicalChannelConfig in this time slot
+        }
+
+        return simState
+    }
 
 
     /**
