@@ -122,6 +122,6 @@ internal open class TelephonyManagerCompat14(
 
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun getNetworkOperator(): Network? =
-        Network.map(telephony.networkOperator) ?: Network.map(getServiceState()?.operatorNumeric)
+        Network.map(getServiceState()?.operatorNumeric) ?: Network.map(telephony.networkOperator)
 
 }

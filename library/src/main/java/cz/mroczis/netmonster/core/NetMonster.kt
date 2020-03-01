@@ -32,13 +32,15 @@ internal class NetMonster(
      */
     @SuppressLint("MissingPermission")
     private val postprocessors = mutableListOf<ICellPostprocessor>().apply {
-        add(MocnNetworkPostprocessor(subscription)) // fix PLMNs
+        add(MocnNetworkPostprocessor(subscription) { subId ->
+            getTelephony(subId).getNetworkOperator()
+        }) // fix PLMNs
         add(InvalidCellsPostprocessor()) // get rid of false-positive cells
         add(PrimaryCellPostprocessor()) // mark 1st cell as Primary if required
-        add(PlmnPostprocessor()) // guess PLMNs when channels match
         add(SubDuplicitiesPostprocessor(subscription) { subId ->
             getTelephony(subId).getNetworkOperator()
         }) // filter out duplicities, only Dual SIMs
+        add(PlmnPostprocessor()) // guess PLMNs when channels match
     }
 
     @WorkerThread

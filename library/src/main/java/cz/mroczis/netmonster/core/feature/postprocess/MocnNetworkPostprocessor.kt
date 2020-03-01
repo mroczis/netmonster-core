@@ -20,18 +20,19 @@ import cz.mroczis.netmonster.core.subscription.ISubscriptionManagerCompat
  * References: [AOSP bug tracker](https://issuetracker.google.com/issues/73130708)
  */
 class MocnNetworkPostprocessor(
-    private val subscription: ISubscriptionManagerCompat
+    private val subscription: ISubscriptionManagerCompat,
+    private val networkOperatorGetter: (subId: Int) -> Network?
 ) : ICellPostprocessor {
 
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun postprocess(list: List<ICell>): List<ICell> {
-        val subscriptions = subscription.getActiveSubscriptions().associateBy {
-            it.subscriptionId
-        }
+        val subscriptions = subscription.getActiveSubscriptionIds()
+            .associateWith { networkOperatorGetter.invoke(it) }
+        
         return list.toMutableList().map { cell ->
-            val suggestedSub = subscriptions[cell.subscriptionId]
-            if (suggestedSub?.network != null && suggestedSub.network != cell.network) {
-                cell.let(PlmnSwitcher(suggestedSub.network))
+            val suggestedNetwork = subscriptions[cell.subscriptionId]
+            if (suggestedNetwork != null && suggestedNetwork != cell.network) {
+                cell.let(PlmnSwitcher(suggestedNetwork))
             } else {
                 cell
             }

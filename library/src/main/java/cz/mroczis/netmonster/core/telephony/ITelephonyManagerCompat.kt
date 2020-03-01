@@ -161,8 +161,8 @@ interface ITelephonyManagerCompat {
      * Some devices return valid values even when they are in 'Emergency calls only' mode.
      *
      * Based on:
-     *  - [TelephonyManager.getNetworkOperator]
-     *  - [TelephonyManager.getServiceState] (fallback if previous one returns `null`)
+     *  - [TelephonyManager.getServiceState]
+     *  - [TelephonyManager.getNetworkOperator] (fallback if previous one returns `null`)
      */
     @WorkerThread
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
