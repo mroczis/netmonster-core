@@ -7,6 +7,7 @@ import cz.mroczis.netmonster.core.model.connection.NoneConnection
 import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 import cz.mroczis.netmonster.core.model.signal.SignalLte
 import cz.mroczis.netmonster.core.subscription.ISubscriptionManagerCompat
+import cz.mroczis.netmonster.core.util.SubscriptionModifier
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FreeSpec
 
@@ -167,23 +168,6 @@ class SubDuplicitiesPostprocessorTest : FreeSpec({
     companion object {
         const val SUB_A = 4
         const val SUB_B = 20
-    }
-
-
-    /**
-     * Changes subscription id to desired one
-     */
-    private class SubscriptionModifier(
-        private val targetSub: Int
-    ) : ICellProcessor<ICell> {
-        override fun processCdma(cell: CellCdma): ICell = cell.copy(subscriptionId = targetSub)
-        override fun processGsm(cell: CellGsm): ICell = cell.copy(subscriptionId = targetSub)
-        override fun processLte(cell: CellLte): ICell = cell.copy(subscriptionId = targetSub)
-        override fun processNr(cell: CellNr): ICell = cell.copy(subscriptionId = targetSub)
-        override fun processTdscdma(cell: CellTdscdma): ICell =
-            cell.copy(subscriptionId = targetSub)
-
-        override fun processWcdma(cell: CellWcdma): ICell = cell.copy(subscriptionId = targetSub)
     }
 
 }
