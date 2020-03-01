@@ -70,6 +70,7 @@ class CellMapperGsmTest29 : SdkTest(Build.VERSION_CODES.Q) {
             }
         }
 
+        // Primary cell must have valid CID
         "Invalid CID" {
             mockValidCell().let {
                 arrayOf( // Array of invalid CIDs we've detected across all devices
@@ -79,11 +80,12 @@ class CellMapperGsmTest29 : SdkTest(Build.VERSION_CODES.Q) {
                     Integer.MAX_VALUE // AOSP
                 ).forEach { cid ->
                     every { it.identity.cid } returns cid
-                    it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal())!!.cid shouldBe null
+                    it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal()) shouldBe null
                 }
             }
         }
 
+        // Primary cell must have valid LAC
         "Invalid LAC" {
             mockValidCell().let {
                 arrayOf( // Array of invalid LACs we've detected across all devices
@@ -93,7 +95,7 @@ class CellMapperGsmTest29 : SdkTest(Build.VERSION_CODES.Q) {
                     Integer.MAX_VALUE // AOSP
                 ).forEach { lac ->
                     every { it.identity.lac } returns lac
-                    it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal())!!.lac shouldBe null
+                    it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal()) shouldBe null
                 }
             }
         }
