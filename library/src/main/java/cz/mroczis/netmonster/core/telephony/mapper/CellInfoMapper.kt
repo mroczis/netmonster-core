@@ -45,9 +45,8 @@ class CellInfoMapper(
 
     private fun mapLte(model: CellInfoLte): ICell? {
         val connection = model.mapConnection()
-        return model.cellSignalStrength.mapSignal()?.let { signal ->
-            model.cellIdentity.mapCell(subId, connection, signal)
-        }
+        val signal =  model.cellSignalStrength.mapSignal()
+        return model.cellIdentity.mapCell(subId, connection, signal)
     }
 
     private fun mapCdma(model: CellInfoCdma): ICell? {

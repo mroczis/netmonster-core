@@ -54,7 +54,7 @@ internal fun CellIdentityLte.mapCell(subId: Int, connection: IConnection, signal
 }
 
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-internal fun CellSignalStrengthLte.mapSignal(): SignalLte? {
+internal fun CellSignalStrengthLte.mapSignal(): SignalLte {
     val rssi = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         rssi
     } else {
@@ -148,21 +148,14 @@ internal fun CellSignalStrengthLte.mapSignal(): SignalLte? {
         Reflection.intFieldOrNull(Reflection.LTE_TA, this)
     }?.inRangeOrNull(SignalLte.TIMING_ADVANCE_RANGE)
 
-    return if (rawRsrq == 225 && isSamsung()) {
-        // In this case Samsung devices report neighbouring cells that are not LTE cells
-        // but possibly WCDMA or GSM. We are not here to guess what's correct
-        // Let's just get rid of this cell.
-        null
-    } else {
-        SignalLte(
-            rssi = rssi,
-            rsrp = rsrp,
-            rsrq = rsrq,
-            cqi = cqi,
-            snr = snr,
-            timingAdvance = ta
-        )
-    }
+    return SignalLte(
+        rssi = rssi,
+        rsrp = rsrp,
+        rsrq = rsrq,
+        cqi = cqi,
+        snr = snr,
+        timingAdvance = ta
+    )
 }
 
 /**
