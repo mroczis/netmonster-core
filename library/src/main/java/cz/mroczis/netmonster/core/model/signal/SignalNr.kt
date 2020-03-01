@@ -55,7 +55,7 @@ data class SignalNr(
     val ssSinr: Int?
 ) : ISignal {
 
-    internal constructor() : this(null, null, null,null,null, null)
+    internal constructor() : this(null, null, null, null, null, null)
 
     override val dbm: Int?
         get() = csiRsrp
@@ -75,6 +75,19 @@ data class SignalNr(
      */
     val ssRsrpAsu
         get() = ssRsrp?.plus(140)
+
+    /**
+     * Merges current instance with [other], keeping data that are valid and adding
+     * other values that are valid in [other] instance but not here.
+     */
+    fun merge(other: SignalNr) = copy(
+        csiRsrp = csiRsrp ?: other.csiRsrp,
+        csiRsrq = csiRsrq ?: other.csiRsrq,
+        csiSinr = csiSinr ?: other.csiSinr,
+        ssRsrp = ssRsrp ?: other.ssRsrp,
+        ssRsrq = ssRsrq ?: other.ssRsrq,
+        ssSinr = ssSinr ?: other.ssSinr
+    )
 
     companion object {
 

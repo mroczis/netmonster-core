@@ -50,6 +50,16 @@ data class SignalGsm(
      */
     fun getDistanceToCell() = timingAdvance?.times(ONE_TA_IN_METERS)
 
+    /**
+     * Merges current instance with [other], keeping data that are valid and adding
+     * other values that are valid in [other] instance but not here.
+     */
+    fun merge(other: SignalGsm) = copy(
+        rssi = rssi ?: other.rssi,
+        bitErrorRate = bitErrorRate ?: other.bitErrorRate,
+        timingAdvance = timingAdvance ?: other.timingAdvance
+    )
+
     companion object {
         /**
          * 1 TA equals to 554 meters in GSM world

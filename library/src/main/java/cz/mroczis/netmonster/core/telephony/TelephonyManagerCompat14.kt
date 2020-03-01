@@ -124,4 +124,6 @@ internal open class TelephonyManagerCompat14(
     override fun getNetworkOperator(): Network? =
         Network.map(getServiceState()?.operatorNumeric) ?: Network.map(telephony.networkOperator)
 
+    fun getSignalStrength() : SignalStrength? =
+        telephony.signalStrength
 }

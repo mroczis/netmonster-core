@@ -10,7 +10,7 @@ data class SignalCdma(
      * Unit: dBm
      */
     @IntRange(from = RSSI_MIN, to = RSSI_MAX)
-    val cdmaRssi : Int?,
+    val cdmaRssi: Int?,
 
     /**
      * Energy per Chip to Interference Power Ratio for CDMA
@@ -18,7 +18,7 @@ data class SignalCdma(
      * Unit: dB
      */
     @DoubleRange(from = -16.0, to = 0.0)
-    val cdmaEcio : Double?,
+    val cdmaEcio: Double?,
 
     /**
      * Received Signal Strength Indicator for EVDO
@@ -46,6 +46,18 @@ data class SignalCdma(
 ) : ISignal {
 
     override val dbm: Int? = cdmaRssi ?: evdoRssi
+
+    /**
+     * Merges current instance with [other], keeping data that are valid and adding
+     * other values that are valid in [other] instance but not here.
+     */
+    fun merge(other: SignalCdma) = copy(
+        cdmaRssi = cdmaRssi ?: other.cdmaRssi,
+        cdmaEcio = cdmaEcio ?: other.cdmaEcio,
+        evdoRssi = evdoRssi ?: other.evdoRssi,
+        evdoEcio = evdoEcio ?: other.evdoEcio,
+        evdoSnr = evdoSnr ?: other.evdoSnr
+    )
 
     companion object {
 

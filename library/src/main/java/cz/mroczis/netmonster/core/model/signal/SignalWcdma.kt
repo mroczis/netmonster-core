@@ -70,6 +70,18 @@ data class SignalWcdma(
      */
     val rssiAsu = rssi?.plus(113)?.div(2)
 
+    /**
+     * Merges current instance with [other], keeping data that are valid and adding
+     * other values that are valid in [other] instance but not here.
+     */
+    fun merge(other : SignalWcdma) =
+        copy(
+            rssi = rssi ?: other.rssi,
+            bitErrorRate = bitErrorRate ?: other.bitErrorRate,
+            ecno = ecno ?: other.ecno,
+            rscp = rscp ?: other.rscp,
+            ecio = ecio ?: other.ecio
+        )
 
     companion object {
         const val RSSI_MAX = -51L

@@ -87,17 +87,8 @@ class CellMergerPrimary : ICellMerger {
      * What can be improved:
      *  - Generally just signal metrics, we'll take first valid
      */
-    private fun mergeLte(new: CellLte, old: CellLte): CellLte {
-        return new.copy(
-            signal = new.signal.copy(
-                rssi = new.signal.rssi ?: old.signal.rssi,
-                rsrp = new.signal.rsrp ?: old.signal.rsrp,
-                rsrq = new.signal.rsrq ?: old.signal.rsrq,
-                cqi = new.signal.cqi ?: old.signal.cqi,
-                snr = new.signal.snr ?: old.signal.snr
-            )
-        )
-    }
+    private fun mergeLte(new: CellLte, old: CellLte): CellLte =
+        new.copy(signal = new.signal.merge(old.signal))
 
     /**
      * WCDMA merging for primary cells:

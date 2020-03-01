@@ -41,6 +41,9 @@ internal class NetMonster(
             getTelephony(subId).getNetworkOperator()
         }) // filter out duplicities, only Dual SIMs
         add(PlmnPostprocessor()) // guess PLMNs when channels match
+        add(SignalStrengthPostprocessor { subId ->
+            getTelephony(subId).getCellLocation().firstOrNull()
+        }) // might add more signal strength indicators
     }
 
     @WorkerThread

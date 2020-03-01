@@ -95,6 +95,19 @@ data class SignalLte(
     fun getDistanceToCell(oneTaInMeters: Double): Double? =
         timingAdvance?.times(oneTaInMeters)
 
+    /**
+     * Merges current instance with [other], keeping data that are valid and adding
+     * other values that are valid in [other] instance but not here.
+     */
+    fun merge(other: SignalLte) = copy(
+        rssi = rssi ?: other.rssi,
+        rsrp = rsrp ?: other.rsrp,
+        rsrq = rsrq ?: other.rsrq,
+        cqi = cqi ?: other.cqi,
+        snr = snr ?: other.snr,
+        timingAdvance = timingAdvance ?: other.timingAdvance
+    )
+
     companion object {
         /**
          * One-way distance from source to terminal
