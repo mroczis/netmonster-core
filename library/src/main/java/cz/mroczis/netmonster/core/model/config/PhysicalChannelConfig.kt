@@ -51,7 +51,7 @@ data class PhysicalChannelConfig(
     companion object {
 
         private val REGEX_CONNECTION = "mConnectionStatus=([^,]*)".toRegex()
-        private val REGEX_BANDWIDTH = "mCellBandwidthDownlinkKhz=([0-9]{4,6})".toRegex()
+        private val REGEX_BANDWIDTH = "mCellBandwidthDownlinkKhz=([0-9]{4,10})".toRegex()
         private val REGEX_CHANNEL = "mChannelNumber=([0-9]{1,10})".toRegex()
         private val REGEX_PCI = "mPhysicalCellId=([0-9]{1,10})".toRegex()
 
@@ -67,7 +67,7 @@ data class PhysicalChannelConfig(
             }
 
             val bandwidth = REGEX_BANDWIDTH.find(string)?.groupValues?.getOrNull(1)
-                ?.toIntOrNull()
+                ?.toIntOrNull()?.inRangeOrNull(CellLte.BANDWIDTH_RANGE)
             val channel = REGEX_CHANNEL.find(string)?.groupValues?.getOrNull(1)
                 ?.toIntOrNull()?.inRangeOrNull(BandLte.DOWNLINK_EARFCN_RANGE)
             val pci = REGEX_PCI.find(string)?.groupValues?.getOrNull(1)
