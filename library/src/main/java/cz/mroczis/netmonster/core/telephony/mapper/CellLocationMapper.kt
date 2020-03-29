@@ -40,7 +40,8 @@ import java.util.concurrent.TimeUnit
  * newer -> it's better to rely on [CellInfoMapper].
  */
 class CellLocationMapper(
-    private val telephony: TelephonyManager
+    private val telephony: TelephonyManager,
+    private val getNetworkOperator: () -> Network?
 ) : ICellMapper<Int> {
 
     companion object {
@@ -63,7 +64,7 @@ class CellLocationMapper(
      * The processing is a bit faster on other devices with Android P+ and newer.
      */
     @WorkerThread
-    @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION])
+    @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun map(model: Int): List<ICell> {
         val scanResult = getUpdatedLocationAndSignal(model)
 
@@ -79,7 +80,7 @@ class CellLocationMapper(
     private fun map(model: GsmCellLocation, signalStrength: SignalStrength?, subId: Int): ICell? {
         val network = NetworkTypeTable.get(telephony.networkType)
         val cid = model.cid
-        val plmn = getNetworkOperator(subId)
+        val plmn = getNetworkOperator.invoke()
 
         val rsrp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             signalStrength?.getCellSignalStrengths(CellSignalStrengthLte::class.java)
@@ -103,7 +104,7 @@ class CellLocationMapper(
             model.mapWcdma(subId, signalStrength, plmn)
         } else if (CellGsm.CID_RANGE.contains(cid) && (!CellWcdma.PSC_RANGE.contains(model.psc) || network is NetworkType.Gsm)) {
             model.mapGsm(subId, signalStrength, plmn)
-        } else if (network is NetworkType.Wcdma) {
+        } else if (network is NetworkType.Wcdma || CellWcdma.PSC_RANGE.contains(model.psc)) {
             model.mapWcdma(subId, signalStrength, plmn)
         } else if (network is NetworkType.Lte) {
             model.mapLte(subId, signalStrength, plmn)
@@ -111,39 +112,6 @@ class CellLocationMapper(
             null
         }
 
-    }
-
-    /**
-     * Obtains network operator considering provided [subId].
-     */
-    private fun getNetworkOperator(subId: Int) : Network? {
-        val oldWay = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N || isHuawei()){
-            // Indirect reflection way that works on older APIs
-            // Also must be used on Huawei devices that have N+ cause SDK methods
-            // return constant PLMN no matter what subId is used
-            arrayOf(
-                "getNetworkOperatorForSubscription",
-                "getNetworkOperator"
-            ).mapNotNull { methodName ->
-                try {
-                    val method: Method = TelephonyManager::class.java.getDeclaredMethod(
-                        methodName, Int::class.javaPrimitiveType
-                    ).apply { isAccessible = true }
-                    val plmn = method.invoke(telephony, subId) as String
-                    Network.map(plmn)
-                } catch (ignored: Throwable) {
-                    null
-                }
-            }.firstOrNull()
-        } else null
-
-        return if (oldWay != null) {
-            oldWay
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            // Direct way through Android API as fallback, even for Huawei
-            val subPlmn = telephony.createForSubscriptionId(subId).networkOperator
-            Network.map(subPlmn ?: telephony.networkOperator)
-        } else null
     }
 
     /**

@@ -1,6 +1,7 @@
 package cz.mroczis.netmonster.core.telephony
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.telephony.*
@@ -17,7 +18,6 @@ import cz.mroczis.netmonster.core.model.model.CellError
 import cz.mroczis.netmonster.core.telephony.mapper.CellInfoMapper
 import cz.mroczis.netmonster.core.telephony.mapper.CellLocationMapper
 import cz.mroczis.netmonster.core.telephony.mapper.NeighbouringCellInfoMapper
-import cz.mroczis.netmonster.core.util.isHuawei
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -31,16 +31,15 @@ internal open class TelephonyManagerCompat14(
 ) : ITelephonyManagerCompat {
 
     protected val telephony: TelephonyManager
-        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager).createForSubscriptionId(subId)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !isHuawei()) {
+        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager).createForSubscriptionId(subId)
         } else {
             context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         }
 
     protected val cellInfoMapper = CellInfoMapper(subId)
-    private val cellLocationMapper = CellLocationMapper(telephony)
+    @SuppressLint("MissingPermission")
+    private val cellLocationMapper = CellLocationMapper(telephony) { getNetworkOperator() }
     private val neighbouringCellInfoMapper = NeighbouringCellInfoMapper(telephony, subId)
     private val serviceStateSource = ServiceStateSource()
 
@@ -124,6 +123,4 @@ internal open class TelephonyManagerCompat14(
     override fun getNetworkOperator(): Network? =
         Network.map(getServiceState()?.operatorNumeric) ?: Network.map(telephony.networkOperator)
 
-    fun getSignalStrength() : SignalStrength? =
-        telephony.signalStrength
 }
