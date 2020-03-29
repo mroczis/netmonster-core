@@ -12,6 +12,5 @@ data class SecondaryConnection(
      *
      * false = Reported directly from device's RIL.
      */
-    val isGuess: Boolean,
-    val primaryCell: ICell? = null
+    val isGuess: Boolean
 ) : IConnection
