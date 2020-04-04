@@ -4,14 +4,19 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
-import android.telephony.*
+import android.telephony.NeighboringCellInfo
+import android.telephony.ServiceState
+import android.telephony.SignalStrength
+import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
 import cz.mroczis.netmonster.core.callback.CellCallbackError
 import cz.mroczis.netmonster.core.callback.CellCallbackSuccess
 import cz.mroczis.netmonster.core.db.NetworkTypeTable
 import cz.mroczis.netmonster.core.db.model.NetworkType
+import cz.mroczis.netmonster.core.feature.config.CellLocationSource
 import cz.mroczis.netmonster.core.feature.config.ServiceStateSource
+import cz.mroczis.netmonster.core.feature.config.SignalStrengthsSource
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.model.CellError
@@ -32,16 +37,25 @@ internal open class TelephonyManagerCompat14(
 
     protected val telephony: TelephonyManager
         get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager).createForSubscriptionId(subId)
+            (context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager).createForSubscriptionId(
+                subId
+            )
         } else {
             context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         }
 
+    private val serviceStateSource = ServiceStateSource()
+    private val signalStrengthsSource = SignalStrengthsSource()
+    private val cellLocationSource = CellLocationSource()
+
     protected val cellInfoMapper = CellInfoMapper(subId)
     @SuppressLint("MissingPermission")
-    private val cellLocationMapper = CellLocationMapper(telephony) { getNetworkOperator() }
+    private val cellLocationMapper = CellLocationMapper(
+        telephony,
+        cellLocationSource,
+        signalStrengthsSource
+    ) { getNetworkOperator() }
     private val neighbouringCellInfoMapper = NeighbouringCellInfoMapper(telephony, subId)
-    private val serviceStateSource = ServiceStateSource()
 
     override fun getTelephonyManager(): TelephonyManager? = telephony
 
@@ -122,5 +136,9 @@ internal open class TelephonyManagerCompat14(
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun getNetworkOperator(): Network? =
         Network.map(getServiceState()?.operatorNumeric) ?: Network.map(telephony.networkOperator)
+
+    override fun getSimOperator(): Network? = Network.map(telephony.simOperator)
+
+    override fun getSignalStrength(): SignalStrength? = signalStrengthsSource.get(telephony, subId)
 
 }

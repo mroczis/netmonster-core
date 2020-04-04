@@ -4,6 +4,7 @@ import android.Manifest
 import android.os.Build
 import android.telephony.PhoneStateListener
 import android.telephony.ServiceState
+import android.telephony.SignalStrength
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
@@ -167,5 +168,25 @@ interface ITelephonyManagerCompat {
     @WorkerThread
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
     fun getNetworkOperator(): Network?
+
+    /**
+     * PLMN of SIM card that is assigned to current subscription
+     * Expect `null` in CDMA networks and when phone is not connected to networks.
+     * 
+     * Based on:
+     *  - [TelephonyManager.getSimOperator]
+     */
+    @WorkerThread
+    fun getSimOperator() : Network?
+
+    /**
+     * Fetches the most recent information about signal from the modem.
+     * In case of failure returns cached data.
+     *
+     * Based on:
+     *  - [TelephonyManager.getSignalStrength]
+     */
+    @WorkerThread
+    fun getSignalStrength() : SignalStrength?
 
 }

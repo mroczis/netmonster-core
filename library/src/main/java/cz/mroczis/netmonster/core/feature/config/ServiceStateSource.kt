@@ -33,7 +33,7 @@ class ServiceStateSource {
     }
 
     /**
-     * Registers [ServiceStateListener] and awaits for data. After 500 milliseconds time outs if
+     * Registers [ServiceStateListener] and awaits data. After 100 milliseconds time outs if
      * nothing is delivered.
      *
      * On Android O and newer directly grabs [ServiceState] from [TelephonyManager].
@@ -51,7 +51,7 @@ class ServiceStateSource {
             getPreOreo(telephonyManager, subId)
         }
 
-    fun getPreOreo(telephonyManager: TelephonyManager, subId: Int) : ServiceState? {
+    private fun getPreOreo(telephonyManager: TelephonyManager, subId: Int) : ServiceState? {
         val asyncLock = CountDownLatch(1)
         var simState: ServiceState? = null
 
