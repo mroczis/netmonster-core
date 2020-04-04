@@ -86,7 +86,7 @@ interface INetMonster {
      *
      * You might write your own [INetworkDetector] or use subset of bundled ones:
      *  - [DetectorHspaDc] (experimental, works since [Build.VERSION_CODES.N])
-     *  - [DetectorLteAdvancedServiceState] (stable, works since [Build.VERSION_CODES.P])
+     *  - [DetectorLteAdvancedNrServiceState] (stable, works since [Build.VERSION_CODES.P])
      *  - [DetectorLteAdvancedPhysicalChannel] (stable, works since [Build.VERSION_CODES.P])
      *  - [DetectorLteAdvancedCellInfo] (experimental, works since [Build.VERSION_CODES.N])
      *  - [DetectorAosp] (legacy AOSP)

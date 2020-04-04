@@ -85,7 +85,9 @@ annotation class NetworkTdscdma
 
 @IntDef(
     value = [
-        NetworkType.NR
+        NetworkType.NR,
+        NetworkType.NR_LTE,
+        NetworkType.NR_LTE_CA
     ]
 )
 @Retention(AnnotationRetention.SOURCE)

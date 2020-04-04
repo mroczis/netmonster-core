@@ -99,7 +99,7 @@ internal class NetMonster(
     override fun getNetworkType(subId: Int): NetworkType = getNetworkType(
         subId,
         DetectorHspaDc(),
-        DetectorLteAdvancedServiceState(),
+        DetectorLteAdvancedNrServiceState(),
         DetectorLteAdvancedPhysicalChannel(),
         DetectorLteAdvancedCellInfo(),
         DetectorAosp() // best to keep last when all other strategies fail

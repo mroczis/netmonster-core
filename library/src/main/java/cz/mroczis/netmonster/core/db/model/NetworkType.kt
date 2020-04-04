@@ -46,8 +46,29 @@ sealed class NetworkType {
         const val NR = 20
 
         // Not in AOSP / not public in AOSP
+        /**
+         * LTE Advanced - carrier aggregation is in use
+         */
         const val LTE_CA = 19
-        const val HSPA_DC = Integer.MAX_VALUE - 1
+
+        /**
+         * The device is camped on an LTE cell that supports E-UTRA-NR Dual Connectivity(EN-DC) and
+         * also connected to at least one 5G cell as a secondary serving cell.
+         */
+        const val NR_LTE = Int.MAX_VALUE - 3
+
+        /**
+         * The device is camped on an LTE cell that supports E-UTRA-NR Dual Connectivity(EN-DC) and
+         * also connected to at least one 5G cell as a secondary serving cell.
+         *
+         * LTE Carrier aggregation is also active.
+         */
+        const val NR_LTE_CA = Int.MAX_VALUE - 2
+
+        /**
+         * HSPA+42 / HSPA+DC - two carriers are in use
+         */
+        const val HSPA_DC = Int.MAX_VALUE - 1
     }
 }
 

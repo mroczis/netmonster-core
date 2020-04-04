@@ -12,11 +12,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.postDelayed
 import androidx.recyclerview.widget.LinearLayoutManager
 import cz.mroczis.netmonster.core.factory.NetMonsterFactory
-import cz.mroczis.netmonster.core.feature.detect.DetectorAosp
-import cz.mroczis.netmonster.core.feature.detect.DetectorHspaDc
-import cz.mroczis.netmonster.core.feature.detect.DetectorLteAdvancedCellInfo
-import cz.mroczis.netmonster.core.feature.detect.DetectorLteAdvancedServiceState
-import cz.mroczis.netmonster.core.feature.merge.CellSource
 import kotlinx.android.synthetic.main.activity_main.*
 
 /**

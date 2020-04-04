@@ -32,6 +32,8 @@ object NetworkTypeTable {
         // Not in AOSP / not public in AOSP
         put(NetworkType.LTE_CA, NetworkType.Lte(NetworkType.LTE_CA))
         put(NetworkType.HSPA_DC, NetworkType.Wcdma(NetworkType.HSPA_DC))
+        put(NetworkType.NR_LTE, NetworkType.Nr(NetworkType.NR_LTE))
+        put(NetworkType.NR_LTE_CA, NetworkType.Nr(NetworkType.NR_LTE_CA))
     }
 
 
