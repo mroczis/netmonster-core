@@ -43,10 +43,16 @@ class DetectorLteAdvancedNrServiceState : INetworkDetector {
      * Android O - IsUsingCarrierAggregation=true
      * Android O_mr1 and P - mIsUsingCarrierAggregation=true
      * Android 10 - mIsUsingCarrierAggregation = true
+     * Huawei connected to 5G NSA - accessNetworkTechnology=LTE-CA, mIsUsingCarrierAggregation=false
+     *                              and mRilDataRadioTechnology=20(NR) - Tested on Mate 20X 5G
+     * LG Android O, P - AdvanceMode1 and mIsUsingCarrierAggregation=false - Tested on LG G7
      */
     @VisibleForTesting
     internal fun isUsingCarrierAggregation(serviceState: String) =
-        (serviceState.contains("IsUsingCarrierAggregation ?= ?true".toRegex()) && serviceState.contains("cellIdentity=CellIdentityLte"))
+        ((serviceState.contains("IsUsingCarrierAggregation ?= ?true".toRegex()) ||
+                serviceState.contains("accessNetworkTechnology=LTE-CA") ||
+                serviceState.contains("AdvanceMode1")) &&
+                serviceState.contains("cellIdentity=CellIdentityLte"))
 
     /**
      * AOSP documentation:
