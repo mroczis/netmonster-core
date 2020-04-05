@@ -15,16 +15,16 @@ import cz.mroczis.netmonster.core.telephony.ITelephonyManagerCompat
 /**
  * Attempts to detect LTE Advanced / LTE Carrier aggregation and NR in NSA mode
  *
- * Based on [ServiceState]'s contents added in Android P which describe if aggregation is currently active.
+ * Based on [ServiceState]'s contents added in Android O which describe if aggregation is currently active.
  */
 class DetectorLteAdvancedNrServiceState : INetworkDetector {
 
     @RequiresPermission(
         allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE]
     )
-    @SinceSdk(Build.VERSION_CODES.P)
+    @SinceSdk(Build.VERSION_CODES.O)
     override fun detect(netmonster: INetMonster, telephony: ITelephonyManagerCompat): NetworkType? =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             telephony.getTelephonyManager()?.serviceState?.toString()?.let {
                 val lteA = isUsingCarrierAggregation(it)
                 val nr = is5gActive(it)
@@ -40,12 +40,13 @@ class DetectorLteAdvancedNrServiceState : INetworkDetector {
         }
 
     /**
-     * Android P - mIsUsingCarrierAggregation=true
+     * Android O - IsUsingCarrierAggregation=true
+     * Android O_mr1 and P - mIsUsingCarrierAggregation=true
      * Android 10 - mIsUsingCarrierAggregation = true
      */
     @VisibleForTesting
     internal fun isUsingCarrierAggregation(serviceState: String) =
-        (serviceState.contains("mIsUsingCarrierAggregation ?= ?true".toRegex()) && serviceState.contains("cellIdentity=CellIdentityLte"))
+        (serviceState.contains("IsUsingCarrierAggregation ?= ?true".toRegex()) && serviceState.contains("cellIdentity=CellIdentityLte"))
 
     /**
      * AOSP documentation:
