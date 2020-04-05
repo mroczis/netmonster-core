@@ -55,14 +55,21 @@ class DetectorLteAdvancedNrServiceState : INetworkDetector {
                 serviceState.contains("cellIdentity=CellIdentityLte"))
 
     /**
-     * AOSP documentation:
+     * AOSP documentation (Android 10):
      * The device is camped on an LTE cell that supports E-UTRA-NR Dual Connectivity(EN-DC) and
      * also connected to at least one 5G cell as a secondary serving cell.
      *
      * NR_STATE_CONNECTED / 3
+     *
+     * Android 10 and some Android P devices - nrStatus=CONNECTED
+     * Huawei Android P - nsaState=5 - Tested on Mate 20X 5G
+     * LG Android P - EnDc=true and 5G Allocated=true - Not tested on a real LG 5G device
      */
     @VisibleForTesting
     internal fun is5gActive(serviceState: String) =
-        serviceState.contains("nrState=CONNECTED")
-
+        serviceState.contains("nrState=CONNECTED") ||
+                serviceState.contains("nsaState=5") ||
+                (serviceState.contains("EnDc=true") &&
+                        serviceState.contains("5G Allocated=true"))
+    
 }
