@@ -17,6 +17,7 @@ import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 import cz.mroczis.netmonster.core.model.signal.SignalLte
 import cz.mroczis.netmonster.core.util.*
 import kotlin.math.abs
+import kotlin.math.absoluteValue
 
 /**
  * [CellIdentityLte] -> [CellLte]
@@ -125,7 +126,7 @@ internal fun CellSignalStrengthLte.mapSignal(): SignalLte {
         rssnr
     } else {
         Reflection.intFieldOrNull(Reflection.LTE_SNR, this)
-    }?.let {
+    }?.absoluteValue?.let { // SM-A205U returns negative values for SNR hence absolute value
         // SNR in range from 0 to 3 means basically no signal and occurs rarely on Android devices
         // On older devices (ASUS_Z00AD) this value has 1 decimal place
         var snr = it.toDouble()
