@@ -55,7 +55,7 @@ sealed class NetworkType {
          * The device is camped on an LTE cell that supports E-UTRA-NR Dual Connectivity(EN-DC) and
          * also connected to at least one 5G cell as a secondary serving cell.
          */
-        const val NR_LTE = Int.MAX_VALUE - 3
+        const val LTE_NR = Int.MAX_VALUE - 3
 
         /**
          * The device is camped on an LTE cell that supports E-UTRA-NR Dual Connectivity(EN-DC) and
@@ -63,7 +63,7 @@ sealed class NetworkType {
          *
          * LTE Carrier aggregation is also active.
          */
-        const val NR_LTE_CA = Int.MAX_VALUE - 2
+        const val LTE_CA_NR = Int.MAX_VALUE - 2
 
         /**
          * HSPA+42 / HSPA+DC - two carriers are in use
