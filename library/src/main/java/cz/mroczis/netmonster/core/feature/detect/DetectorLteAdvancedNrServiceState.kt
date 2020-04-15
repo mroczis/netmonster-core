@@ -29,8 +29,8 @@ class DetectorLteAdvancedNrServiceState : INetworkDetector {
                 val lteA = isUsingCarrierAggregation(it)
                 val nr = is5gActive(it)
                 when {
-                    lteA && nr -> NetworkTypeTable.get(NetworkType.NR_LTE_CA)
-                    nr -> NetworkTypeTable.get(NetworkType.NR_LTE)
+                    lteA && nr -> NetworkTypeTable.get(NetworkType.LTE_CA_NR)
+                    nr -> NetworkTypeTable.get(NetworkType.LTE_NR)
                     lteA -> NetworkTypeTable.get(NetworkType.LTE_CA)
                     else -> null
                 }
