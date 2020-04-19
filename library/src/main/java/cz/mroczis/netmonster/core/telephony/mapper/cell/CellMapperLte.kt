@@ -126,7 +126,7 @@ internal fun CellSignalStrengthLte.mapSignal(): SignalLte {
         rssnr
     } else {
         Reflection.intFieldOrNull(Reflection.LTE_SNR, this)
-    }?.absoluteValue?.let { // SM-A205U returns negative values for SNR hence absolute value
+    }?.let {
         // SNR in range from 0 to 3 means basically no signal and occurs rarely on Android devices
         // On older devices (ASUS_Z00AD) this value has 1 decimal place
         var snr = it.toDouble()
@@ -135,7 +135,7 @@ internal fun CellSignalStrengthLte.mapSignal(): SignalLte {
         }
 
         snr
-    }?.inRangeOrNull(SignalLte.SNR_RANGE)
+    }?.inRangeOrNull(SignalLte.SNR_RANGE)?.nullIf { it == 0.0 } // Samsung uses 0.0 as N/A value
 
     val cqi = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         cqi
@@ -210,7 +210,7 @@ internal fun GsmCellLocation.mapLte(subId: Int, signalStrength: SignalStrength?,
                 }
 
                 snr
-            }?.inRangeOrNull(SignalLte.SNR_RANGE)
+            }?.inRangeOrNull(SignalLte.SNR_RANGE)?.nullIf { it == 0.0 } // Samsung uses 0.0 as N/A value
 
         val cqi = Reflection.intFieldOrNull(Reflection.SS_LTE_CQI, signalStrength)
             ?.inRangeOrNull(SignalLte.CQI_RANGE)
