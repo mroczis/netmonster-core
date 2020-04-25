@@ -1,10 +1,15 @@
 package cz.mroczis.netmonster.core.model.connection
 
-import cz.mroczis.netmonster.core.model.cell.ICell
 
 /**
  * Cell is primary for data or voice communication with outer world
  */
-data class PrimaryConnection(
-    val aggregatedCells: List<ICell> = emptyList()
-) : IConnection
+class PrimaryConnection : IConnection {
+
+    override fun toString(): String {
+        return "PrimaryConnection()"
+    }
+
+    override fun equals(other: Any?) = other?.javaClass == javaClass
+    override fun hashCode() = toString().hashCode()
+}

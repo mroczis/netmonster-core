@@ -3,6 +3,7 @@ package cz.mroczis.netmonster.core.model.signal
 import android.os.Build
 import androidx.annotation.IntRange
 import cz.mroczis.netmonster.core.model.annotation.SinceSdk
+import cz.mroczis.netmonster.core.util.minOrNotnull
 
 data class SignalGsm(
     /**
@@ -53,9 +54,12 @@ data class SignalGsm(
     /**
      * Merges current instance with [other], keeping data that are valid and adding
      * other values that are valid in [other] instance but not here.
+     *
+     * For [rssi] we pick smaller value since Samsung devices used to return -51 dBm as
+     * invalid RSSI.
      */
     fun merge(other: SignalGsm) = copy(
-        rssi = rssi ?: other.rssi,
+        rssi = minOrNotnull(rssi, other.rssi),
         bitErrorRate = bitErrorRate ?: other.bitErrorRate,
         timingAdvance = timingAdvance ?: other.timingAdvance
     )

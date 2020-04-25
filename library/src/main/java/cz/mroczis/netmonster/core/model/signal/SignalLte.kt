@@ -135,11 +135,7 @@ data class SignalLte(
         const val CQI_MIN = 1L
 
         const val SNR_MAX = 29.9
-
-        /**
-         * Samsung uses 0.0 as invalid value
-         */
-        const val SNR_MIN = 0.1
+        const val SNR_MIN = -19.9
 
         const val TIMING_ADVANCE_MAX = 1282L
         const val TIMING_ADVANCE_MIN = 0L

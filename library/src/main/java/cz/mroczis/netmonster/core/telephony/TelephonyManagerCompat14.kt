@@ -23,6 +23,8 @@ import cz.mroczis.netmonster.core.model.model.CellError
 import cz.mroczis.netmonster.core.telephony.mapper.CellInfoMapper
 import cz.mroczis.netmonster.core.telephony.mapper.CellLocationMapper
 import cz.mroczis.netmonster.core.telephony.mapper.NeighbouringCellInfoMapper
+import cz.mroczis.netmonster.core.telephony.network.NetworkOperatorGetter
+import cz.mroczis.netmonster.core.telephony.network.SimOperatorGetter
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -47,6 +49,9 @@ internal open class TelephonyManagerCompat14(
     private val serviceStateSource = ServiceStateSource()
     private val signalStrengthsSource = SignalStrengthsSource()
     private val cellLocationSource = CellLocationSource()
+
+    private val networkOperatorGetter = NetworkOperatorGetter()
+    private val simOperatorGetter = SimOperatorGetter()
 
     protected val cellInfoMapper = CellInfoMapper(subId)
     @SuppressLint("MissingPermission")
@@ -135,9 +140,10 @@ internal open class TelephonyManagerCompat14(
 
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun getNetworkOperator(): Network? =
-        Network.map(getServiceState()?.operatorNumeric) ?: Network.map(telephony.networkOperator)
+        networkOperatorGetter.getNetwork(this)
 
-    override fun getSimOperator(): Network? = Network.map(telephony.simOperator)
+    override fun getSimOperator(): Network? =
+        simOperatorGetter.getNetwork(this)
 
     override fun getSignalStrength(): SignalStrength? = signalStrengthsSource.get(telephony, subId)
 

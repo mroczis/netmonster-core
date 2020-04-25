@@ -15,7 +15,10 @@ import cz.mroczis.netmonster.core.subscription.ISubscriptionManagerCompat
  * This class aims to fix the issues by modifying PLMN assigned to cells.
  *
  * Postprocessor does not work if phone is in "Emergency calls only" state since those two sources
- * do not return valid data -> incorrect PLMN will stay incorrect
+ * do not return valid data -> incorrect PLMN will stay incorrect.
+ *
+ * This should be LTE exclusive cause cause the bug is present only in LTE networks.
+ * However it is also used to fix PLMN when it's completely invalid.
  *
  * References: [AOSP bug tracker](https://issuetracker.google.com/issues/73130708)
  */
@@ -31,7 +34,7 @@ class MocnNetworkPostprocessor(
         
         return list.toMutableList().map { cell ->
             val suggestedNetwork = subscriptions[cell.subscriptionId]
-            if (suggestedNetwork != null && suggestedNetwork != cell.network) {
+            if ((cell is CellLte || cell.network == null) && suggestedNetwork != null && suggestedNetwork != cell.network) {
                 cell.let(PlmnSwitcher(suggestedNetwork))
             } else {
                 cell

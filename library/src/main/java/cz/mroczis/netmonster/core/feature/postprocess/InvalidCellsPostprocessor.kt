@@ -4,6 +4,7 @@ import cz.mroczis.netmonster.core.model.cell.CellGsm
 import cz.mroczis.netmonster.core.model.cell.CellLte
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
+import cz.mroczis.netmonster.core.util.isHuawei
 import cz.mroczis.netmonster.core.util.isSamsung
 
 /**
@@ -22,7 +23,7 @@ class InvalidCellsPostprocessor : ICellPostprocessor {
         // The problem is that each phone acts differently; this generalized rule is based on:
         // - a7y18ltexx, API 28
         // - beyond1lteeea, API 29
-        .filterNot { it is CellLte && isSamsung() && it.band?.number == 1 && it.connectionStatus !is PrimaryConnection && it.signal.rssi != null && it.signal.rsrp != null && it.signal.rsrq == null }
+        .filterNot { it is CellLte && isSamsung() && it.band?.number == 1 && it.connectionStatus !is PrimaryConnection && it.signal.rsrp != null && it.signal.rsrq == null }
         .toList()
 
 }
