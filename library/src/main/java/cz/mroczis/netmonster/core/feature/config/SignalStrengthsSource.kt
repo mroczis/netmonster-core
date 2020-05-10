@@ -43,6 +43,7 @@ class SignalStrengthsSource {
         getFresh(telephonyManager, subId) ?: getCached(telephonyManager)
 
     private fun getFresh(telephonyManager: TelephonyManager, subId: Int?): SignalStrength? {
+        var listener: SignalStrengthsListener? = null
         val asyncLock = CountDownLatch(1)
         var signal: SignalStrength? = null
 
@@ -50,10 +51,9 @@ class SignalStrengthsSource {
             // We'll receive callbacks on thread that created instance of [listener] by default.
             // Async processing is required otherwise deadlock would arise cause we block
             // original thread
-            val listener = SignalStrengthsListener(subId) {
+            listener = SignalStrengthsListener(subId) {
                 signal = it
                 asyncLock.countDown()
-                telephonyManager.listen(this, PhoneStateListener.LISTEN_NONE)
             }
 
             telephonyManager.listen(listener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS)
@@ -67,6 +67,8 @@ class SignalStrengthsSource {
         } catch (e: InterruptedException) {
             // System was not able to deliver PhysicalChannelConfig in this time slot
         }
+
+        listener?.let { telephonyManager.listen(it, PhoneStateListener.LISTEN_NONE) }
 
         return signal
     }

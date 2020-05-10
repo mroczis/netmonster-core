@@ -52,6 +52,7 @@ class ServiceStateSource {
         }
 
     private fun getPreOreo(telephonyManager: TelephonyManager, subId: Int) : ServiceState? {
+        var listener: ServiceStateListener? = null
         val asyncLock = CountDownLatch(1)
         var simState: ServiceState? = null
 
@@ -59,10 +60,9 @@ class ServiceStateSource {
             // We'll receive callbacks on thread that created instance of [listener] by default.
             // Async processing is required otherwise deadlock would arise cause we block
             // original thread
-            val listener = ServiceStateListener(subId) {
+            listener = ServiceStateListener(subId) {
                 simState = it
                 asyncLock.countDown()
-                telephonyManager.listen(this, PhoneStateListener.LISTEN_NONE)
             }
 
             telephonyManager.listen(listener, PhoneStateListener.LISTEN_SERVICE_STATE)
@@ -76,6 +76,8 @@ class ServiceStateSource {
         } catch (e: InterruptedException) {
             // System was not able to deliver PhysicalChannelConfig in this time slot
         }
+
+        listener?.let { telephonyManager.listen(it, PhoneStateListener.LISTEN_NONE) }
 
         return simState
     }
