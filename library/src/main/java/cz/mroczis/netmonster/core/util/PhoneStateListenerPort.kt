@@ -16,9 +16,9 @@ open class PhoneStateListenerPort(subId: Int?) : PhoneStateListener() {
     private fun init(subId: Int?) {
         if (subId != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             try {
-                PhoneStateListener::class.java.getDeclaredField("mSubId").apply {
-                    isAccessible = true
-                    set(this, subId)
+                PhoneStateListener::class.java.getDeclaredField("mSubId").also {
+                    it.isAccessible = true
+                    it.set(this, subId)
                 }
             } catch (ignored: Throwable) {
                 // When it does not work, it does not work...
