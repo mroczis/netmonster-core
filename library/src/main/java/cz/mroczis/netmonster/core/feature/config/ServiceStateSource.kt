@@ -91,8 +91,10 @@ class ServiceStateSource {
         private val simStateListener: ServiceStateListener.(state: ServiceState) -> Unit
     ) : PhoneStateListenerPort(subId) {
 
-        override fun onServiceStateChanged(serviceState: ServiceState) {
-            simStateListener.invoke(this, serviceState)
+        override fun onServiceStateChanged(serviceState: ServiceState?) {
+            if (serviceState != null) {
+                simStateListener.invoke(this, serviceState)
+            }
         }
     }
 }

@@ -79,9 +79,11 @@ class CellLocationSource {
         private val simStateListener: CellLocationListener.(state: CellLocation) -> Unit
     ) : PhoneStateListenerPort(subId) {
 
-        override fun onCellLocationChanged(location: CellLocation) {
+        override fun onCellLocationChanged(location: CellLocation?) {
             super.onCellLocationChanged(location)
-            simStateListener.invoke(this, location)
+            if (location != null) {
+                simStateListener.invoke(this, location)
+            }
         }
     }
 }

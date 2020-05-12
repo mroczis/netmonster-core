@@ -91,9 +91,11 @@ class SignalStrengthsSource {
         private val simStateListener: SignalStrengthsListener.(state: SignalStrength) -> Unit
     ) : PhoneStateListenerPort(subId) {
 
-        override fun onSignalStrengthsChanged(signalStrength: SignalStrength) {
+        override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {
             super.onSignalStrengthsChanged(signalStrength)
-            simStateListener.invoke(this, signalStrength)
+            if (signalStrength != null) {
+                simStateListener.invoke(this, signalStrength)
+            }
         }
     }
 }
