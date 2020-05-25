@@ -71,7 +71,10 @@ data class SignalGsm(
          */
         internal const val ONE_TA_IN_METERS = 554
 
-        const val RSSI_MAX = -51L
+        /**
+         * Limit is usually -51, Huawei CAM-L21 works up to -40
+         */
+        const val RSSI_MAX = -40L
         const val RSSI_MIN = -113L
 
         const val BIT_ERROR_RATE_MAX = 7L

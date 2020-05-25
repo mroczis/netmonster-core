@@ -37,7 +37,6 @@ class PhysicalChannelPostprocessor(
                 .map { (subId, cells) ->
                     val configs = physicalChannelConfigGetter
                         .invoke(subId)
-                        .toMutableList()
 
                     val res = MergeBundle(cells, configs)
                         .removeRedundantConfigs()
@@ -47,6 +46,7 @@ class PhysicalChannelPostprocessor(
                         .mergeByConnection()
 
                     res.cells
+                        .fixConnections()
 
                 }.flatten()
         } else {
@@ -54,14 +54,14 @@ class PhysicalChannelPostprocessor(
         }
 
     /**
-     * Filtration round - remove configs that are useless. 
+     * Filtration round - remove configs that are useless.
      * This is only applicable for [PrimaryConnection] cells who already have bandwidth.
      */
-    private fun MergeBundle.removeRedundantConfigs() : MergeBundle {
+    private fun MergeBundle.removeRedundantConfigs(): MergeBundle {
         val usableConfigs = configs.filterNot { config ->
             cells.find { it is CellLte && it.connectionStatus == config.connectionStatus && it.bandwidth == config.bandwidth && (it.pci == config.pci || config.pci == null) } != null
         }
-        
+
         return copy(configs = usableConfigs)
     }
 
@@ -75,7 +75,7 @@ class PhysicalChannelPostprocessor(
             .mapNotNull { config ->
                 val candidates = cells
                     .filterIsInstance(CellLte::class.java)
-                    .filter { cell -> cell.pci == config.pci && cell.bandwidth == null}
+                    .filter { cell -> cell.pci == config.pci && cell.bandwidth == null }
 
                 if (candidates.size == 1) {
                     candidates[0] to config
@@ -205,8 +205,11 @@ class PhysicalChannelPostprocessor(
             // Samsung reports via PCC Primary connection for secondary cells, at least
             // that's what I saw on multiple devices, so keep it as a guess
             cell.connectionStatus is NoneConnection ->
-                SecondaryConnection(isGuess = config.connectionStatus is PrimaryConnection)
-
+                when (config.connectionStatus) {
+                    is PrimaryConnection -> SecondaryConnection(isGuess = true)
+                    is SecondaryConnection -> SecondaryConnection(isGuess = false)
+                    else -> config.connectionStatus
+                }
             // Otherwise just keep it as it was
             else -> cell.connectionStatus
         }
@@ -230,6 +233,7 @@ class PhysicalChannelPostprocessor(
          */
         val configs: List<PhysicalChannelConfig>
     ) {
+
         /**
          * Helper map that gives us information about already assigned bandwidths
          */
@@ -239,5 +243,27 @@ class PhysicalChannelPostprocessor(
                     it.band.channelNumber to it.bandwidth
                 } else null
             }.toMap()
+    }
+
+    /**
+     * Terminals update [PhysicalChannelConfig] and data about cells asynchronously.
+     * This can lead to occasional mishaps. According to physical channel layer is the phone
+     * connected to multiple cells that share the same EARFCN which is technically impossible.
+     * In that case we modify connection type from [SecondaryConnection] to [NoneConnection].
+     *
+     * Known terminals with this issue: Pixel 4 XL, Samsung SM-G981N
+     */
+    private fun List<ICell>.fixConnections(): List<ICell> {
+        val primaryChannelNumbers = filterIsInstance(CellLte::class.java)
+            .filter { it.connectionStatus is PrimaryConnection }
+            .mapNotNull { it.band?.channelNumber }
+
+        return map { cell ->
+            if (cell is CellLte && cell.connectionStatus is SecondaryConnection && cell.band?.channelNumber in primaryChannelNumbers) {
+                cell.copy(connectionStatus = NoneConnection())
+            } else {
+                cell
+            }
+        }
     }
 }

@@ -11,7 +11,7 @@ import cz.mroczis.netmonster.core.model.connection.SecondaryConnection
 import cz.mroczis.netmonster.core.model.signal.SignalLte
 import io.kotlintest.shouldBe
 
-class PhysicalChannelPostprocessorTest : SdkTest(Build.VERSION_CODES.Q){
+class PhysicalChannelPostprocessorTest : SdkTest(Build.VERSION_CODES.Q) {
 
     companion object {
         private val SUB_ID = 1
@@ -21,7 +21,7 @@ class PhysicalChannelPostprocessorTest : SdkTest(Build.VERSION_CODES.Q){
     init {
 
         "Same PCIs twice, non-transitive" {
-            val pccProvider : (Int) -> List<PhysicalChannelConfig> =  { _ ->
+            val pccProvider: (Int) -> List<PhysicalChannelConfig> = { _ ->
                 listOf(
                     PhysicalChannelConfig(connectionStatus = PrimaryConnection(), bandwidth = 20_000, channelNumber = null, pci = 149),
                     PhysicalChannelConfig(connectionStatus = SecondaryConnection(isGuess = false), bandwidth = 20_000, channelNumber = null, pci = 149)
@@ -48,7 +48,7 @@ class PhysicalChannelPostprocessorTest : SdkTest(Build.VERSION_CODES.Q){
         }
 
         "Same PCI twice, transitive through EARFCN" {
-            val pccProvider : (Int) -> List<PhysicalChannelConfig> =  { _ ->
+            val pccProvider: (Int) -> List<PhysicalChannelConfig> = { _ ->
                 listOf(
                     PhysicalChannelConfig(connectionStatus = PrimaryConnection(), bandwidth = 20_000, channelNumber = null, pci = 149),
                     PhysicalChannelConfig(connectionStatus = SecondaryConnection(isGuess = false), bandwidth = 10_000, channelNumber = null, pci = 149),
@@ -69,14 +69,14 @@ class PhysicalChannelPostprocessorTest : SdkTest(Build.VERSION_CODES.Q){
                 CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
                 CellLte(connectionStatus = SecondaryConnection(isGuess = false), eci = null, tac = null, pci = 149, band = BandTableLte.map(1275), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
                 CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 224, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
-                CellLte(connectionStatus = SecondaryConnection(isGuess = false), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null)
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null)
             )
 
             result shouldBe expected
         }
 
         "No PCI" {
-            val pccProvider : (Int) -> List<PhysicalChannelConfig> =  { _ ->
+            val pccProvider: (Int) -> List<PhysicalChannelConfig> = { _ ->
                 listOf(
                     PhysicalChannelConfig(connectionStatus = PrimaryConnection(), bandwidth = 20_000, channelNumber = null, pci = null),
                     PhysicalChannelConfig(connectionStatus = SecondaryConnection(isGuess = false), bandwidth = 10_000, channelNumber = null, pci = null)
@@ -97,6 +97,29 @@ class PhysicalChannelPostprocessorTest : SdkTest(Build.VERSION_CODES.Q){
                 CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 149, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
                 CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 224, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
                 CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null)
+            )
+
+            result shouldBe expected
+        }
+
+        "Do not mark as secondarily serving when primary has same EARFCN" {
+            val pccProvider: (Int) -> List<PhysicalChannelConfig> = { _ ->
+                listOf(
+                    PhysicalChannelConfig(connectionStatus = PrimaryConnection(), bandwidth = 20_000, channelNumber = null, pci = 149),
+                    PhysicalChannelConfig(connectionStatus = SecondaryConnection(isGuess = false), bandwidth = 10_000, channelNumber = null, pci = 63)
+                )
+            }
+
+            val cells = listOf(
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null)
+            )
+
+            val result = PhysicalChannelPostprocessor(pccProvider).postprocess(cells)
+
+            val expected = listOf(
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null)
             )
 
             result shouldBe expected

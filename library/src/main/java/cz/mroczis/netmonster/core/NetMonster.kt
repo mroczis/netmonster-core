@@ -11,12 +11,14 @@ import cz.mroczis.netmonster.core.factory.NetMonsterFactory
 import cz.mroczis.netmonster.core.feature.config.PhysicalChannelConfigSource
 import cz.mroczis.netmonster.core.feature.detect.*
 import cz.mroczis.netmonster.core.feature.merge.CellMerger
+import cz.mroczis.netmonster.core.feature.merge.CellSignalMerger
 import cz.mroczis.netmonster.core.feature.merge.CellSource
 import cz.mroczis.netmonster.core.feature.postprocess.*
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.config.PhysicalChannelConfig
 import cz.mroczis.netmonster.core.subscription.ISubscriptionManagerCompat
 import cz.mroczis.netmonster.core.telephony.ITelephonyManagerCompat
+import cz.mroczis.netmonster.core.telephony.mapper.cell.toCells
 import cz.mroczis.netmonster.core.util.isDisplayOn
 
 internal class NetMonster(
@@ -24,7 +26,8 @@ internal class NetMonster(
     private val subscription: ISubscriptionManagerCompat
 ) : INetMonster {
 
-    private val merger = CellMerger()
+    private val oldAndNewCellMerger = CellMerger()
+    private val newAndSignalCellMerger = CellSignalMerger()
     private val physicalChannelSource by lazy { PhysicalChannelConfigSource() }
 
     /**
@@ -45,7 +48,7 @@ internal class NetMonster(
             getTelephony(subId).getCellLocation().firstOrNull()
         }) // might add more signal strength indicators
         add(PhysicalChannelPostprocessor { subId ->
-           getPhysicalChannelConfiguration(subId)
+            getPhysicalChannelConfiguration(subId)
         })
     }
 
@@ -90,7 +93,14 @@ internal class NetMonster(
             allCells
         } else emptyList()
 
-        return merger.merge(oldApi, newApi, context.isDisplayOn())
+        val signalApi = if (sources.contains(CellSource.SIGNAL_STRENGTH)) {
+            subscriptions.mapNotNull { subId ->
+                getTelephony(subId).getSignalStrength()?.toCells(subId)
+            }.flatten().toSet().toList()
+        } else emptyList()
+
+        val mergedOldNew = oldAndNewCellMerger.merge(oldApi, newApi, context.isDisplayOn())
+        return newAndSignalCellMerger.merge(mergedOldNew, signalApi)
     }
 
     @RequiresPermission(
@@ -116,12 +126,12 @@ internal class NetMonster(
         return null
     }
 
-    override fun getPhysicalChannelConfiguration(subId : Int): List<PhysicalChannelConfig> =
+    override fun getPhysicalChannelConfiguration(subId: Int): List<PhysicalChannelConfig> =
         getTelephony(subId).getTelephonyManager()?.let {
             physicalChannelSource.get(it, subId)
         } ?: emptyList()
 
-    private infix fun getTelephony(subId: Int) : ITelephonyManagerCompat {
+    private infix fun getTelephony(subId: Int): ITelephonyManagerCompat {
         return NetMonsterFactory.getTelephony(context, subId)
     }
 

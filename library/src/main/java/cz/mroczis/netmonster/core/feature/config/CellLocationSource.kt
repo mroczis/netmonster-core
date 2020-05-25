@@ -40,6 +40,7 @@ class CellLocationSource {
         getFresh(telephonyManager, subId) ?: telephonyManager.cellLocation
 
     private fun getFresh(telephonyManager: TelephonyManager, subId: Int?) : CellLocation? {
+        var listener: CellLocationListener? = null
         val asyncLock = CountDownLatch(1)
         var cellLocation: CellLocation? = null
 
@@ -47,10 +48,9 @@ class CellLocationSource {
             // We'll receive callbacks on thread that created instance of [listener] by default.
             // Async processing is required otherwise deadlock would arise cause we block
             // original thread
-            val listener = CellLocationListener(subId) {
+            listener = CellLocationListener(subId) {
                 cellLocation = it
                 asyncLock.countDown()
-                telephonyManager.listen(this, PhoneStateListener.LISTEN_NONE)
             }
 
             telephonyManager.listen(listener, PhoneStateListener.LISTEN_CELL_LOCATION)
@@ -65,6 +65,8 @@ class CellLocationSource {
             // System was not able to deliver PhysicalChannelConfig in this time slot
         }
 
+        listener?.let { telephonyManager.listen(it, PhoneStateListener.LISTEN_NONE) }
+
         return cellLocation
     }
 
@@ -77,9 +79,11 @@ class CellLocationSource {
         private val simStateListener: CellLocationListener.(state: CellLocation) -> Unit
     ) : PhoneStateListenerPort(subId) {
 
-        override fun onCellLocationChanged(location: CellLocation) {
+        override fun onCellLocationChanged(location: CellLocation?) {
             super.onCellLocationChanged(location)
-            simStateListener.invoke(this, location)
+            if (location != null) {
+                simStateListener.invoke(this, location)
+            }
         }
     }
 }

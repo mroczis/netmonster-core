@@ -34,6 +34,17 @@ enum class CellSource {
      * Corresponds to [ITelephonyManagerCompat.getAllCellInfo]
      */
     @SinceSdk(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    ALL_CELL_INFO;
+    ALL_CELL_INFO,
+
+    /**
+     * Corresponds to [ITelephonyManagerCompat.getSignalStrength]
+     *
+     * On Android Q some phones like Samsung SM-G981N return valid
+     * signal data for NR in NSA mode. We can use them to identify secondarily
+     * serving cells.
+     */
+    @SinceSdk(Build.VERSION_CODES.Q)
+    SIGNAL_STRENGTH,
+    ;
 
 }
