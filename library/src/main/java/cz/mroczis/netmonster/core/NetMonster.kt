@@ -57,7 +57,7 @@ internal class NetMonster(
         allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE]
     )
     override fun getCells(): List<ICell> = getCells(
-        CellSource.CELL_LOCATION, CellSource.ALL_CELL_INFO, CellSource.NEIGHBOURING_CELLS
+        CellSource.CELL_LOCATION, CellSource.ALL_CELL_INFO, CellSource.NEIGHBOURING_CELLS, CellSource.SIGNAL_STRENGTH
     )
 
     @WorkerThread
