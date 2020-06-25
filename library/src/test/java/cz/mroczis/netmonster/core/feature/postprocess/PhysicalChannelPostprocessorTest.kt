@@ -124,6 +124,94 @@ class PhysicalChannelPostprocessorTest : SdkTest(Build.VERSION_CODES.Q) {
 
             result shouldBe expected
         }
+
+        "One neighbour + two configs -> same PCI, no channel" {
+            val pccProvider: (Int) -> List<PhysicalChannelConfig> = { _ ->
+                listOf(
+                    PhysicalChannelConfig(connectionStatus = PrimaryConnection(), bandwidth = 10_000, channelNumber = null, pci = 118),
+                    PhysicalChannelConfig(connectionStatus = SecondaryConnection(isGuess = false), bandwidth = 10_000, channelNumber = null, pci = 94),
+                    PhysicalChannelConfig(connectionStatus = SecondaryConnection(isGuess = false), bandwidth = 10_000, channelNumber = null, pci = 94)
+                )
+            }
+
+            val cells = listOf(
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null)
+            )
+
+            val result = PhysicalChannelPostprocessor(pccProvider).postprocess(cells)
+
+            val expected = listOf(
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = SecondaryConnection(isGuess = false), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null)
+            )
+
+            result shouldBe expected
+
+        }
+
+        "Two neighbours + two configs -> same PCI, no channel" {
+            val pccProvider: (Int) -> List<PhysicalChannelConfig> = { _ ->
+                listOf(
+                    PhysicalChannelConfig(connectionStatus = PrimaryConnection(), bandwidth = 10_000, channelNumber = null, pci = 118),
+                    PhysicalChannelConfig(connectionStatus = SecondaryConnection(isGuess = false), bandwidth = 10_000, channelNumber = null, pci = 94),
+                    PhysicalChannelConfig(connectionStatus = SecondaryConnection(isGuess = false), bandwidth = 10_000, channelNumber = null, pci = 94)
+                )
+            }
+
+            val cells = listOf(
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null)
+            )
+
+            val result = PhysicalChannelPostprocessor(pccProvider).postprocess(cells)
+
+            val expected = listOf(
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = SecondaryConnection(isGuess = false), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = SecondaryConnection(isGuess = false), eci = null, tac = null, pci = 94, band = BandTableLte.map(3000), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null)
+            )
+
+            result shouldBe expected
+
+        }
+
+        "Three neighbours + two configs -> same PCI, no channel" {
+            val pccProvider: (Int) -> List<PhysicalChannelConfig> = { _ ->
+                listOf(
+                    PhysicalChannelConfig(connectionStatus = PrimaryConnection(), bandwidth = 10_000, channelNumber = null, pci = 118),
+                    PhysicalChannelConfig(connectionStatus = SecondaryConnection(isGuess = false), bandwidth = 10_000, channelNumber = null, pci = 94),
+                    PhysicalChannelConfig(connectionStatus = SecondaryConnection(isGuess = false), bandwidth = 10_000, channelNumber = null, pci = 94)
+                )
+            }
+
+            val cells = listOf(
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(1579), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null)
+            )
+
+            val result = PhysicalChannelPostprocessor(pccProvider).postprocess(cells)
+
+            // Do not merge cause we have 2 possible configs but 3 candidates
+            val expected = listOf(
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(1579), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null)
+            )
+
+            result shouldBe expected
+
+        }
     }
 
 }

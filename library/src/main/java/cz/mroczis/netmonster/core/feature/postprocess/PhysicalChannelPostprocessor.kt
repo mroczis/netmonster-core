@@ -44,6 +44,7 @@ class PhysicalChannelPostprocessor(
                         .mergeByPciWithHints()
                         .mergeByPci()
                         .mergeByConnection()
+                        .mergeLeftovers()
 
                     res.cells
                         .fixConnections()
@@ -146,6 +147,66 @@ class PhysicalChannelPostprocessor(
 
         val remainingConfigs = configs.toMutableList().apply {
             removeAll(cellToConfig.values)
+        }.toList()
+
+        return MergeBundle(
+            cells = mergedCells,
+            configs = remainingConfigs
+        )
+    }
+
+    /**
+     * Merges configs with invalid channel number with cells that have matching PCI and also invalid channel number.
+     * This method can deal with multiple same PCIs on different channels that are unknown
+     *
+     * Example
+     * -------
+     * Cells:
+     *  - A ... PCI = 33, EARFCN = 6200, BW = 10_000
+     *  - B ... PCI = 10, EARFCN = null, BW = null
+     *  - C ... PCI = 10, EARFCN = null, BW = null
+     *  - D ... PCI = 10, EARFCN = null, BW = null
+     *
+     * Configs:
+     *  - X ... PCI = 10, EARFCN = null, BW = 10_000
+     *  - Y ... PCI = 10, EARFCN = null, BW = 10_000
+     *  - Z ... PCI = 23, EARFCN = null, BW = 10_000
+     *
+     * If we had [A,B] then one of [X,Y] is taken.
+     * If we had [A,B,C] then both [X,Y] are utilized.
+     * If we had [A,B,C,D] then there are 3 cells for 2 options, nothing is merged.
+     */
+    private fun MergeBundle.mergeLeftovers(): MergeBundle {
+        val tokenMap = configs
+            .groupingBy { it }
+            .eachCount()
+            .toMutableMap()
+
+        val candidates = cells
+            .filterIsInstance(CellLte::class.java)
+            .filter { cell -> cell.bandwidth == null && cell.band != null }
+            .mapNotNull { cell ->
+                configs.firstOrNull { it.pci == cell.pci && it.channelNumber == null }?.let { candidate ->
+                    // We take one "token" which means that once we get to negative numbers then there are more candidates then possible configs
+                    tokenMap[candidate] = tokenMap.getOrPut(candidate) { 0 } - 1
+                    cell to candidate
+                }
+            }.toMap()
+
+        val usedConfigs = mutableListOf<PhysicalChannelConfig>()
+        val mergedCells = cells.map { cell ->
+            candidates[cell]?.let { config ->
+                tokenMap[config]?.let { availableTokens ->
+                    if (availableTokens >= 0) {
+                        usedConfigs += config
+                        mergeByCode(cell as CellLte, config)
+                    } else cell
+                } ?: cell
+            } ?: cell
+        }
+
+        val remainingConfigs = configs.toMutableList().apply {
+            removeAll(usedConfigs)
         }.toList()
 
         return MergeBundle(
