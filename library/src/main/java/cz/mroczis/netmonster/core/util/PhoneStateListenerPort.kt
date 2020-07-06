@@ -30,6 +30,7 @@ open class PhoneStateListenerPort(subId: Int?) : PhoneStateListener() {
     /**
      * This function exists in AOSP but it's hidden ^_^
      */
+    @Deprecated("Removed in Android R, no replacement available")
     open fun onPhysicalChannelConfigurationChanged(configs: List<Any?>) {
 
     }

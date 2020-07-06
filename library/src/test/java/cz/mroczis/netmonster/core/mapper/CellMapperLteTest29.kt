@@ -80,19 +80,19 @@ class CellMapperLteTest29 : SdkTest(Build.VERSION_CODES.Q) {
             // Samsung SM-G935V
             mockValidCell().let {
                 every { it.signal.rsrp } returns 1025
-                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal()!!)?.signal?.rsrp shouldBe -102.5
+                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal())?.signal?.rsrp shouldBe -102.5
             }
 
             // Sony E2003
             mockValidCell().let {
                 every { it.signal.rsrp } returns 464
-                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal()!!)?.signal?.rsrp shouldBe -46.4
+                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal())?.signal?.rsrp shouldBe -46.4
             }
 
             // Device name I forgot
             mockValidCell().let {
                 every { it.signal.rsrp } returns 25
-                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal()!!)?.signal?.rsrp shouldBe (-140.0 + 25.0)
+                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal())?.signal?.rsrp shouldBe (-140.0 + 25.0)
             }
         }
 
@@ -100,24 +100,24 @@ class CellMapperLteTest29 : SdkTest(Build.VERSION_CODES.Q) {
             // Sony E2003
             mockValidCell().let {
                 every { it.signal.rsrq } returns 135
-                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal()!!)?.signal?.rsrq shouldBe -13.5
+                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal())?.signal?.rsrq shouldBe -13.5
             }
         }
 
         "Reflection - SNR" {
             mockValidCell().let {
                 every { it.signal.rssnr } returns 300
-                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal()!!)?.signal?.snr shouldBe null
+                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal())?.signal?.snr shouldBe null
             }
 
             mockValidCell().let {
                 every { it.signal.rssnr } returns 30
-                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal()!!)?.signal?.snr shouldBe null
+                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal())?.signal?.snr shouldBe null
             }
 
             mockValidCell().let {
                 every { it.signal.rssnr } returns 263
-                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal()!!)?.signal?.snr shouldBe 26.3
+                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal())?.signal?.snr shouldBe 26.3
             }
         }
 

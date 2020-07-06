@@ -39,7 +39,7 @@ class PhysicalChannelConfigSource {
      * nothing is delivered.
      */
     fun get(telephonyManager: TelephonyManager, subId: Int): List<PhysicalChannelConfig> =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             var listener: PhysicalChannelListener? = null
             var config: List<PhysicalChannelConfig>? = null
             val asyncLock = CountDownLatch(1)
@@ -67,7 +67,6 @@ class PhysicalChannelConfigSource {
 
             // PhysicalChannelConfig is no longer accessible in Android R hence
             // asyncLock timeouts every time
-            // TODO Handle in root 'if' once final Android R SDK is released
             listener?.let { telephonyManager.listen(it, PhoneStateListener.LISTEN_NONE) }
 
             config ?: emptyList()
