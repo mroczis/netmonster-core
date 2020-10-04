@@ -8,6 +8,7 @@ import cz.mroczis.netmonster.core.model.connection.IConnection
 import cz.mroczis.netmonster.core.model.signal.SignalCdma
 
 data class CellCdma(
+    override val network: Network? = null,
     /**
      * System Id
      * in range from [BID_MIN] to [BID_MAX], null if unavailable
@@ -48,8 +49,7 @@ data class CellCdma(
 
     override val signal: SignalCdma,
     override val connectionStatus: IConnection,
-    override val subscriptionId: Int,
-    override val network: Network? = null
+    override val subscriptionId: Int
 ) : ICell {
 
     /**
