@@ -24,7 +24,7 @@ data class CellNr(
     val nci: Long?,
 
     /**
-     * 16-bit Tracking Area Code
+     * 24-bit Tracking Area Code
      * in range from [TAC_MIN] to [TAC_MAX], null if unavailable
      */
     val tac: Int?,
@@ -50,7 +50,7 @@ data class CellNr(
 
 
         const val TAC_MIN = 0L
-        const val TAC_MAX = 65_535L
+        const val TAC_MAX = 16_777_215L
 
         const val PCI_MIN = 0L
         const val PCI_MAX = 1007L
