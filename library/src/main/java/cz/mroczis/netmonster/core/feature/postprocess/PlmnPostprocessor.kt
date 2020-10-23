@@ -2,6 +2,8 @@ package cz.mroczis.netmonster.core.feature.postprocess
 
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.cell.*
+import cz.mroczis.netmonster.core.model.connection.IConnection
+import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 
 /**
  * Attempts to assign valid PLMN ([Network]) to cells which do not have valid value.
@@ -28,25 +30,26 @@ class PlmnPostprocessor : ICellPostprocessor {
             null
 
         override fun processGsm(cell: CellGsm) =
-            cell.network?.let { PlmnNetwork(it, NetworkGeneration.GSM, null, cell.lac) }
+            cell.network?.let { PlmnNetwork(it, NetworkGeneration.GSM, cell.connectionStatus, null, cell.lac) }
 
         override fun processWcdma(cell: CellWcdma) =
-            cell.network?.let { PlmnNetwork(it, NetworkGeneration.WCDMA, cell.band?.channelNumber) }
+            cell.network?.let { PlmnNetwork(it, NetworkGeneration.WCDMA, cell.connectionStatus, cell.band?.channelNumber) }
 
         override fun processLte(cell: CellLte) =
-            cell.network?.let { PlmnNetwork(it, NetworkGeneration.LTE, cell.band?.channelNumber) }
+            cell.network?.let { PlmnNetwork(it, NetworkGeneration.LTE, cell.connectionStatus, cell.band?.channelNumber) }
 
         override fun processTdscdma(cell: CellTdscdma) =
             cell.network?.let {
                 PlmnNetwork(
                     it,
                     NetworkGeneration.TDSCDMA,
+                    cell.connectionStatus,
                     cell.band?.channelNumber
                 )
             }
 
         override fun processNr(cell: CellNr) =
-            cell.network?.let { PlmnNetwork(it, NetworkGeneration.NR, cell.band?.channelNumber) }
+            cell.network?.let { PlmnNetwork(it, NetworkGeneration.NR, cell.connectionStatus, cell.band?.channelNumber) }
     }
 
     /**
@@ -104,7 +107,14 @@ class PlmnPostprocessor : ICellPostprocessor {
                 if (plmns.size == 1) {
                     plmns[0].network
                 } else {
-                    plmns.firstOrNull { it.channelNumber == channel }?.network
+                    val channelMatches = plmns.filter { it.channelNumber == channel }
+                    when (channelMatches.size) {
+                        0 -> null
+                        1 -> channelMatches[0].network
+                        // More networks per one channel, this happens when cell list is not sorted
+                        // in that case we rely just on PrimaryConnection if's available.
+                        else -> channelMatches.firstOrNull { it.connection is PrimaryConnection }?.network
+                    }
                 }
             }
 
@@ -123,6 +133,7 @@ class PlmnPostprocessor : ICellPostprocessor {
     private data class PlmnNetwork(
         val network: Network,
         val generation: NetworkGeneration,
+        val connection: IConnection,
         val channelNumber: Int? = null,
         val areaCode: Int? = null
     )
