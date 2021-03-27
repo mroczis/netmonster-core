@@ -91,10 +91,10 @@ data class SignalWcdma(
         const val BIT_ERROR_RATE_MIN = 0L
 
         const val ECNO_MAX = 1L
-        const val ECNO_MIN = -24L
+        const val ECNO_MIN = -23L
 
         const val RSCP_MAX = -24L
-        const val RSCP_MIN = -120L
+        const val RSCP_MIN = -119L
 
         const val ECIO_MAX = 0L
         const val ECIO_MIN = -20L

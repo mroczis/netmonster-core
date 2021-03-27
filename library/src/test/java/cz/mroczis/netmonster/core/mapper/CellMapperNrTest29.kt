@@ -23,7 +23,7 @@ class CellMapperNrTest29 : SdkTest(Build.VERSION_CODES.Q) {
         const val NCI = Integer.MAX_VALUE + 1L
         const val TAC = 29410
         const val PCI = 42
-        const val ARFCN = 151_600
+        const val ARFCN = 158_000
         const val MCC = 230
         const val MNC = 11
 
@@ -37,7 +37,7 @@ class CellMapperNrTest29 : SdkTest(Build.VERSION_CODES.Q) {
     }
 
     init {
-        "Standard LTE cell" {
+        "Standard NR cell" {
             val cell = mockValidCell().let {
                 it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal())
             }
@@ -51,7 +51,7 @@ class CellMapperNrTest29 : SdkTest(Build.VERSION_CODES.Q) {
 
                 band.applyNonNull {
                     downlinkArfcn shouldBe ARFCN
-                    downlinkFrequency shouldBe 758_000
+                    downlinkFrequency shouldBe 790_000
                     name shouldBe "700"
                     number shouldBe 28
                 }
