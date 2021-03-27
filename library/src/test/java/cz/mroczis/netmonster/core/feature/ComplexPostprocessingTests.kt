@@ -38,8 +38,8 @@ class ComplexPostprocessingTests : SdkTest(Build.VERSION_CODES.P) {
 
                 override fun getActiveSubscriptions(): List<SubscribedNetwork> =
                     listOf(
-                        SubscribedNetwork(1, Network.map(413, 2)),
-                        SubscribedNetwork(2, pairA)
+                        SubscribedNetwork(0,1, Network.map(413, 2)),
+                        SubscribedNetwork(1,2, pairA)
                     )
             }
 
@@ -230,8 +230,8 @@ class ComplexPostprocessingTests : SdkTest(Build.VERSION_CODES.P) {
 
                 override fun getActiveSubscriptions(): List<SubscribedNetwork> =
                     listOf(
-                        SubscribedNetwork(1, Network.map(203, 2)),
-                        SubscribedNetwork(3, Network.map(203, 1))
+                        SubscribedNetwork(0,1, Network.map(203, 2)),
+                        SubscribedNetwork(1, 3, Network.map(203, 1))
                     )
             }
 

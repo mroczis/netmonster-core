@@ -22,7 +22,7 @@ internal open class SubscriptionManagerCompat14(
      */
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun getActiveSubscriptions(): List<SubscribedNetwork> = mutableListOf<SubscribedNetwork>().apply {
-        add(SubscribedNetwork(Integer.MAX_VALUE, null))
+        add(SubscribedNetwork(0, Integer.MAX_VALUE, null))
     }
 
 }

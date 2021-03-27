@@ -52,8 +52,8 @@ class SubDuplicitiesPostprocessorTest29 : SdkTest(Build.VERSION_CODES.Q) {
         val bServing1 = aServing1.copy(network = Network.map("70077"), subscriptionId = SUB_B)
         val bNeighbour1 = aNeighbour1.copy(pci = 234, subscriptionId = SUB_B)
 
-        val aSubscription = SubscribedNetwork(SUB_A, Network.map(800, 88))
-        val bSubscription = SubscribedNetwork(SUB_B, Network.map(700, 77))
+        val aSubscription = SubscribedNetwork(0, SUB_A, Network.map(800, 88))
+        val bSubscription = SubscribedNetwork(1, SUB_B, Network.map(700, 77))
 
         val abManager = object : ISubscriptionManagerCompat {
             override fun getActiveSubscriptionIds(): List<Int> =

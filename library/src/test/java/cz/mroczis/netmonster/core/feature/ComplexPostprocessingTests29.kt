@@ -127,8 +127,8 @@ class ComplexPostprocessingTests29 : SdkTest(Build.VERSION_CODES.Q) {
 
                 override fun getActiveSubscriptions(): List<SubscribedNetwork> =
                     listOf(
-                        SubscribedNetwork(1, Network.map(203, 3)),
-                        SubscribedNetwork(3, Network.map(203, 3))
+                        SubscribedNetwork(0,1, Network.map(203, 3)),
+                        SubscribedNetwork(1,3, Network.map(203, 3))
                     )
             }
 

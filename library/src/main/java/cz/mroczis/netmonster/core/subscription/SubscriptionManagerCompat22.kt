@@ -28,7 +28,7 @@ internal open class SubscriptionManagerCompat22(
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun getActiveSubscriptions(): List<SubscribedNetwork> {
         val subscriptions = manager.activeSubscriptionInfoList
-            ?.sortedBy { it.simSlotIndex }
+            ?.sortedBy { it.simSlotIndex }  
             ?.mapNotNull {
                 val id = it.subscriptionId
 
@@ -37,7 +37,7 @@ internal open class SubscriptionManagerCompat22(
                 val telephony = NetMonsterFactory.getTelephony(context, id)
                 val simServiceState = telephony.getServiceState()?.state ?: ServiceState.STATE_POWER_OFF
                 if (simServiceState != ServiceState.STATE_POWER_OFF && simServiceState != ServiceState.STATE_OUT_OF_SERVICE) {
-                    SubscribedNetwork(it.subscriptionId, it.mapNetwork())
+                    SubscribedNetwork(it.simSlotIndex, it.subscriptionId, it.mapNetwork())
                 } else {
                     null
                 }
