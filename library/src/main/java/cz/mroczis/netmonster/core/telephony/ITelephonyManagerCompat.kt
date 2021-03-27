@@ -11,6 +11,7 @@ import androidx.annotation.WorkerThread
 import cz.mroczis.netmonster.core.callback.CellCallbackError
 import cz.mroczis.netmonster.core.callback.CellCallbackSuccess
 import cz.mroczis.netmonster.core.db.model.NetworkType
+import cz.mroczis.netmonster.core.model.DisplayInfo
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.annotation.SinceSdk
 import cz.mroczis.netmonster.core.model.annotation.TillSdk
@@ -188,5 +189,17 @@ interface ITelephonyManagerCompat {
      */
     @WorkerThread
     fun getSignalStrength() : SignalStrength?
+
+    /**
+     * Fetches information about current network type and possible override
+     * that should be presented to user.
+     *
+     * On SDKs lower than [Build.VERSION_CODES.R] always returns [DisplayInfo] with unknwon
+     * network type and none override type
+     */
+    @WorkerThread
+    @SinceSdk(Build.VERSION_CODES.R)
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE])
+    fun getDisplayInfo(): DisplayInfo
 
 }

@@ -10,6 +10,7 @@ import cz.mroczis.netmonster.core.feature.detect.*
 import cz.mroczis.netmonster.core.feature.config.*
 import cz.mroczis.netmonster.core.feature.merge.CellSource
 import cz.mroczis.netmonster.core.model.annotation.SinceSdk
+import cz.mroczis.netmonster.core.model.annotation.TillSdk
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.config.PhysicalChannelConfig
 import cz.mroczis.netmonster.core.telephony.ITelephonyManagerCompat
@@ -103,7 +104,7 @@ interface INetMonster {
      * Obtains synchronously currently active configurations for physical channel.
      *
      * This method is not publicly accessible in AOSP and can be used to detect multiple
-     * active active carriers when LTE is active.
+     * active carriers when LTE is active.
      *
      * Works since [Build.VERSION_CODES.P] on some phones. Look to [PhysicalChannelConfig] for
      * more details.
@@ -116,6 +117,10 @@ interface INetMonster {
      */
     @WorkerThread
     @SinceSdk(Build.VERSION_CODES.P)
+    @TillSdk(
+        sdkInt = Build.VERSION_CODES.Q,
+        fallbackBehaviour = "Way to access this data was removed, expect empty list on Android Q+"
+    )
     fun getPhysicalChannelConfiguration(subId: Int) : List<PhysicalChannelConfig>
 
 }

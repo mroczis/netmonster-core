@@ -17,6 +17,7 @@ import cz.mroczis.netmonster.core.db.model.NetworkType
 import cz.mroczis.netmonster.core.feature.config.CellLocationSource
 import cz.mroczis.netmonster.core.feature.config.ServiceStateSource
 import cz.mroczis.netmonster.core.feature.config.SignalStrengthsSource
+import cz.mroczis.netmonster.core.model.DisplayInfo
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.model.CellError
@@ -33,8 +34,8 @@ import java.util.concurrent.TimeUnit
  * methods across all platform versions.
  */
 internal open class TelephonyManagerCompat14(
-    private val context: Context,
-    private val subId: Int
+    protected val context: Context,
+    protected val subId: Int
 ) : ITelephonyManagerCompat {
 
     protected val telephony: TelephonyManager
@@ -145,6 +146,11 @@ internal open class TelephonyManagerCompat14(
     override fun getSimOperator(): Network? =
         simOperatorGetter.getNetwork(this)
 
-    override fun getSignalStrength(): SignalStrength? = signalStrengthsSource.get(telephony, subId)
+    override fun getSignalStrength(): SignalStrength? = 
+        signalStrengthsSource.get(telephony, subId)
+
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE])
+    override fun getDisplayInfo(): DisplayInfo =
+        DisplayInfo(getNetworkType(), DisplayInfo.NetworkOverrideType.NONE)
 
 }

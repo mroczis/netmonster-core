@@ -53,14 +53,15 @@ class CellLocationMapper(
         val scanResult = getUpdatedLocationAndSignal(model)
 
         return mutableListOf<ICell>().apply {
-            if (scanResult?.location is GsmCellLocation) {
+            if (scanResult.location is GsmCellLocation) {
                 map(scanResult.location, scanResult.signal, model)?.let { add(it) }
-            } else if (scanResult?.location is CdmaCellLocation) {
+            } else if (scanResult.location is CdmaCellLocation) {
                 scanResult.location.mapCdma(model, scanResult.signal)?.let { add(it) }
             }
         }
     }
 
+    @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE])
     private fun map(model: GsmCellLocation, signalStrength: SignalStrength?, subId: Int): ICell? {
         val network = NetworkTypeTable.get(telephony.networkType)
         val cid = model.cid
@@ -104,7 +105,7 @@ class CellLocationMapper(
      */
     @WorkerThread
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION])
-    private fun getUpdatedLocationAndSignal(subId: Int?): ScanResult? =
+    private fun getUpdatedLocationAndSignal(subId: Int?): ScanResult =
         ScanResult(
             location = cellLocationSource.get(telephony, subId),
             signal = signalStrengthSource.get(telephony, subId)

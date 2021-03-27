@@ -21,7 +21,7 @@ import cz.mroczis.netmonster.core.util.DirectExecutor
 internal open class TelephonyManagerCompat29(
     context: Context,
     subId: Int = Integer.MAX_VALUE
-) : TelephonyManagerCompat14(context, subId) {
+) : TelephonyManagerCompat17(context, subId) {
 
 
     @WorkerThread
