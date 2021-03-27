@@ -1,11 +1,14 @@
 package cz.mroczis.netmonster.core.feature.config
 
 import android.Manifest
-import android.os.Handler
-import android.os.HandlerThread
-import android.telephony.*
+import android.telephony.CellLocation
+import android.telephony.PhoneStateListener
+import android.telephony.ServiceState
+import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
+import cz.mroczis.netmonster.core.feature.config.CellLocationSource.CellLocationListener
 import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
+import cz.mroczis.netmonster.core.util.Threads
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -14,19 +17,6 @@ import java.util.concurrent.TimeUnit
  * approach fails then looks to cache in [TelephonyManager].
  */
 class CellLocationSource {
-
-    companion object {
-
-        /**
-         * Async executor so can await data from [CellLocationListener]
-         */
-        private val asyncExecutor by lazy {
-            val thread = HandlerThread("CellLocationSource").apply {
-                start()
-            }
-            Handler(thread.looper)
-        }
-    }
 
     /**
      * Registers [CellLocationListener] and awaits data. After 100 milliseconds time outs if
@@ -44,11 +34,12 @@ class CellLocationSource {
         val asyncLock = CountDownLatch(1)
         var cellLocation: CellLocation? = null
 
-        asyncExecutor.post {
+        Threads.phoneStateListener.post {
             // We'll receive callbacks on thread that created instance of [listener] by default.
             // Async processing is required otherwise deadlock would arise cause we block
             // original thread
             listener = CellLocationListener(subId) {
+                telephonyManager.listen(this, PhoneStateListener.LISTEN_NONE)
                 cellLocation = it
                 asyncLock.countDown()
             }

@@ -1,14 +1,13 @@
 package cz.mroczis.netmonster.core.feature.config
 
 import android.os.Build
-import android.os.Handler
-import android.os.HandlerThread
 import android.telephony.PhoneStateListener
 import android.telephony.ServiceState
 import android.telephony.SignalStrength
 import android.telephony.TelephonyManager
 import cz.mroczis.netmonster.core.feature.config.SignalStrengthsSource.SignalStrengthsListener
 import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
+import cz.mroczis.netmonster.core.util.Threads
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -20,19 +19,6 @@ import java.util.concurrent.TimeUnit
  */
 class SignalStrengthsSource {
 
-    companion object {
-
-        /**
-         * Async executor so can await data from [SignalStrengthsListener]
-         */
-        private val asyncExecutor by lazy {
-            val thread = HandlerThread("SignalStrengthsSource").apply {
-                start()
-            }
-            Handler(thread.looper)
-        }
-    }
-
     /**
      * Registers [SignalStrengthsListener] and awaits data. After 100 milliseconds time outs if
      * nothing is delivered.
@@ -40,18 +26,19 @@ class SignalStrengthsSource {
      * On Android O and newer directly grabs [ServiceState] from [TelephonyManager].
      */
     fun get(telephonyManager: TelephonyManager, subId: Int?): SignalStrength? =
-        getFresh(telephonyManager, subId) ?: getCached(telephonyManager)
+        getCached(telephonyManager) ?: getFresh(telephonyManager, subId)
 
     private fun getFresh(telephonyManager: TelephonyManager, subId: Int?): SignalStrength? {
         var listener: SignalStrengthsListener? = null
         val asyncLock = CountDownLatch(1)
         var signal: SignalStrength? = null
 
-        asyncExecutor.post {
+        Threads.phoneStateListener.post {
             // We'll receive callbacks on thread that created instance of [listener] by default.
             // Async processing is required otherwise deadlock would arise cause we block
             // original thread
             listener = SignalStrengthsListener(subId) {
+                telephonyManager.listen(this, PhoneStateListener.LISTEN_NONE)
                 signal = it
                 asyncLock.countDown()
             }
