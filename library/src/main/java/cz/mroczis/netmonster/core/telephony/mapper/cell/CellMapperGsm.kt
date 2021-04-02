@@ -4,6 +4,7 @@ import android.annotation.TargetApi
 import android.os.Build
 import android.telephony.CellIdentityGsm
 import android.telephony.CellSignalStrengthGsm
+import android.telephony.CellSignalStrengthWcdma
 import android.telephony.SignalStrength
 import android.telephony.gsm.GsmCellLocation
 import cz.mroczis.netmonster.core.db.BandTableGsm
@@ -50,10 +51,31 @@ internal fun CellSignalStrengthGsm.mapSignal(): SignalGsm {
 }
 
 /**
+ * Special mapper dedicated to Samsung SM-G973F.
+ * In GSM this device reports signal in CellSignalStrengthWcdma instances.
+ */
+@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+private fun CellSignalStrengthWcdma.mapWcdmaSignalToGsm(): SignalGsm {
+    val rssi = dbm.inRangeOrNull(SignalGsm.RSSI_RANGE)
+    val ber = Reflection.intFieldOrNull(Reflection.GSM_BIT_ERROR_RATE, this)
+        ?.inRangeOrNull(SignalGsm.BIT_ERROR_RATE_RANGE)
+
+    return SignalGsm(
+        rssi = rssi,
+        bitErrorRate = ber,
+        timingAdvance = null
+    )
+}
+
+/**
  * [CellIdentityGsm] -> [CellGsm]
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-internal fun CellIdentityGsm.mapCell(subId: Int, connection: IConnection, signal: SignalGsm): CellGsm? {
+internal fun CellIdentityGsm.mapCell(
+    subId: Int,
+    connection: IConnection,
+    signal: SignalGsm
+): CellGsm? {
     val network = mapNetwork()
     val cid = cid.inRangeOrNull(CellGsm.CID_RANGE)
     val lac = lac.inRangeOrNull(CellGsm.LAC_RANGE)
@@ -105,14 +127,30 @@ internal fun CellIdentityGsm.mapNetwork(): Network? =
     }
 
 @Suppress("DEPRECATION")
-internal fun GsmCellLocation.mapGsm(subId: Int, signalStrength: SignalStrength?, network: Network?): ICell? {
+internal fun GsmCellLocation.mapGsm(
+    subId: Int,
+    signalStrength: SignalStrength?,
+    network: Network?
+): ICell? {
     val cid = cid.inRangeOrNull(CellGsm.CID_RANGE)
     val lac = lac.inRangeOrNull(CellGsm.LAC_RANGE)
 
     val signal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        signalStrength?.getCellSignalStrengths(CellSignalStrengthGsm::class.java)
+        val gsm = signalStrength?.getCellSignalStrengths(CellSignalStrengthGsm::class.java)
             ?.firstOrNull()
-            ?.mapSignal() ?: SignalGsm(null, null, null)
+            ?.mapSignal()
+
+        // Samsung SM-G973F in GSM mode uses CellSignalStrengthWcdma for some reason
+        // So if GSM instance will not work, let's try look for WCDMA and grab only convertible fields
+        val wcdma = if (gsm == null) {
+            signalStrength?.getCellSignalStrengths(CellSignalStrengthWcdma::class.java)
+                ?.firstOrNull()
+                ?.mapWcdmaSignalToGsm()
+        } else {
+            null
+        }
+        
+        gsm ?: wcdma ?: SignalGsm(null, null, null)
     } else {
         val rssi = signalStrength?.getGsmRssi()?.inRangeOrNull(SignalGsm.RSSI_RANGE)
         val ber = signalStrength?.gsmBitErrorRate?.inRangeOrNull(SignalGsm.BIT_ERROR_RATE_RANGE)
