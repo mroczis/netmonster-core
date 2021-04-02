@@ -8,9 +8,6 @@ import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
 import cz.mroczis.netmonster.core.feature.config.ServiceStateSource.ServiceStateListener
 import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
-import cz.mroczis.netmonster.core.util.Threads
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 /**
  * On Android N and older fetches [ServiceState] using [ServiceStateListener].
@@ -37,38 +34,10 @@ class ServiceStateSource {
             getPreOreo(telephonyManager, subId)
         }
 
-    private fun getPreOreo(telephonyManager: TelephonyManager, subId: Int) : ServiceState? {
-        var listener: ServiceStateListener? = null
-        val asyncLock = CountDownLatch(1)
-        var simState: ServiceState? = null
-
-        Threads.phoneStateListener.post {
-            // We'll receive callbacks on thread that created instance of [listener] by default.
-            // Async processing is required otherwise deadlock would arise cause we block
-            // original thread
-            listener = ServiceStateListener(subId) {
-                telephonyManager.listen(this, PhoneStateListener.LISTEN_NONE)
-                simState = it
-                asyncLock.countDown()
-            }
-
-            telephonyManager.listen(listener, PhoneStateListener.LISTEN_SERVICE_STATE)
+    private fun getPreOreo(telephonyManager: TelephonyManager, subId: Int): ServiceState? =
+        telephonyManager.requestSingleUpdate<ServiceState>(PhoneStateListener.LISTEN_SERVICE_STATE) { onData ->
+            ServiceStateListener(subId, onData)
         }
-
-        // And we also must block original thread
-        // It'll get unblocked once we receive required data
-        // This usually takes +/- 20 ms to complete
-        try {
-            asyncLock.await(100, TimeUnit.MILLISECONDS)
-        } catch (e: InterruptedException) {
-            // System was not able to deliver PhysicalChannelConfig in this time slot
-        }
-
-        listener?.let { telephonyManager.listen(it, PhoneStateListener.LISTEN_NONE) }
-
-        return simState
-    }
-
 
     /**
      * Kotlin friendly PhoneStateListener that grabs [ServiceState]

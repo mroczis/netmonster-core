@@ -7,9 +7,6 @@ import android.telephony.SignalStrength
 import android.telephony.TelephonyManager
 import cz.mroczis.netmonster.core.feature.config.SignalStrengthsSource.SignalStrengthsListener
 import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
-import cz.mroczis.netmonster.core.util.Threads
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 /**
  * Attempts to fetch fresh [SignalStrength] using [SignalStrengthsListener]. If this
@@ -26,39 +23,12 @@ class SignalStrengthsSource {
      * On Android O and newer directly grabs [ServiceState] from [TelephonyManager].
      */
     fun get(telephonyManager: TelephonyManager, subId: Int?): SignalStrength? =
-        getCached(telephonyManager) ?: getFresh(telephonyManager, subId)
+        getFresh(telephonyManager, subId) ?: getCached(telephonyManager)
 
-    private fun getFresh(telephonyManager: TelephonyManager, subId: Int?): SignalStrength? {
-        var listener: SignalStrengthsListener? = null
-        val asyncLock = CountDownLatch(1)
-        var signal: SignalStrength? = null
-
-        Threads.phoneStateListener.post {
-            // We'll receive callbacks on thread that created instance of [listener] by default.
-            // Async processing is required otherwise deadlock would arise cause we block
-            // original thread
-            listener = SignalStrengthsListener(subId) {
-                telephonyManager.listen(this, PhoneStateListener.LISTEN_NONE)
-                signal = it
-                asyncLock.countDown()
-            }
-
-            telephonyManager.listen(listener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS)
+    private fun getFresh(telephonyManager: TelephonyManager, subId: Int?): SignalStrength? =
+        telephonyManager.requestSingleUpdate<SignalStrength>(PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) { onData ->
+            SignalStrengthsListener(subId, onData)
         }
-
-        // And we also must block original thread
-        // It'll get unblocked once we receive required data
-        // This usually takes +/- 20 ms to complete
-        try {
-            asyncLock.await(100, TimeUnit.MILLISECONDS)
-        } catch (e: InterruptedException) {
-            // System was not able to deliver PhysicalChannelConfig in this time slot
-        }
-
-        listener?.let { telephonyManager.listen(it, PhoneStateListener.LISTEN_NONE) }
-
-        return signal
-    }
 
     /**
      * Since Android P we can ask [TelephonyManager] directly

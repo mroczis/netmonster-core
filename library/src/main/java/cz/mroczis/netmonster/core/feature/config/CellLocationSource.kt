@@ -8,9 +8,6 @@ import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
 import cz.mroczis.netmonster.core.feature.config.CellLocationSource.CellLocationListener
 import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
-import cz.mroczis.netmonster.core.util.Threads
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 /**
  * Attempts to fetch fresh [CellLocation] using [CellLocationListener]. If this
@@ -27,40 +24,17 @@ class CellLocationSource {
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION])
     @Suppress("DEPRECATION")
     fun get(telephonyManager: TelephonyManager, subId: Int?): CellLocation? =
-        getFresh(telephonyManager, subId) ?: telephonyManager.cellLocation
-
-    private fun getFresh(telephonyManager: TelephonyManager, subId: Int?) : CellLocation? {
-        var listener: CellLocationListener? = null
-        val asyncLock = CountDownLatch(1)
-        var cellLocation: CellLocation? = null
-
-        Threads.phoneStateListener.post {
-            // We'll receive callbacks on thread that created instance of [listener] by default.
-            // Async processing is required otherwise deadlock would arise cause we block
-            // original thread
-            listener = CellLocationListener(subId) {
-                telephonyManager.listen(this, PhoneStateListener.LISTEN_NONE)
-                cellLocation = it
-                asyncLock.countDown()
-            }
-
-            telephonyManager.listen(listener, PhoneStateListener.LISTEN_CELL_LOCATION)
+        getFresh(telephonyManager, subId) ?: try {
+            telephonyManager.cellLocation
+        } catch (e : NullPointerException) {
+            // Xiaomi Mi 10, SDK 30 throws NPE here when data are not available
+            null
         }
 
-        // And we also must block original thread
-        // It'll get unblocked once we receive required data
-        // This usually takes +/- 20 ms to complete
-        try {
-            asyncLock.await(100, TimeUnit.MILLISECONDS)
-        } catch (e: InterruptedException) {
-            // System was not able to deliver PhysicalChannelConfig in this time slot
+    private fun getFresh(telephonyManager: TelephonyManager, subId: Int?): CellLocation? =
+        telephonyManager.requestSingleUpdate<CellLocation>(PhoneStateListener.LISTEN_CELL_LOCATION) { onData ->
+            CellLocationListener(subId, onData)
         }
-
-        listener?.let { telephonyManager.listen(it, PhoneStateListener.LISTEN_NONE) }
-
-        return cellLocation
-    }
-
 
     /**
      * Kotlin friendly PhoneStateListener that grabs [CellLocation]

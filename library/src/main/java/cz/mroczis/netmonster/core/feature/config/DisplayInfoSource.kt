@@ -10,9 +10,6 @@ import androidx.annotation.RequiresPermission
 import cz.mroczis.netmonster.core.model.DisplayInfo
 import cz.mroczis.netmonster.core.telephony.mapper.toDisplayInfo
 import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
-import cz.mroczis.netmonster.core.util.Threads
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 /**
  * Attempts to fetch fresh [TelephonyDisplayInfo] using [DisplayInfoSource].
@@ -34,38 +31,10 @@ class DisplayInfoSource {
         } ?: DisplayInfo()
 
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
-    private fun getFresh(telephonyManager: TelephonyManager, subId: Int?): TelephonyDisplayInfo? {
-        var listener: DisplayInfoListener? = null
-        val asyncLock = CountDownLatch(1)
-        var displayInfo: TelephonyDisplayInfo? = null
-
-        Threads.phoneStateListener.post {
-            // We'll receive callbacks on thread that created instance of [listener] by default.
-            // Async processing is required otherwise deadlock would arise cause we block
-            // original thread
-            listener = DisplayInfoListener(subId) {
-                telephonyManager.listen(this, PhoneStateListener.LISTEN_NONE)
-                displayInfo = it
-                asyncLock.countDown()
-            }
-
-            telephonyManager.listen(listener, PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED)
+    private fun getFresh(telephonyManager: TelephonyManager, subId: Int?): TelephonyDisplayInfo? =
+        telephonyManager.requestSingleUpdate<TelephonyDisplayInfo>(PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED) { onData ->
+            DisplayInfoListener(subId, onData)
         }
-
-        // And we also must block original thread
-        // It'll get unblocked once we receive required data
-        // This usually takes +/- 20 ms to complete
-        try {
-            asyncLock.await(100, TimeUnit.MILLISECONDS)
-        } catch (e: InterruptedException) {
-            // System was not able to deliver PhysicalChannelConfig in this time slot
-        }
-
-        listener?.let { telephonyManager.listen(it, PhoneStateListener.LISTEN_NONE) }
-
-        return displayInfo
-    }
-
 
     /**
      * Kotlin friendly PhoneStateListener that grabs [TelephonyDisplayInfo]
