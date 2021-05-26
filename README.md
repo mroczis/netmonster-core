@@ -118,12 +118,14 @@ NetMonsterFactory.get(context).apply {
     
     // Only HSPA+42 (guess, not from RIL)
     val isHspaDc: NetworkType? = getNetworkType(SUBSCRIPTION_ID, DetectorHspaDc())
-    // LTE-A from CellInfo (guess, not from RIL)
-    val isLteCaCellInfo: NetworkType? = getNetworkType(SUBSCRIPTION_ID, DetectorLteAdvancedCellInfo())
+    // LTE-A from CellInfo (guess, not from RIL), NSA NR
+    val isLteCaCellInfo: NetworkType? = getNetworkType(SUBSCRIPTION_ID, DetectorCellInfo())
     // LTE-A from ServiceState (from RIL, Android P+)
     val isLteCaServiceState: NetworkType? = getNetworkType(SUBSCRIPTION_ID, DetectorLteAdvancedNrServiceState())
     // LTE-A from PhysicalChannel (from RIL, Android P+)
     val isLteCaPhysicalChannel: NetworkType? = getNetworkType(SUBSCRIPTION_ID, DetectorLteAdvancedPhysicalChannel())
+    // LTE-A and NR from DisplayInfo (marketing purposes, might result false-positive data, Android R+)
+    val isLteCaOrNsaNrDisplayInfo: NetworkType? = getNetworkType(SUBSCRIPTION_ID, DetectorLteAdvancedNrDisplayInfo())
 }
 ```
 

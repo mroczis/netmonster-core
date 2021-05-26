@@ -3,22 +3,19 @@ package cz.mroczis.netmonster.core.feature.detect
 import android.os.Build
 import cz.mroczis.netmonster.core.SdkTest
 import cz.mroczis.netmonster.core.db.BandTableLte
-import cz.mroczis.netmonster.core.db.BandTableWcdma
 import cz.mroczis.netmonster.core.db.NetworkTypeTable
 import cz.mroczis.netmonster.core.db.model.NetworkType
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.cell.CellLte
-import cz.mroczis.netmonster.core.model.cell.CellWcdma
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.connection.NoneConnection
 import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 import cz.mroczis.netmonster.core.model.signal.SignalLte
-import cz.mroczis.netmonster.core.model.signal.SignalWcdma
 import io.kotlintest.shouldBe
 
-class DetectorLteAdvancedCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
+class DetectorCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
 
-    private val detector = DetectorLteAdvancedCellInfo()
+    private val detector = DetectorCellInfo(detectLteCa = true, detectNrNsa = false)
 
     init {
 

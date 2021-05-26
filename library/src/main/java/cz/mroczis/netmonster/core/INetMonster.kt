@@ -89,7 +89,7 @@ interface INetMonster {
      *  - [DetectorHspaDc] (experimental, works since [Build.VERSION_CODES.N])
      *  - [DetectorLteAdvancedNrServiceState] (stable, works since [Build.VERSION_CODES.P])
      *  - [DetectorLteAdvancedPhysicalChannel] (stable, works since [Build.VERSION_CODES.P])
-     *  - [DetectorLteAdvancedCellInfo] (experimental, works since [Build.VERSION_CODES.N])
+     *  - [DetectorCellInfo] (experimental, works since [Build.VERSION_CODES.N])
      *  - [DetectorAosp] (legacy AOSP)
      *
      * If [detectors] are empty or all of them return null then you'll get also null.

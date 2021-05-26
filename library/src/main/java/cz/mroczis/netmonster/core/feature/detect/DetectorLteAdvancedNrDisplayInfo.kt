@@ -16,6 +16,12 @@ import cz.mroczis.netmonster.core.telephony.ITelephonyManagerCompat
  * Attempts to detect LTE Advanced / LTE Carrier aggregation and NR in NSA mode
  *
  * Based on [TelephonyDisplayInfo]'s contents added in Android R.
+ *
+ * NOTE: This detector relies on [TelephonyDisplayInfo] which means that detected network
+ * types might not be correct since [TelephonyDisplayInfo] returns data in accordance with carrier
+ * policy and branding preferences.
+ *
+ * For more info refer to Android Reference.
  */
 class DetectorLteAdvancedNrDisplayInfo : INetworkDetector {
 

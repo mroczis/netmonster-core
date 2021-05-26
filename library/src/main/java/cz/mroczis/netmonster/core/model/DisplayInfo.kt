@@ -11,6 +11,12 @@ data class DisplayInfo(
     /**
      * Override network type giving more granular information about current connection.
      * Works just for LTE and NR networks.
+     * 
+     * Note that this is so-called marketing network type. If can be adjusted by manufacturer of
+     * carrier to emulate different network type. In most of the cases they intend to
+     * show 5G even when it's not in use, but only deployed on site.
+     * 
+     * Do not use this field as source of truth whilst detecting 5G.
      */
     val overrideNetworkType: NetworkOverrideType = NetworkOverrideType.NONE,
 ) {
