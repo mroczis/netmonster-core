@@ -22,7 +22,13 @@ internal fun CellIdentityNr.mapCell(subId: Int, connection: IConnection, signal:
     val tac = tac.inRangeOrNull(CellNr.TAC_RANGE)
     val pci = pci.inRangeOrNull(CellNr.PCI_RANGE)
     val arfcn = nrarfcn.inRangeOrNull(BandNr.DOWNLINK_EARFCN_RANGE)
-    val band = arfcn?.let { BandTableNr.map(it) }
+    val band = arfcn?.let {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            BandTableNr.map(it, bands)
+        } else {
+            BandTableNr.map(it)
+        }
+    }
 
     return CellNr(
         network = network,

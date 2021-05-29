@@ -56,8 +56,10 @@ object BandTableNr {
         BandEntity(693_334..733_333, "4500", 79)
     )
 
-    internal fun get(arfcn: Int): IBandEntity? {
-        val candidates = bands.filter { it.channelRange.contains(arfcn) }
+    internal fun get(arfcn: Int, bandHints: IntArray = intArrayOf()): IBandEntity? {
+        val candidates = bands
+            .filter { it.channelRange.contains(arfcn) }
+            .filter { bandHints.isEmpty() || (it.number != null && bandHints.contains(it.number)) }
 
         when {
             candidates.isEmpty() -> return null
@@ -123,8 +125,8 @@ object BandTableNr {
      * Attempts to find current band information depending on [arfcn].
      * If no such band is found then result [BandNr] will contain only [BandNr.downlinkArfcn].
      */
-    fun map(arfcn: Int): BandNr {
-        val raw = get(arfcn)
+    fun map(arfcn: Int, bandHints: IntArray = intArrayOf()): BandNr {
+        val raw = get(arfcn, bandHints)
         return BandNr(
             downlinkArfcn = arfcn,
             downlinkFrequency = getFrequency(arfcn),

@@ -47,8 +47,18 @@ class BandTableNrTest : FreeSpec() {
         }
 
         // Arfcn that does not follow 5 MHz blocks alignment
-        "Band 50,51,75,76 overlap - not aligned" {
-            BandTableNr.get(289_962) shouldBe null
+        "Band 50,75,92,94 overlap - not aligned" {
+            BandTableNr.get(289_962).applyNonNull {
+                name shouldBe "1500"
+                number shouldBe null
+            }
+        }
+
+        "Band 50,75,92,94 overlap - not aligned, with hint" {
+            BandTableNr.get(289_962, intArrayOf(75)).applyNonNull {
+                name shouldBe "1500"
+                number shouldBe 75
+            }
         }
     }
 }
