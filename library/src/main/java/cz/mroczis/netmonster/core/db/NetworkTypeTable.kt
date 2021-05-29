@@ -1,6 +1,7 @@
 package cz.mroczis.netmonster.core.db
 
 import cz.mroczis.netmonster.core.db.model.NetworkType
+import cz.mroczis.netmonster.core.model.nr.NrNsaState
 
 /**
  * Mapping between AOSP's constants and ours which are nearly the same
@@ -27,13 +28,13 @@ object NetworkTypeTable {
         put(16, NetworkType.Gsm(NetworkType.GSM))
         put(17, NetworkType.Tdscdma(NetworkType.TD_SCDMA))
         put(18, NetworkType.Lte(NetworkType.IWLAN))
-        put(20, NetworkType.Nr(NetworkType.NR))
+        put(20, NetworkType.Nr.Sa(NetworkType.NR))
 
         // Not in AOSP / not public in AOSP
         put(NetworkType.LTE_CA, NetworkType.Lte(NetworkType.LTE_CA))
         put(NetworkType.HSPA_DC, NetworkType.Wcdma(NetworkType.HSPA_DC))
-        put(NetworkType.LTE_NR, NetworkType.Nr(NetworkType.LTE_NR))
-        put(NetworkType.LTE_CA_NR, NetworkType.Nr(NetworkType.LTE_CA_NR))
+        put(NetworkType.LTE_NR, NetworkType.Nr.Nsa(NetworkType.LTE_NR, NrNsaState()))
+        put(NetworkType.LTE_CA_NR, NetworkType.Nr.Nsa(NetworkType.LTE_CA_NR, NrNsaState()))
     }
 
 

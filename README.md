@@ -125,7 +125,24 @@ NetMonsterFactory.get(context).apply {
     // LTE-A from PhysicalChannel (from RIL, Android P+)
     val isLteCaPhysicalChannel: NetworkType? = getNetworkType(SUBSCRIPTION_ID, DetectorLteAdvancedPhysicalChannel())
     // LTE-A and NR from DisplayInfo (marketing purposes, might result false-positive data, Android R+)
+    // You can also detect only LTE-A or NR using one of classes:
+    // - DetectorLteAdvancedServiceState ... for LTE-A
+    // - DetectorNsaNr ... for NR NSA
     val isLteCaOrNsaNrDisplayInfo: NetworkType? = getNetworkType(SUBSCRIPTION_ID, DetectorLteAdvancedNrDisplayInfo())
+}
+```
+
+##### Detection of NR NSA
+Issue:
+ - AOSP does not provide any information about NR NSA connection status.
+ - The only official available information is in `TelephonyDisplayInfo` which provide inaccurate (marketing-based) data.
+
+Solution:
+ - In order to obtain detailed connection info about NR NSA you need to get `NetworkType` instance.
+```kotlin
+val networkType : NetworkType = NetMonsterFactory.get(context).getNetworkType(SUBSCRIPTION_ID)
+if (networkType is NetworkType.Nr.Nsa) {
+    val state: NrNsaState = networkType.nrNsaState // For more info refer to NrNsaState class
 }
 ```
 

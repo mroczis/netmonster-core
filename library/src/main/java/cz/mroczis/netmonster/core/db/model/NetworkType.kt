@@ -3,6 +3,7 @@ package cz.mroczis.netmonster.core.db.model
 import android.os.Build
 import android.telephony.TelephonyManager
 import cz.mroczis.netmonster.core.model.annotation.SinceSdk
+import cz.mroczis.netmonster.core.model.nr.NrNsaState
 
 sealed class NetworkType {
 
@@ -13,7 +14,10 @@ sealed class NetworkType {
     data class Wcdma internal constructor(@NetworkWcdma override val technology: Int) : NetworkType()
     data class Lte internal constructor(@NetworkLte override val technology: Int) : NetworkType()
     data class Tdscdma internal constructor(@NetworkTdscdma override val technology: Int) : NetworkType()
-    data class Nr internal constructor(@NetworkNr override val technology: Int) : NetworkType()
+    open class Nr private constructor(@NetworkNr override val technology: Int) : NetworkType() {
+        data class Nsa internal constructor(@NetworkNr override val technology: Int, val nrNsaState: NrNsaState) : Nr(technology)
+        data class Sa internal constructor(@NetworkNr override val technology: Int) : Nr(technology)
+    }
     data class Unknown internal constructor(@NetworkUnknown override val technology: Int) : NetworkType()
 
     /**

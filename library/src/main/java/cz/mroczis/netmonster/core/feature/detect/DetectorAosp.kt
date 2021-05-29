@@ -12,7 +12,7 @@ import cz.mroczis.netmonster.core.telephony.ITelephonyManagerCompat
 class DetectorAosp : INetworkDetector {
 
     @RequiresPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
-    override fun detect(netmonster: INetMonster, telephony: ITelephonyManagerCompat): NetworkType? =
+    override fun detect(netmonster: INetMonster, telephony: ITelephonyManagerCompat): NetworkType =
         telephony.getNetworkType()
 
 

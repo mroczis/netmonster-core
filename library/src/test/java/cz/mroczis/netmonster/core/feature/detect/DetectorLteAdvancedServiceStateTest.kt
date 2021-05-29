@@ -4,9 +4,9 @@ import android.os.Build
 import cz.mroczis.netmonster.core.SdkTest
 import io.kotlintest.shouldBe
 
-class DetectorLteAdvancedNrServiceStateTest : SdkTest(Build.VERSION_CODES.N) {
+class DetectorLteAdvancedServiceStateTest : SdkTest(Build.VERSION_CODES.N) {
 
-    private val detector = DetectorLteAdvancedNrServiceState()
+    private val detector = DetectorLteAdvancedServiceState()
 
     companion object {
         private const val PIXEL_2_XL_RESULT =
@@ -24,33 +24,32 @@ class DetectorLteAdvancedNrServiceStateTest : SdkTest(Build.VERSION_CODES.N) {
         //5G available but not connected or UpperLayerIndication
         private const val HUAWEI_MATE20X_5G_RESULT_2 = "{mVoiceRegState=0(IN_SERVICE), mDataRegState=0(IN_SERVICE), mChannelNumber=-1, duplexMode()=0, mCellBandwidths=[], mVoiceRoamingType=home, mDataRoamingType=home, mVoiceOperatorAlphaLong=vodafone IT, mVoiceOperatorAlphaShort=vodafone IT, mDataOperatorAlphaLong=vodafone IT, mDataOperatorAlphaShort=vodafone IT, isManualNetworkSelection=false(automatic), mRilVoiceRadioTechnology=20(NR), mRilDataRadioTechnology=20(NR), mCssIndicator=unsupported, mNetworkId=-1, mSystemId=-1, mCdmaRoamingIndicator=-1, mCdmaDefaultRoamingIndicator=-1, mIsEmergencyOnly=false, mIsDataRoamingFromRegistration=false, mIsUsingCarrierAggregation=false, mLteEarfcnRsrpBoost=0, mNetworkRegistrationStates=[NetworkRegistrationState{transportType=1 domain=PS regState=HOME accessNetworkTechnology=LTE-CA reasonForDenial=-1 emergencyEnabled=false supportedServices=[I@2c074ca cellIdentity=CellIdentityLte:{ mPci=494 mEarfcn=-1 mBandwidth=2147483647 mMcc=222 mMnc=10 mAlphaLong=null mAlphaShort=null} voiceSpecificStates=null dataSpecificStates=DataSpecificRegistrationStates { mMaxDataCalls=1} nsaState=2}, NetworkRegistrationState{transportType=1 domain=CS regState=HOME accessNetworkTechnology=LTE reasonForDenial=0 emergencyEnabled=false supportedServices=[I@dc3763b cellIdentity=CellIdentityLte:{ mPci=-1 mEarfcn=-1 mBandwidth=2147483647 mMcc=222 mMnc=10 mAlphaLong=null mAlphaShort=null} voiceSpecificStates=VoiceSpecificRegistrationStates { mCssSupported=false mRoamingIndicator=0 mSystemIsInPrl=0 mDefaultRoamingIndicator=0} dataSpecificStates=null nsaState=2}]}"
 
-    }
+        }
 
     init {
 
         "Pixel 2 XL result" {
             detector.isUsingCarrierAggregation(PIXEL_2_XL_RESULT) shouldBe true
-            detector.is5gActive(PIXEL_2_XL_RESULT) shouldBe false
         }
 
         "Samsung S10 result" {
             detector.isUsingCarrierAggregation(SAMSUNG_S10_5G_RESULT) shouldBe false
-            detector.is5gActive(SAMSUNG_S10_5G_RESULT) shouldBe true
         }
 
         "LG LTE-A result" {
             detector.isUsingCarrierAggregation(LG_G7_RESULT) shouldBe true
-            detector.is5gActive(LG_G7_RESULT) shouldBe false
         }
 
         "Mate 20X 5G result" {
             detector.isUsingCarrierAggregation(HUAWEI_MATE20X_5G_RESULT) shouldBe true
-            detector.is5gActive(HUAWEI_MATE20X_5G_RESULT) shouldBe true
         }
 
         "Mate 20X 5G result 2" {
             detector.isUsingCarrierAggregation(HUAWEI_MATE20X_5G_RESULT_2) shouldBe true
-            detector.is5gActive(HUAWEI_MATE20X_5G_RESULT_2) shouldBe false
+        }
+
+        "Pixel 5, Android S, NOT_RESTRICTED" {
+            detector.isUsingCarrierAggregation(HUAWEI_MATE20X_5G_RESULT_2) shouldBe true
         }
     }
 

@@ -15,7 +15,7 @@ import io.kotlintest.shouldBe
 
 class DetectorCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
 
-    private val detector = DetectorCellInfo(detectLteCa = true, detectNrNsa = false)
+    private val detector = DetectorLteAdvancedCellInfo()
 
     init {
 
