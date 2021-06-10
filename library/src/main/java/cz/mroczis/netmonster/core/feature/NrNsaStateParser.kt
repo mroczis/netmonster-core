@@ -74,10 +74,10 @@ class NrNsaStateParser {
 
                 // Generally working ~ Android P, Q, R
                 nrState.contains("CONNECTED") -> NrNsaState.Connection.Connected
-                nrState.contains("NOT_RESTRICTED") || dcNrRestricted -> NrNsaState.Connection.Rejected(
+                nrState.contains("NOT_RESTRICTED") -> NrNsaState.Connection.Rejected(
                     NrNsaState.RejectionReason.NOT_RESTRICTED
                 )
-                nrState.contains("RESTRICTED") -> NrNsaState.Connection.Rejected(NrNsaState.RejectionReason.RESTRICTED)
+                nrState.contains("RESTRICTED") || dcNrRestricted -> NrNsaState.Connection.Rejected(NrNsaState.RejectionReason.RESTRICTED)
                 nrState.contains("NONE") -> NrNsaState.Connection.Disconnected
 
                 // When nrState is now masked '****' ~ Android S+
