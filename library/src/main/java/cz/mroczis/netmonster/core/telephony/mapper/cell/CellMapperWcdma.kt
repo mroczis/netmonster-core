@@ -79,7 +79,7 @@ internal fun CellSignalStrengthWcdma.mapSignal(): SignalWcdma {
  * [CellIdentityWcdma] -> [CellWcdma]
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-internal fun CellIdentityWcdma.mapCell(subId: Int, connection: IConnection, signal: SignalWcdma): CellWcdma? {
+internal fun CellIdentityWcdma.mapCell(subId: Int, connection: IConnection, signal: SignalWcdma, timestamp: Long): CellWcdma? {
     val network = mapNetwork()
     val lac = lac.inRangeOrNull(CellWcdma.LAC_RANGE)
     val ci = if (lac == null && cid < 100) {
@@ -111,7 +111,8 @@ internal fun CellIdentityWcdma.mapCell(subId: Int, connection: IConnection, sign
             connectionStatus = connection,
             signal = signal,
             band = band,
-            subscriptionId = subId
+            subscriptionId = subId,
+            timestamp = timestamp
         )
     }
 }
@@ -129,7 +130,7 @@ internal fun CellIdentityWcdma.mapNetwork(): Network? =
     }
 
 @Suppress("DEPRECATION")
-internal fun GsmCellLocation.mapWcdma(subId: Int, signalStrength: SignalStrength?, network: Network?): ICell? {
+internal fun GsmCellLocation.mapWcdma(subId: Int, signalStrength: SignalStrength?, network: Network?, timestamp: Long?): ICell? {
     val cid = cid.inRangeOrNull(CellWcdma.CID_RANGE)
     val lac = lac.inRangeOrNull(CellWcdma.LAC_RANGE)
     val psc = psc.inRangeOrNull(CellWcdma.PSC_RANGE)
@@ -164,7 +165,8 @@ internal fun GsmCellLocation.mapWcdma(subId: Int, signalStrength: SignalStrength
             signal = signal,
             network = network,
             connectionStatus = PrimaryConnection(),
-            subscriptionId = subId
+            subscriptionId = subId,
+            timestamp = timestamp
         )
     } else null
 }

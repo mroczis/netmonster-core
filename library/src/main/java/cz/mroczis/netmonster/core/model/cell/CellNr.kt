@@ -38,7 +38,8 @@ data class CellNr(
     override val band: BandNr?,
     override val signal: SignalNr,
     override val connectionStatus: IConnection,
-    override val subscriptionId: Int
+    override val subscriptionId: Int,
+    override val timestamp: Long? = null
 ) : ICell {
 
     override fun <T> let(processor: ICellProcessor<T>): T = processor.processNr(this)

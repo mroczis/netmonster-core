@@ -15,6 +15,12 @@ fun SignalStrength.toCells(subscriptionId: Int): List<CellNr> =
         val lteSignal = getCellSignalStrengths(CellSignalStrengthLte::class.java)
         val nrSignal = getCellSignalStrengths(CellSignalStrengthNr::class.java)
 
+        val timestamp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            timestampMillis
+        } else {
+            null
+        }
+
         if (lteSignal.isNotEmpty() && nrSignal.isNotEmpty()) {
             // When we have LTE & NR signal then this could be NR in NSA
             val mappedSignal = nrSignal[0].mapSignal()
@@ -26,7 +32,8 @@ fun SignalStrength.toCells(subscriptionId: Int): List<CellNr> =
                 band = null,
                 signal = mappedSignal,
                 connectionStatus = SecondaryConnection(isGuess = false),
-                subscriptionId = subscriptionId
+                subscriptionId = subscriptionId,
+                timestamp = timestamp
             )
 
             listOf(cell)

@@ -11,12 +11,13 @@ import cz.mroczis.netmonster.core.model.cell.CellNr
 import cz.mroczis.netmonster.core.model.connection.IConnection
 import cz.mroczis.netmonster.core.model.signal.SignalNr
 import cz.mroczis.netmonster.core.util.inRangeOrNull
+import java.sql.Timestamp
 
 /**
  * [CellIdentityNr] -> [CellNr]
  */
 @TargetApi(Build.VERSION_CODES.Q)
-internal fun CellIdentityNr.mapCell(subId: Int, connection: IConnection, signal: SignalNr?): CellNr? {
+internal fun CellIdentityNr.mapCell(subId: Int, connection: IConnection, signal: SignalNr?, timestamp: Long): CellNr? {
     val network = Network.map(mccString, mncString)
     val nci = nci.inRangeOrNull(CellNr.CID_RANGE)
     val tac = tac.inRangeOrNull(CellNr.TAC_RANGE)
@@ -38,7 +39,8 @@ internal fun CellIdentityNr.mapCell(subId: Int, connection: IConnection, signal:
         connectionStatus = connection,
         signal = signal ?: SignalNr(),
         band = band,
-        subscriptionId = subId
+        subscriptionId = subId,
+        timestamp = timestamp
     )
 }
 

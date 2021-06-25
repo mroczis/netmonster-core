@@ -40,7 +40,7 @@ class CellMapperWcdmaTest29 : SdkTest(Build.VERSION_CODES.Q) {
     init {
         "Standard WCDMA cell" {
             val cell = mockValidCell().let {
-                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal())
+                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal(), 1624656855654)
             }
 
             cell.applyNonNull {
@@ -69,6 +69,8 @@ class CellMapperWcdmaTest29 : SdkTest(Build.VERSION_CODES.Q) {
                     ecno shouldBe ECNO
                     ecio shouldBe null
                 }
+
+                timestamp shouldBe 1624656855654
             }
         }
 
@@ -78,7 +80,7 @@ class CellMapperWcdmaTest29 : SdkTest(Build.VERSION_CODES.Q) {
             mockValidCell().let {
                 every { it.identity.cid } returns 1
                 every { it.identity.lac } returns 0
-                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal()).letNonNull {
+                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal(), 1624656855654).letNonNull {
                     it.ci shouldBe null
                     it.lac shouldBe null
                     it.psc shouldBe PSC

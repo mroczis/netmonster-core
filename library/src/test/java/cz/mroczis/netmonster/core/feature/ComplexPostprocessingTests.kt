@@ -77,7 +77,8 @@ class ComplexPostprocessingTests : SdkTest(Build.VERSION_CODES.P) {
                         ),
                         bandwidth = null,
                         subscriptionId = 1,
-                        connectionStatus = PrimaryConnection()
+                        connectionStatus = PrimaryConnection(),
+                        timestamp = null
                     )
                 )
 

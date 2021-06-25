@@ -42,7 +42,8 @@ data class CellGsm(
 
     override val signal: SignalGsm,
     override val connectionStatus: IConnection,
-    override val subscriptionId: Int
+    override val subscriptionId: Int,
+    override val timestamp: Long? = null
 ) : ICell {
 
     /**

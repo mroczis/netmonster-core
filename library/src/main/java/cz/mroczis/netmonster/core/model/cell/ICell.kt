@@ -8,7 +8,6 @@ import cz.mroczis.netmonster.core.model.connection.IConnection
 import cz.mroczis.netmonster.core.model.signal.ISignal
 
 interface ICell {
-
     /**
      * Subscription id into which cell is bound to, [Int.MAX_VALUE] if
      * subscriptions are not supported yet
@@ -37,6 +36,11 @@ interface ICell {
      * Generally null for non-serving cells if no postprocessing is done.
      */
     val network: Network?
+
+    /**
+     *  Timestamp of this cell data
+     */
+    val timestamp: Long?
 
     /**
      * Using visitor pattern invokes one method of [processor]

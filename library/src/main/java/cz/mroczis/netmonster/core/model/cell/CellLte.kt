@@ -44,7 +44,8 @@ data class CellLte(
 
     override val signal: SignalLte,
     override val connectionStatus: IConnection,
-    override val subscriptionId: Int
+    override val subscriptionId: Int,
+    override val timestamp: Long? = null
 ) : ICell {
 
     /**
@@ -68,6 +69,7 @@ data class CellLte(
         get() = if (network != null && eci != null) {
             "${network.toPlmn()}${eci.toString().padStart(10, '0')}"
         } else null
+
 
     override fun <T> let(processor: ICellProcessor<T>): T = processor.processLte(this)
 

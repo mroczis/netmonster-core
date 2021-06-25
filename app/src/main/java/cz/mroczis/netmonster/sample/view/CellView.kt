@@ -28,6 +28,7 @@ class CellView @JvmOverloads constructor(
             cell.pci?.let { addView("PCI", it) }
             cell.bandwidth?.let { addView("BW", it) }
 
+            cell.timestamp?.let { addView("Timestamp", it) }
             cell.signal.let { signal ->
                 signal.rssi?.let { addView("RSSI", it) }
                 signal.rsrp?.let { addView("RSRP", it) }

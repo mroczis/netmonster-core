@@ -39,7 +39,7 @@ class CellMapperNrTest29 : SdkTest(Build.VERSION_CODES.Q) {
     init {
         "Standard NR cell" {
             val cell = mockValidCell().let {
-                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal())
+                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal(), 1624656855654)
             }
 
             cell.applyNonNull {
@@ -68,6 +68,8 @@ class CellMapperNrTest29 : SdkTest(Build.VERSION_CODES.Q) {
                     csiRsrpAsu shouldBe CSI_RSRP + 140
                     ssRsrpAsu shouldBe SS_RSRP + 140
                 }
+
+                timestamp shouldBe 1624656855654
             }
         }
     }

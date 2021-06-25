@@ -23,7 +23,7 @@ import kotlin.math.absoluteValue
  * [CellIdentityLte] -> [CellLte]
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-internal fun CellIdentityLte.mapCell(subId: Int, connection: IConnection, signal: SignalLte): CellLte? {
+internal fun CellIdentityLte.mapCell(subId: Int, connection: IConnection, signal: SignalLte, timestamp: Long?): CellLte? {
     val network = mapNetwork()
     val ci = ci.inRangeOrNull(CellLte.CID_RANGE)
     val tac = tac.inRangeOrNull(CellLte.TAC_RANGE)
@@ -50,7 +50,8 @@ internal fun CellIdentityLte.mapCell(subId: Int, connection: IConnection, signal
         connectionStatus = connection,
         signal = signal,
         band = band,
-        subscriptionId = subId
+        subscriptionId = subId,
+        timestamp = timestamp
     )
 }
 
@@ -172,7 +173,7 @@ internal fun CellIdentityLte.mapNetwork(): Network? =
     }
 
 @Suppress("DEPRECATION")
-internal fun GsmCellLocation.mapLte(subId: Int, signalStrength: SignalStrength?, network: Network?): ICell? {
+internal fun GsmCellLocation.mapLte(subId: Int, signalStrength: SignalStrength?, network: Network?, timestamp: Long?): ICell? {
     val ci = cid.inRangeOrNull(CellLte.CID_RANGE)
     val tac = lac.inRangeOrNull(CellLte.TAC_RANGE)
 
@@ -221,7 +222,7 @@ internal fun GsmCellLocation.mapLte(subId: Int, signalStrength: SignalStrength?,
             rsrq = rsrq,
             cqi = cqi,
             snr = snr,
-            timingAdvance = null
+            timingAdvance = null,
         )
     }
 
@@ -235,7 +236,8 @@ internal fun GsmCellLocation.mapLte(subId: Int, signalStrength: SignalStrength?,
             bandwidth = null,
             signal = signal,
             connectionStatus = PrimaryConnection(),
-            subscriptionId = subId
+            subscriptionId = subId,
+            timestamp = timestamp
         )
     } else null
 }
