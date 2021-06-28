@@ -42,7 +42,7 @@ class DetectorLteAdvancedServiceState : INetworkDetector {
      */
     @VisibleForTesting
     internal fun isUsingCarrierAggregation(serviceState: String) =
-        ((serviceState.contains("IsUsingCarrierAggregation ?= ?true".toRegex()) ||
+        ((serviceState.contains("[mI|i]sUsingCarrierAggregation ?= ?true".toRegex()) ||
                 serviceState.contains("accessNetworkTechnology=LTE-CA") ||
                 serviceState.contains("AdvanceMode1")) &&
                 serviceState.contains("cellIdentity=CellIdentityLte"))

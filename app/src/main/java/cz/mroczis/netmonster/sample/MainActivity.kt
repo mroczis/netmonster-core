@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -23,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         private const val REFRESH_RATIO = 5_000L
     }
 
-    private val handler = Handler()
+    private val handler = Handler(Looper.getMainLooper())
     private val adapter = MainAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {

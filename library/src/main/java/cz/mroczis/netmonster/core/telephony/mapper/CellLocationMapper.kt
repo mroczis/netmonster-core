@@ -95,10 +95,10 @@ class CellLocationMapper(
             model.mapWcdma(subId, signalStrength, plmn, timestamp)
         } else if (CellGsm.CID_RANGE.contains(cid) && (!CellWcdma.PSC_RANGE.contains(model.psc) || network is NetworkType.Gsm)) {
             model.mapGsm(subId, signalStrength, plmn, timestamp)
+        } else if (network is NetworkType.Lte || model.psc == 0) {
+            model.mapLte(subId, signalStrength, plmn, timestamp)
         } else if (network is NetworkType.Wcdma || CellWcdma.PSC_RANGE.contains(model.psc)) {
             model.mapWcdma(subId, signalStrength, plmn, timestamp)
-        } else if (network is NetworkType.Lte) {
-            model.mapLte(subId, signalStrength, plmn, timestamp)
         } else {
             null
         }
