@@ -52,23 +52,17 @@ class CellLocationMapper(
     override fun map(model: Int): List<ICell> {
         val scanResult = getUpdatedLocationAndSignal(model)
 
-        val timestamp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            scanResult.signal?.timestampMillis
-        } else {
-            null
-        }
-
         return mutableListOf<ICell>().apply {
             if (scanResult.location is GsmCellLocation) {
-                map(scanResult.location, scanResult.signal, model, timestamp)?.let { add(it) }
+                map(scanResult.location, scanResult.signal, model)?.let { add(it) }
             } else if (scanResult.location is CdmaCellLocation) {
-                scanResult.location.mapCdma(model, scanResult.signal, timestamp)?.let { add(it) }
+                scanResult.location.mapCdma(model, scanResult.signal)?.let { add(it) }
             }
         }
     }
 
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE])
-    private fun map(model: GsmCellLocation, signalStrength: SignalStrength?, subId: Int, timestamp: Long?): ICell? {
+    private fun map(model: GsmCellLocation, signalStrength: SignalStrength?, subId: Int): ICell? {
         val network = NetworkTypeTable.get(telephony.networkType)
         val cid = model.cid
         val plmn = getNetworkOperator.invoke()
@@ -90,15 +84,15 @@ class CellLocationMapper(
         }
 
         return if (rsrp != null && network is NetworkType.Lte && !CellGsm.CID_RANGE.contains(cid)) {
-            model.mapLte(subId, signalStrength, plmn, timestamp)
+            model.mapLte(subId, signalStrength, plmn)
         } else if (SignalWcdma.RSCP_RANGE.contains(wcdma) && network is NetworkType.Wcdma) {
-            model.mapWcdma(subId, signalStrength, plmn, timestamp)
+            model.mapWcdma(subId, signalStrength, plmn)
         } else if (CellGsm.CID_RANGE.contains(cid) && (!CellWcdma.PSC_RANGE.contains(model.psc) || network is NetworkType.Gsm)) {
-            model.mapGsm(subId, signalStrength, plmn, timestamp)
+            model.mapGsm(subId, signalStrength, plmn)
         } else if (network is NetworkType.Lte || model.psc == 0) {
-            model.mapLte(subId, signalStrength, plmn, timestamp)
+            model.mapLte(subId, signalStrength, plmn)
         } else if (network is NetworkType.Wcdma || CellWcdma.PSC_RANGE.contains(model.psc)) {
-            model.mapWcdma(subId, signalStrength, plmn, timestamp)
+            model.mapWcdma(subId, signalStrength, plmn)
         } else {
             null
         }

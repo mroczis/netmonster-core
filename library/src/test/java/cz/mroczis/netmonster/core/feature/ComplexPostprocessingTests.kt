@@ -97,7 +97,8 @@ class ComplexPostprocessingTests : SdkTest(Build.VERSION_CODES.P) {
                             rscp = null
                         ),
                         subscriptionId = 2,
-                        connectionStatus = PrimaryConnection()
+                        connectionStatus = PrimaryConnection(),
+                        timestamp = null,
                     )
                 )
 
@@ -116,7 +117,8 @@ class ComplexPostprocessingTests : SdkTest(Build.VERSION_CODES.P) {
                             rscp = null
                         ),
                         subscriptionId = 2,
-                        connectionStatus = NoneConnection()
+                        connectionStatus = NoneConnection(),
+                        timestamp = null,
                     )
                 )
 
@@ -144,7 +146,8 @@ class ComplexPostprocessingTests : SdkTest(Build.VERSION_CODES.P) {
                             timingAdvance = null
                         ),
                         subscriptionId = 1,
-                        connectionStatus = PrimaryConnection()
+                        connectionStatus = PrimaryConnection(),
+                        timestamp = null,
                     )
                 )
 
@@ -161,7 +164,8 @@ class ComplexPostprocessingTests : SdkTest(Build.VERSION_CODES.P) {
                             timingAdvance = null
                         ),
                         subscriptionId = 1,
-                        connectionStatus = NoneConnection()
+                        connectionStatus = NoneConnection(),
+                        timestamp = null,
                     )
                 )
 
@@ -182,7 +186,8 @@ class ComplexPostprocessingTests : SdkTest(Build.VERSION_CODES.P) {
                         ),
                         bandwidth = null,
                         subscriptionId = 3,
-                        connectionStatus = PrimaryConnection()
+                        connectionStatus = PrimaryConnection(),
+                        timestamp = null,
                     )
                 )
 
@@ -203,7 +208,8 @@ class ComplexPostprocessingTests : SdkTest(Build.VERSION_CODES.P) {
                         ),
                         bandwidth = null,
                         subscriptionId = 3,
-                        connectionStatus = NoneConnection()
+                        connectionStatus = NoneConnection(),
+                        timestamp = null,
                     )
                 )
 
@@ -220,7 +226,8 @@ class ComplexPostprocessingTests : SdkTest(Build.VERSION_CODES.P) {
                             timingAdvance = null
                         ),
                         subscriptionId = 3,
-                        connectionStatus = NoneConnection()
+                        connectionStatus = NoneConnection(),
+                        timestamp = null,
                     )
                 )
             }

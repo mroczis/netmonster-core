@@ -25,7 +25,8 @@ class CdmaPlmnPostProcessorTest : FreeSpec({
         bandwidth = null,
         signal = SignalLte(-51, -87.0, null, null, null, null),
         connectionStatus = PrimaryConnection(),
-        subscriptionId = 0
+        subscriptionId = 0,
+        timestamp = null,
     )
 
     val lte23001neighbour = CellLte(
@@ -37,7 +38,8 @@ class CdmaPlmnPostProcessorTest : FreeSpec({
         bandwidth = null,
         signal = SignalLte(-51, -87.0, null, null, null, null),
         connectionStatus = NoneConnection(),
-        subscriptionId = 0
+        subscriptionId = 0,
+        timestamp = null,
     )
 
     val lte23011 = CellLte(
@@ -49,7 +51,8 @@ class CdmaPlmnPostProcessorTest : FreeSpec({
         bandwidth = null,
         signal = SignalLte(-51, -87.0, null, null, null, null),
         connectionStatus = PrimaryConnection(),
-        subscriptionId = 0
+        subscriptionId = 0,
+        timestamp = null,
     )
 
     val cdmaWithoutPlmn = CellCdma(
@@ -61,7 +64,8 @@ class CdmaPlmnPostProcessorTest : FreeSpec({
         lon = 2.0,
         signal = SignalCdma(null, null, null, null, null),
         connectionStatus = PrimaryConnection(),
-        subscriptionId = 0
+        subscriptionId = 0,
+        timestamp = null,
     )
 
     val cdmaWithPlmn = cdmaWithoutPlmn.copy(network = plmn)

@@ -28,7 +28,8 @@ class DetectorHspaDcTest : SdkTest(Build.VERSION_CODES.N) {
                 band = BandTableWcdma.map(10_838),
                 signal = SignalWcdma(null, null, null, null, null),
                 connectionStatus = PrimaryConnection(),
-                subscriptionId = 0
+                subscriptionId = 0,
+                timestamp = null,
             )
 
             val secondary = CellWcdma(
@@ -39,7 +40,8 @@ class DetectorHspaDcTest : SdkTest(Build.VERSION_CODES.N) {
                 band = BandTableWcdma.map(10_588),
                 signal = SignalWcdma(null, null, null, null, null),
                 connectionStatus = NoneConnection(),
-                subscriptionId = 0
+                subscriptionId = 0,
+                timestamp = null,
             )
 
             val cells = mutableListOf<ICell>().apply {
@@ -61,7 +63,8 @@ class DetectorHspaDcTest : SdkTest(Build.VERSION_CODES.N) {
                 band = BandTableWcdma.map(2_937),
                 signal = SignalWcdma(null, null, null, null, null),
                 connectionStatus = PrimaryConnection(),
-                subscriptionId = 0
+                subscriptionId = 0,
+                timestamp = null,
             )
 
             val secondary = CellWcdma(
@@ -72,7 +75,8 @@ class DetectorHspaDcTest : SdkTest(Build.VERSION_CODES.N) {
                 band = BandTableWcdma.map(10_588),
                 signal = SignalWcdma(null, null, null, null, null),
                 connectionStatus = NoneConnection(),
-                subscriptionId = 0
+                subscriptionId = 0,
+                timestamp = null,
             )
 
             val cells = mutableListOf<ICell>().apply {
@@ -93,7 +97,8 @@ class DetectorHspaDcTest : SdkTest(Build.VERSION_CODES.N) {
                 band = BandTableWcdma.map(2_937),
                 signal = SignalWcdma(null, null, null, null, null),
                 connectionStatus = PrimaryConnection(),
-                subscriptionId = 0
+                subscriptionId = 0,
+                timestamp = null,
             )
 
             val secondary = primary.copy(

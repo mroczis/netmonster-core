@@ -26,7 +26,8 @@ class PrimaryCellPostprocessorTest : FreeSpec({
                 bandwidth = null,
                 signal = SignalLte(-51, -87.0, null, null, null, null),
                 connectionStatus = NoneConnection(),
-                subscriptionId = 0
+                subscriptionId = 0,
+                timestamp = null,
             ))
 
             add(CellLte(
@@ -38,7 +39,8 @@ class PrimaryCellPostprocessorTest : FreeSpec({
                 bandwidth = null,
                 signal = SignalLte(-63, -101.0, null, null, null, null),
                 connectionStatus = NoneConnection(),
-                subscriptionId = 0
+                subscriptionId = 0,
+                timestamp = null,
             ))
         }
 
@@ -58,7 +60,8 @@ class PrimaryCellPostprocessorTest : FreeSpec({
                 band = null,
                 signal = SignalWcdma(-51, null, null, null, null),
                 connectionStatus = NoneConnection(),
-                subscriptionId = 0
+                subscriptionId = 0,
+                timestamp = null,
             ))
 
             add(CellWcdma(
@@ -69,7 +72,8 @@ class PrimaryCellPostprocessorTest : FreeSpec({
                 band = null,
                 signal = SignalWcdma(-51, null, null, null, null),
                 connectionStatus = NoneConnection(),
-                subscriptionId = 0
+                subscriptionId = 0,
+                timestamp = null,
             ))
         }
 

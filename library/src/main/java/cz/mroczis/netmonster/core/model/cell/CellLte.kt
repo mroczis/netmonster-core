@@ -2,6 +2,7 @@ package cz.mroczis.netmonster.core.model.cell
 
 import android.os.Build
 import androidx.annotation.IntRange
+import cz.mroczis.netmonster.core.Milliseconds
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.annotation.SinceSdk
 import cz.mroczis.netmonster.core.model.band.BandLte
@@ -45,7 +46,7 @@ data class CellLte(
     override val signal: SignalLte,
     override val connectionStatus: IConnection,
     override val subscriptionId: Int,
-    override val timestamp: Long? = null
+    override val timestamp: Milliseconds?,
 ) : ICell {
 
     /**

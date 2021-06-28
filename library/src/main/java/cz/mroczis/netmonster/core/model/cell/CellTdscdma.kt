@@ -1,6 +1,7 @@
 package cz.mroczis.netmonster.core.model.cell
 
 import android.os.Build
+import cz.mroczis.netmonster.core.Milliseconds
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.annotation.SinceSdk
 import cz.mroczis.netmonster.core.model.band.BandTdscdma
@@ -12,7 +13,6 @@ import cz.mroczis.netmonster.core.model.cell.CellTdscdma.Companion.LAC_MAX
 import cz.mroczis.netmonster.core.model.cell.CellTdscdma.Companion.LAC_MIN
 import cz.mroczis.netmonster.core.model.connection.IConnection
 import cz.mroczis.netmonster.core.model.signal.SignalTdscdma
-import java.sql.Timestamp
 
 @SinceSdk(Build.VERSION_CODES.Q)
 data class CellTdscdma(
@@ -42,7 +42,7 @@ data class CellTdscdma(
     override val signal: SignalTdscdma,
     override val connectionStatus: IConnection,
     override val subscriptionId: Int,
-    override val timestamp: Long? = null,
+    override val timestamp: Milliseconds?,
 ) : ICell {
 
     /**

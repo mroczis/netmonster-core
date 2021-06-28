@@ -61,7 +61,7 @@ internal fun CellIdentityCdma.mapCell(subId: Int, connection: IConnection, signa
 }
 
 @Suppress("DEPRECATION")
-internal fun CdmaCellLocation.mapCdma(subId: Int, signal: SignalStrength?, timestamp: Long?): ICell? {
+internal fun CdmaCellLocation.mapCdma(subId: Int, signal: SignalStrength?): ICell? {
     val bid = baseStationId.inRangeOrNull(CellCdma.BID_RANGE)
     val nid = networkId.inRangeOrNull(CellCdma.NID_RANGE)
     val sid = systemId.inRangeOrNull(CellCdma.SID_RANGE)
@@ -91,7 +91,7 @@ internal fun CdmaCellLocation.mapCdma(subId: Int, signal: SignalStrength?, times
             ),
             connectionStatus = PrimaryConnection(),
             subscriptionId = subId,
-            timestamp = timestamp
+            timestamp = null,
         )
     } else null
 }

@@ -40,7 +40,8 @@ class ComplexPostprocessingTests29 : SdkTest(Build.VERSION_CODES.Q) {
                             timingAdvance = null
                         ),
                         subscriptionId = 1,
-                        connectionStatus = PrimaryConnection()
+                        connectionStatus = PrimaryConnection(),
+                        timestamp = null,
                     )
                 )
 
@@ -57,7 +58,8 @@ class ComplexPostprocessingTests29 : SdkTest(Build.VERSION_CODES.Q) {
                             timingAdvance = null
                         ),
                         subscriptionId = 1,
-                        connectionStatus = NoneConnection()
+                        connectionStatus = NoneConnection(),
+                        timestamp = null,
                     )
                 )
 
@@ -78,7 +80,8 @@ class ComplexPostprocessingTests29 : SdkTest(Build.VERSION_CODES.Q) {
                         ),
                         bandwidth = null,
                         subscriptionId = 3,
-                        connectionStatus = PrimaryConnection()
+                        connectionStatus = PrimaryConnection(),
+                        timestamp = null,
                     )
                 )
 
@@ -99,7 +102,8 @@ class ComplexPostprocessingTests29 : SdkTest(Build.VERSION_CODES.Q) {
                         ),
                         bandwidth = null,
                         subscriptionId = 3,
-                        connectionStatus = NoneConnection()
+                        connectionStatus = NoneConnection(),
+                        timestamp = null,
                     )
                 )
 
@@ -116,7 +120,8 @@ class ComplexPostprocessingTests29 : SdkTest(Build.VERSION_CODES.Q) {
                             timingAdvance = null
                         ),
                         subscriptionId = 3,
-                        connectionStatus = NoneConnection()
+                        connectionStatus = NoneConnection(),
+                        timestamp = null,
                     )
                 )
             }

@@ -173,7 +173,7 @@ internal fun CellIdentityLte.mapNetwork(): Network? =
     }
 
 @Suppress("DEPRECATION")
-internal fun GsmCellLocation.mapLte(subId: Int, signalStrength: SignalStrength?, network: Network?, timestamp: Long?): ICell? {
+internal fun GsmCellLocation.mapLte(subId: Int, signalStrength: SignalStrength?, network: Network?): ICell? {
     val ci = cid.inRangeOrNull(CellLte.CID_RANGE)
     val tac = lac.inRangeOrNull(CellLte.TAC_RANGE)
 
@@ -237,7 +237,7 @@ internal fun GsmCellLocation.mapLte(subId: Int, signalStrength: SignalStrength?,
             signal = signal,
             connectionStatus = PrimaryConnection(),
             subscriptionId = subId,
-            timestamp = timestamp
+            timestamp = null,
         )
     } else null
 }

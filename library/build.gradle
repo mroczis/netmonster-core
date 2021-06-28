@@ -37,7 +37,7 @@ dependencies {
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.4.0'
-    testImplementation 'io.mockk:mockk:1.9.3'
+    testImplementation 'io.mockk:mockk:1.11.0'
 
     androidTestImplementation 'androidx.test:runner:1.3.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'

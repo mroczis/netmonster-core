@@ -27,7 +27,8 @@ class PlmnPostprocessorTest : FreeSpec({
                     bandwidth = null,
                     signal = SignalLte(-51, -87.0, null, null, null, null),
                     connectionStatus = NoneConnection(),
-                    subscriptionId = 0
+                    subscriptionId = 0,
+                    timestamp = null,
                 )
             )
 
@@ -41,7 +42,8 @@ class PlmnPostprocessorTest : FreeSpec({
                     bandwidth = null,
                     signal = SignalLte(-63, -101.0, null, null, null, null),
                     connectionStatus = NoneConnection(),
-                    subscriptionId = 0
+                    subscriptionId = 0,
+                    timestamp = null,
                 )
             )
         }
@@ -67,7 +69,8 @@ class PlmnPostprocessorTest : FreeSpec({
                     band = null,
                     signal = SignalGsm(-51, null, null),
                     connectionStatus = PrimaryConnection(),
-                    subscriptionId = 0
+                    subscriptionId = 0,
+                    timestamp = null,
                 )
             )
 
@@ -80,7 +83,8 @@ class PlmnPostprocessorTest : FreeSpec({
                     band = null,
                     signal = SignalGsm(-51, null, null),
                     connectionStatus = PrimaryConnection(),
-                    subscriptionId = 0
+                    subscriptionId = 0,
+                    timestamp = null,
                 )
             )
 
@@ -94,7 +98,8 @@ class PlmnPostprocessorTest : FreeSpec({
                     band = null,
                     signal = SignalGsm(-51, null, null),
                     connectionStatus = NoneConnection(),
-                    subscriptionId = 0
+                    subscriptionId = 0,
+                    timestamp = null,
                 )
             )
 
@@ -107,7 +112,8 @@ class PlmnPostprocessorTest : FreeSpec({
                     band = null,
                     signal = SignalGsm(-51, null, null),
                     connectionStatus = NoneConnection(),
-                    subscriptionId = 0
+                    subscriptionId = 0,
+                    timestamp = null,
                 )
             )
         }

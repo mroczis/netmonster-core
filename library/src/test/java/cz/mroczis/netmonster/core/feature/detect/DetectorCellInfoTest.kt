@@ -29,7 +29,8 @@ class DetectorCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 bandwidth = 10_000,
                 signal = SignalLte(null, null, null, null, null, null),
                 connectionStatus = PrimaryConnection(),
-                subscriptionId = 0
+                subscriptionId = 0,
+                timestamp = null,
             )
 
             val secondary = primary.copy(
@@ -58,7 +59,8 @@ class DetectorCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 bandwidth = 10_000,
                 signal = SignalLte(null, null, null, null, null, null),
                 connectionStatus = PrimaryConnection(),
-                subscriptionId = 0
+                subscriptionId = 0,
+                timestamp = null,
             )
 
             val secondary = primary.copy(
@@ -89,7 +91,8 @@ class DetectorCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 bandwidth = 10_000,
                 signal = SignalLte(null, null, null, null, null, null),
                 connectionStatus = PrimaryConnection(),
-                subscriptionId = 0
+                subscriptionId = 0,
+                timestamp = null,
             )
 
             val secondary = primary.copy(
@@ -99,7 +102,7 @@ class DetectorCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 band = BandTableLte.map(1_849),
                 bandwidth = 15_000,
                 connectionStatus = NoneConnection(),
-                subscriptionId = 0
+                subscriptionId = 0,
             )
 
             val cells = mutableListOf<ICell>().apply {
@@ -120,7 +123,8 @@ class DetectorCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 bandwidth = 10_000,
                 signal = SignalLte(null, null, null, null, null, null),
                 connectionStatus = PrimaryConnection(),
-                subscriptionId = 0
+                subscriptionId = 0,
+                timestamp = null,
             )
 
             // Classic in Android N+
@@ -130,7 +134,7 @@ class DetectorCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 pci = 2,
                 band = BandTableLte.map(1_849),
                 bandwidth = 15_000,
-                connectionStatus = NoneConnection()
+                connectionStatus = NoneConnection(),
             )
 
             // Classic in Android M
@@ -162,7 +166,8 @@ class DetectorCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 bandwidth = 10_000,
                 signal = SignalLte(null, null, null, null, null, null),
                 connectionStatus = PrimaryConnection(),
-                subscriptionId = 0
+                subscriptionId = 0,
+                timestamp = null,
             )
 
             val secondary = primary.copy(

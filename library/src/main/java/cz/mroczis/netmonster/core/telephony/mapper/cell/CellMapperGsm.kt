@@ -18,7 +18,6 @@ import cz.mroczis.netmonster.core.model.signal.SignalGsm
 import cz.mroczis.netmonster.core.util.Reflection
 import cz.mroczis.netmonster.core.util.getGsmRssi
 import cz.mroczis.netmonster.core.util.inRangeOrNull
-import java.sql.Timestamp
 
 /**
  * [CellSignalStrengthGsm] -> [SignalGsm]
@@ -112,7 +111,7 @@ internal fun CellIdentityGsm.mapCell(
             } else signal,
             band = band,
             subscriptionId = subId,
-            timestamp = timestamp
+            timestamp = timestamp,
         )
     } else null
 }
@@ -134,7 +133,6 @@ internal fun GsmCellLocation.mapGsm(
     subId: Int,
     signalStrength: SignalStrength?,
     network: Network?,
-    timestamp: Long?
 ): ICell? {
     val cid = cid.inRangeOrNull(CellGsm.CID_RANGE)
     val lac = lac.inRangeOrNull(CellGsm.LAC_RANGE)
@@ -176,7 +174,7 @@ internal fun GsmCellLocation.mapGsm(
             network = network,
             connectionStatus = PrimaryConnection(),
             subscriptionId = subId,
-            timestamp = timestamp
+            timestamp = null,
         )
     } else null
 }

@@ -26,7 +26,8 @@ class SignalStrengthPostprocessorTest : SdkTest(Build.VERSION_CODES.Q){
                     band = BandTableWcdma.map(2_937),
                     signal = SignalWcdma(-79, null, null, null, null),
                     connectionStatus = PrimaryConnection(),
-                    subscriptionId = 0
+                    subscriptionId = 0,
+                    timestamp = null,
                 )
             )
 
@@ -38,7 +39,8 @@ class SignalStrengthPostprocessorTest : SdkTest(Build.VERSION_CODES.Q){
                 band = null,
                 signal = SignalWcdma(-81, null, -4, -92, null),
                 connectionStatus = PrimaryConnection(),
-                subscriptionId = 0
+                subscriptionId = 0,
+                timestamp = null,
             )
 
             val result = SignalStrengthPostprocessor {

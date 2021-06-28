@@ -119,7 +119,8 @@ class NrNsaStateParserTest : SdkTest(Build.VERSION_CODES.P) {
                         bandwidth = 10_000,
                         signal = SignalLte(null, null, null, null, null, null),
                         connectionStatus = PrimaryConnection(),
-                        subscriptionId = 1
+                        subscriptionId = 1,
+                        timestamp = null,
                     ),
                     CellNr(
                         network = null,
@@ -129,7 +130,8 @@ class NrNsaStateParserTest : SdkTest(Build.VERSION_CODES.P) {
                         band = null,
                         signal = SignalNr(),
                         connectionStatus = SecondaryConnection(false),
-                        subscriptionId = 1
+                        subscriptionId = 1,
+                        timestamp = null,
                     )
                 )
             ) shouldBe NrNsaState(
@@ -153,7 +155,8 @@ class NrNsaStateParserTest : SdkTest(Build.VERSION_CODES.P) {
                         bandwidth = 10_000,
                         signal = SignalLte(null, null, null, null, null, null),
                         connectionStatus = PrimaryConnection(),
-                        subscriptionId = 1
+                        subscriptionId = 1,
+                        timestamp = null,
                     ),
                     CellNr(
                         network = null,
@@ -163,7 +166,8 @@ class NrNsaStateParserTest : SdkTest(Build.VERSION_CODES.P) {
                         band = null,
                         signal = SignalNr(),
                         connectionStatus = SecondaryConnection(false),
-                        subscriptionId = 1
+                        subscriptionId = 1,
+                        timestamp = null,
                     )
                 )
             ) shouldBe NrNsaState(
