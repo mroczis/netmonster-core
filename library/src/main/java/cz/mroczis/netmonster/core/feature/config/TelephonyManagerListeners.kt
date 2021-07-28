@@ -77,6 +77,7 @@ internal fun <T> TelephonyManager.requestSingleUpdate(
             listen(it, PhoneStateListener.LISTEN_NONE)
         }
     }
+    listen(listener, PhoneStateListener.LISTEN_NONE)
 
     return result
 }
