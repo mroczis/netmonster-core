@@ -93,7 +93,7 @@ data class SignalWcdma(
         const val ECNO_MAX = 1L
         const val ECNO_MIN = -23L
 
-        const val RSCP_MAX = -24L
+        const val RSCP_MAX = -25L
         const val RSCP_MIN = -119L
 
         const val ECIO_MAX = 0L

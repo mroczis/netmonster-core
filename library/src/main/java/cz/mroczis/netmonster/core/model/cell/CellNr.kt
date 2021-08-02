@@ -47,11 +47,17 @@ data class CellNr(
 
     companion object {
 
-        const val CID_MIN = 0L
+        /**
+         * Correct min CID value is 0. Some Samsung phones use it as N/A value.
+         */
+        const val CID_MIN = 1L
         const val CID_MAX = 68_719_476_735L
 
 
-        const val TAC_MIN = 0L
+        /**
+         * Correct min TAC value is 0. Some Samsung phones use it as N/A value.
+         */
+        const val TAC_MIN = 1L
         const val TAC_MAX = 16_777_215L
 
         const val PCI_MIN = 0L

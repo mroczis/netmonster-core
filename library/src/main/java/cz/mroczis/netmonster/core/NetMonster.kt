@@ -35,6 +35,7 @@ internal class NetMonster(
      */
     @SuppressLint("MissingPermission")
     private val postprocessors = mutableListOf<ICellPostprocessor>().apply {
+        add(SamsungInvalidValuesPostprocessor())
         add(MocnNetworkPostprocessor(subscription) { subId ->
             getTelephony(subId).getNetworkOperator()
         }) // fix PLMNs
