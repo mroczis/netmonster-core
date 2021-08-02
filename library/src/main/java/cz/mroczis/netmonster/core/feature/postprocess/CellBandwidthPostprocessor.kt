@@ -16,17 +16,15 @@ class CellBandwidthPostprocessor(
 ) : ICellPostprocessor {
 
     override fun postprocess(list: List<ICell>): List<ICell> =
-        list.toMutableList().map {cell ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                if (cell is CellLte && cell.connectionStatus is PrimaryConnection) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            list.map { cell ->
+                if (cell is CellLte && cell.connectionStatus is PrimaryConnection && cell.bandwidth == null) {
                     serviceStateGetter.invoke(cell.subscriptionId)?.let { serviceState ->
                         cell.copy(bandwidth = serviceState.cellBandwidths.firstOrNull())
                     } ?: cell
-                } else {
-                    cell
-                }
-            } else {
-                cell
+                } else cell
             }
+        } else {
+            list
         }
 }
