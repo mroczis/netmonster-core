@@ -43,6 +43,11 @@ internal fun <T> TelephonyManager.requestSingleUpdate(
     var listener: PhoneStateListener? = null
     var result: T? = null
 
+    if (simState == TelephonyManager.SIM_STATE_ABSENT) {
+        // When SIM is missing then all calls will timeout, so there's no need to even try
+        return null
+    }
+
     Threads.phoneStateListener.post {
         // We'll receive callbacks on thread that created instance of [listener] by default.
         // Async processing is required otherwise deadlock would arise cause we block
@@ -78,5 +83,6 @@ internal fun <T> TelephonyManager.requestSingleUpdate(
         }
     }
 
+    Log.d("Mon", "EN-$event")
     return result
 }
