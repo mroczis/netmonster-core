@@ -7,6 +7,7 @@ import android.telephony.PhoneStateListener
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
+import cz.mroczis.netmonster.core.cache.TelephonyCache
 import cz.mroczis.netmonster.core.model.DisplayInfo
 import cz.mroczis.netmonster.core.telephony.mapper.toDisplayInfo
 import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
@@ -32,8 +33,10 @@ class DisplayInfoSource {
 
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     private fun getFresh(telephonyManager: TelephonyManager, subId: Int?): TelephonyDisplayInfo? =
-        telephonyManager.requestSingleUpdate<TelephonyDisplayInfo>(PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED) { onData ->
-            DisplayInfoListener(subId, onData)
+        TelephonyCache.getOrUpdate(subId, PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED) {
+            telephonyManager.requestSingleUpdate<TelephonyDisplayInfo>(PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED) { onData ->
+                DisplayInfoListener(subId, onData)
+            }
         }
 
     /**

@@ -2,11 +2,9 @@ package cz.mroczis.netmonster.core.feature.config
 
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
-import android.util.Log
 import androidx.annotation.AnyThread
 import cz.mroczis.netmonster.core.util.Threads
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.*
 
 /**
  * Represents method that is invoked when new data are available.
@@ -83,6 +81,5 @@ internal fun <T> TelephonyManager.requestSingleUpdate(
         }
     }
 
-    Log.d("Mon", "EN-$event")
     return result
 }

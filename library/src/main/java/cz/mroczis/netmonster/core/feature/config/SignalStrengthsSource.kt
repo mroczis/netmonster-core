@@ -5,6 +5,7 @@ import android.telephony.PhoneStateListener
 import android.telephony.ServiceState
 import android.telephony.SignalStrength
 import android.telephony.TelephonyManager
+import cz.mroczis.netmonster.core.cache.TelephonyCache
 import cz.mroczis.netmonster.core.feature.config.SignalStrengthsSource.SignalStrengthsListener
 import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
 
@@ -26,8 +27,10 @@ class SignalStrengthsSource {
         getFresh(telephonyManager, subId) ?: getCached(telephonyManager)
 
     private fun getFresh(telephonyManager: TelephonyManager, subId: Int?): SignalStrength? =
-        telephonyManager.requestSingleUpdate<SignalStrength>(PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) { onData ->
-            SignalStrengthsListener(subId, onData)
+        TelephonyCache.getOrUpdate(subId, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) {
+            telephonyManager.requestSingleUpdate<SignalStrength>(PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) { onData ->
+                SignalStrengthsListener(subId, onData)
+            }
         }
 
     /**

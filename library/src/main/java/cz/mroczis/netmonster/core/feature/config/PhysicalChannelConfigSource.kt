@@ -2,6 +2,7 @@ package cz.mroczis.netmonster.core.feature.config
 
 import android.os.Build
 import android.telephony.TelephonyManager
+import cz.mroczis.netmonster.core.cache.TelephonyCache
 import cz.mroczis.netmonster.core.feature.config.PhysicalChannelConfigSource.PhysicalChannelListener
 import cz.mroczis.netmonster.core.model.config.PhysicalChannelConfig
 import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
@@ -26,8 +27,12 @@ class PhysicalChannelConfigSource {
      */
     fun get(telephonyManager: TelephonyManager, subId: Int): List<PhysicalChannelConfig> =
         if (Build.VERSION.SDK_INT in Build.VERSION_CODES.P..Build.VERSION_CODES.Q) {
-            telephonyManager.requestSingleUpdate<List<PhysicalChannelConfig>>(LISTEN_PHYSICAL_CHANNEL_CONFIGURATION) { onData ->
-                PhysicalChannelListener(subId, onData)
+            TelephonyCache.getOrUpdate(subId, LISTEN_PHYSICAL_CHANNEL_CONFIGURATION) {
+                telephonyManager.requestSingleUpdate<List<PhysicalChannelConfig>>(
+                    LISTEN_PHYSICAL_CHANNEL_CONFIGURATION
+                ) { onData ->
+                    PhysicalChannelListener(subId, onData)
+                }
             } ?: emptyList()
         } else {
             emptyList()

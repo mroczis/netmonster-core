@@ -6,6 +6,7 @@ import android.telephony.PhoneStateListener
 import android.telephony.ServiceState
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
+import cz.mroczis.netmonster.core.cache.TelephonyCache
 import cz.mroczis.netmonster.core.feature.config.ServiceStateSource.ServiceStateListener
 import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
 
@@ -35,8 +36,10 @@ class ServiceStateSource {
         }
 
     private fun getPreOreo(telephonyManager: TelephonyManager, subId: Int): ServiceState? =
-        telephonyManager.requestSingleUpdate<ServiceState>(PhoneStateListener.LISTEN_SERVICE_STATE) { onData ->
-            ServiceStateListener(subId, onData)
+        TelephonyCache.getOrUpdate(subId, PhoneStateListener.LISTEN_SERVICE_STATE) {
+            telephonyManager.requestSingleUpdate<ServiceState>(PhoneStateListener.LISTEN_SERVICE_STATE) { onData ->
+                ServiceStateListener(subId, onData)
+            }
         }
 
     /**

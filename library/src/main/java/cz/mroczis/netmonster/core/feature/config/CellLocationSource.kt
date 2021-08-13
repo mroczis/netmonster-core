@@ -6,6 +6,7 @@ import android.telephony.PhoneStateListener
 import android.telephony.ServiceState
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
+import cz.mroczis.netmonster.core.cache.TelephonyCache
 import cz.mroczis.netmonster.core.feature.config.CellLocationSource.CellLocationListener
 import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
 
@@ -32,8 +33,10 @@ class CellLocationSource {
         }
 
     private fun getFresh(telephonyManager: TelephonyManager, subId: Int?): CellLocation? =
-        telephonyManager.requestSingleUpdate<CellLocation>(PhoneStateListener.LISTEN_CELL_LOCATION) { onData ->
-            CellLocationListener(subId, onData)
+        TelephonyCache.getOrUpdate(subId, PhoneStateListener.LISTEN_CELL_LOCATION) {
+            telephonyManager.requestSingleUpdate<CellLocation>(PhoneStateListener.LISTEN_CELL_LOCATION) { onData ->
+                CellLocationListener(subId, onData)
+            }
         }
 
     /**
