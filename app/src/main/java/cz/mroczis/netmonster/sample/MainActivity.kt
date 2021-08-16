@@ -11,9 +11,8 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.os.postDelayed
-import androidx.recyclerview.widget.LinearLayoutManager
 import cz.mroczis.netmonster.core.factory.NetMonsterFactory
-import kotlinx.android.synthetic.main.activity_main.*
+import cz.mroczis.netmonster.sample.databinding.ActivityMainBinding
 
 /**
  * Activity periodically updates data (once in [REFRESH_RATIO] ms) when it's on foreground.
@@ -27,12 +26,16 @@ class MainActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private val adapter = MainAdapter()
 
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
 
-        recycler.adapter = adapter
-        recycler.layoutManager = LinearLayoutManager(this)
+        with(binding) {
+            setContentView(root)
+            recycler.adapter = adapter
+        }
     }
 
     override fun onResume() {

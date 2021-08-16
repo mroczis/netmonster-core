@@ -1,21 +1,26 @@
 package cz.mroczis.netmonster.sample
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import cz.mroczis.netmonster.core.model.cell.*
-import kotlinx.android.synthetic.main.view_cell.view.*
+import cz.mroczis.netmonster.core.model.cell.ICell
+import cz.mroczis.netmonster.sample.databinding.ViewCellBinding
 
-class MainVH(view: View) : RecyclerView.ViewHolder(view) {
+class MainVH(
+    private val binding: ViewCellBinding
+) : RecyclerView.ViewHolder(binding.root) {
 
     companion object {
-        fun create(parent: ViewGroup): MainVH {
-            val v = LayoutInflater.from(parent.context).inflate(R.layout.view_cell, parent, false)
-            return MainVH(v)
-        }
+        fun create(parent: ViewGroup): MainVH =
+            MainVH(
+                ViewCellBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+            )
     }
 
-    fun bind(cell: ICell) = itemView.root.bind(cell)
+    fun bind(cell: ICell) = binding.root.bind(cell)
 
 }
