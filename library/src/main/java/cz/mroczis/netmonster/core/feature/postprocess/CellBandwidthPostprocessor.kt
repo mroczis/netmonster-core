@@ -20,7 +20,10 @@ class CellBandwidthPostprocessor(
             list.map { cell ->
                 if (cell is CellLte && cell.connectionStatus is PrimaryConnection && cell.bandwidth == null) {
                     serviceStateGetter.invoke(cell.subscriptionId)?.let { serviceState ->
-                        cell.copy(bandwidth = serviceState.cellBandwidths.firstOrNull())
+                        serviceState.cellBandwidths
+                            .firstOrNull()
+                            ?.takeIf { it in CellLte.BANDWIDTH_RANGE }
+                            ?.let { cell.copy(bandwidth = it) } ?: cell
                     } ?: cell
                 } else cell
             }
