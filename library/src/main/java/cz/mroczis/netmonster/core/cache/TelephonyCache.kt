@@ -27,7 +27,7 @@ internal object TelephonyCache {
      * [event] - one of PhoneStateListener.LISTEN_* constants
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T : Any> getOrUpdate(subId: Int?, event: Int, update: () -> T?): T? {
+    fun <T> getOrUpdate(subId: Int?, event: Int, update: () -> T?): T? {
         // Make sure that there will be only one instance of a key
         val key = synchronized(this) {
             val modelKey = Key(subId = subId, event = event)
@@ -40,14 +40,14 @@ internal object TelephonyCache {
         // Try to get cached one without synchronised access
         val value = cache[key]?.takeIf { it.valid }
         if (value != null) {
-            return value.any as T
+            return value.any as? T
         }
 
         return synchronized(key) {
             // Let's try grab cached value once again since we are in a critical section
             val syncedValue = cache[key]?.takeIf { it.valid }
             if (syncedValue != null) {
-                syncedValue.any as T
+                syncedValue.any as? T
             } else {
                 cache.remove(key)
                 update().let {
