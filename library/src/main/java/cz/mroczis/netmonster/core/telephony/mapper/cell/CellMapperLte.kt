@@ -33,13 +33,25 @@ internal fun CellIdentityLte.mapCell(subId: Int, connection: IConnection, signal
         earfcn.inRangeOrNull(BandLte.DOWNLINK_EARFCN_RANGE)
     } else null
 
-    val bandwidth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        bandwidth.inRangeOrNull(CellLte.BANDWIDTH_RANGE)
-    } else null
-
     val band = if (earfcn != null) {
         BandTableLte.map(earfcn)
     } else null
+
+    val suggestedBands = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        bands.filter { it in BandTableLte.BAND_NUMBER_RANGE }
+    } else {
+        emptyList()
+    }
+
+    val bandwidth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        bandwidth.inRangeOrNull(CellLte.BANDWIDTH_RANGE).takeIf {
+            // Sync issue, devices sometimes report invalid combos
+            // Example: EARFCN=473, Bands=[20], BW=10_000
+            // Real values: EARFCN=473, Bands=[1], BW=20_000
+            band?.number == null || suggestedBands.isEmpty() || suggestedBands.contains(band.number)
+        }
+    } else null
+
 
     return CellLte(
         network = network,

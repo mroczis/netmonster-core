@@ -1,7 +1,5 @@
 package cz.mroczis.netmonster.core.model.connection
 
-import cz.mroczis.netmonster.core.model.cell.ICell
-
 /**
  * Secondary cell for data communication (aggregated cell).
  *

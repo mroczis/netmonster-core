@@ -9,6 +9,8 @@ import cz.mroczis.netmonster.core.model.band.BandLte
  */
 object BandTableLte {
 
+    internal val BAND_NUMBER_RANGE = 1..88
+
     private val bands = arrayOf(
         BandEntity(0..599, "2100", 1),
         BandEntity(600..1199, "1900", 2),

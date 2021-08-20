@@ -4,10 +4,10 @@ import android.os.Build
 import android.telephony.*
 import cz.mroczis.netmonster.core.SdkTest
 import cz.mroczis.netmonster.core.applyNonNull
+import cz.mroczis.netmonster.core.db.BandTableLte
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.cell.CellLte
 import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
-import cz.mroczis.netmonster.core.telephony.mapper.CellInfoMapper
 import cz.mroczis.netmonster.core.telephony.mapper.cell.mapCell
 import cz.mroczis.netmonster.core.telephony.mapper.cell.mapConnection
 import cz.mroczis.netmonster.core.telephony.mapper.cell.mapSignal
@@ -18,7 +18,7 @@ import io.mockk.mockkClass
 /**
  * Testing conversion [CellInfoLte] -> [CellLte]
  */
-class CellMapperLteTest29 : SdkTest(Build.VERSION_CODES.Q) {
+class CellMapperLteTest30 : SdkTest(Build.VERSION_CODES.R) {
 
     companion object {
         const val CI = 523524
@@ -122,6 +122,18 @@ class CellMapperLteTest29 : SdkTest(Build.VERSION_CODES.Q) {
             }
         }
 
+        "Invalid Band vs EARFCN" {
+            mockValidCell().let {
+                every { it.identity.earfcn } returns 6200
+                every { it.identity.bands } returns intArrayOf(1) // 6200 is band 20
+
+                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal(), 1624656855654)?.let { cell ->
+                    cell.band shouldBe BandTableLte.map(6200)
+                    cell.bandwidth shouldBe null // BW ignored since band does not match EARFCN
+                }
+            }
+        }
+
     }
 
     @Suppress("DEPRECATION")
@@ -131,6 +143,7 @@ class CellMapperLteTest29 : SdkTest(Build.VERSION_CODES.Q) {
         every { id.tac } returns TAC
         every { id.pci } returns PCI
         every { id.earfcn } returns EARFCN
+        every { id.bands } returns intArrayOf(20)
         every { id.mcc } returns MCC
         every { id.mccString } returns MCC.toString()
         every { id.mnc } returns MNC
