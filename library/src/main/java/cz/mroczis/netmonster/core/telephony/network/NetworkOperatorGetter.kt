@@ -53,7 +53,6 @@ internal class NetworkOperatorGetter : INetworkGetter {
             }
         }
 
-
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun getNetwork(telephony: ITelephonyManagerCompat): Network? =
         getFromReflection(telephony.getTelephonyManager(), telephony.getSubscriberId())
@@ -73,7 +72,15 @@ internal class NetworkOperatorGetter : INetworkGetter {
 
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
     private fun getFromServiceState(telephony: ITelephonyManagerCompat) =
-        Network.map(telephony.getServiceState()?.operatorNumeric)
+        telephony.getServiceState()?.let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                it.networkRegistrationInfoList
+                    .mapNotNull { Network.map(it.registeredPlmn) }
+                    .firstOrNull() ?: Network.map(it.operatorNumeric)
+            } else {
+                Network.map(it.operatorNumeric)
+            }
+        }
 
     private fun getFromNetworkOperator(telephony: TelephonyManager?) =
         telephony?.networkOperator?.let { Network.map(it) }
