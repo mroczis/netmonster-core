@@ -1,15 +1,17 @@
+# NetMonster Core
 
-# NetMonster Core  
-  
-🚧 Work in progress! 🚧    
-    
 Lightweight Android library that is build over [Telephony SDK](https://developer.android.com/reference/android/telephony/package-summary). NetMonster core is extracted from [NetMonster](https://play.google.com/store/apps/details?id=cz.mroczis.netmonster) application and backports several Telephony features to older Android devices.  
   
 Why use NetMonster Core instead of legacy API?  
  - Validation - library validates data from RIL and corrects them if possible 
  - Richer information - additional functions for cell identity and cell signal that will make your code more understandable  
  - Backport - several non-accessible signal or identity fields are now accessible without boilerplate code  
- - Tested - tested on real devices, 50 000+ active users  
+ - Tested - tested on real devices, 50 000+ active users
+
+![Latest version](https://img.shields.io/maven-central/v/app.netmonster/core "Latest lib version")
+```groovy
+implementation 'app.netmonster:core:$version'
+```
 
 ### New functions
 Here's small comparison for each of voice / data network you can meet.
