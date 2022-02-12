@@ -35,6 +35,22 @@ internal class CellSignalMerger {
                     remove(nrCells[0])
                     add(mergedCell)
                 }
+            } else if (nrCells.size > 1 && signalApi.size == 1) {
+                // Multiple NR cells (two sims with working 5G), decide using subscription id
+                val targetSub = signalApi[0].subscriptionId
+                val sourceCell = nrCells.find { it.subscriptionId == targetSub }
+                if (sourceCell != null) {
+                    val mergedCell = sourceCell mergeWith signalApi[0]
+                    newApi.toMutableList().apply {
+                        remove(nrCells[0])
+                        add(mergedCell)
+                    }
+                } else {
+                    // No matching sub, pass everything
+                    newApi.toMutableList().apply {
+                        addAll(nonPresentNr)
+                    }.toList()
+                }
             } else {
                 newApi.toMutableList().apply {
                     addAll(nonPresentNr)

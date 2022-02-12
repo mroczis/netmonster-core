@@ -11,7 +11,6 @@ import cz.mroczis.netmonster.core.model.cell.CellNr
 import cz.mroczis.netmonster.core.model.connection.IConnection
 import cz.mroczis.netmonster.core.model.signal.SignalNr
 import cz.mroczis.netmonster.core.util.inRangeOrNull
-import java.sql.Timestamp
 
 /**
  * [CellIdentityNr] -> [CellNr]
@@ -19,7 +18,7 @@ import java.sql.Timestamp
 @TargetApi(Build.VERSION_CODES.Q)
 internal fun CellIdentityNr.mapCell(subId: Int, connection: IConnection, signal: SignalNr?, timestamp: Long): CellNr? {
     val network = Network.map(mccString, mncString)
-    val nci = nci.inRangeOrNull(CellNr.CID_RANGE)
+    val nci = nci.inRangeOrNull(CellNr.CID_RANGE)?.takeIf { it != Int.MAX_VALUE.toLong() }
     val tac = tac.inRangeOrNull(CellNr.TAC_RANGE)
     val pci = pci.inRangeOrNull(CellNr.PCI_RANGE)
     val arfcn = nrarfcn.inRangeOrNull(BandNr.DOWNLINK_EARFCN_RANGE)
