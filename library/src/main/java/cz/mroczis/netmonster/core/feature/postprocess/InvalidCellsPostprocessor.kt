@@ -2,9 +2,11 @@ package cz.mroczis.netmonster.core.feature.postprocess
 
 import cz.mroczis.netmonster.core.model.cell.CellGsm
 import cz.mroczis.netmonster.core.model.cell.CellLte
+import cz.mroczis.netmonster.core.model.cell.CellNr
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 import cz.mroczis.netmonster.core.util.isHuawei
+import cz.mroczis.netmonster.core.util.isMediatek
 import cz.mroczis.netmonster.core.util.isSamsung
 
 /**
@@ -24,6 +26,9 @@ class InvalidCellsPostprocessor : ICellPostprocessor {
         // - a7y18ltexx, API 28
         // - beyond1lteeea, API 29
         .filterNot { it is CellLte && isSamsung() && it.band?.number == 1 && it.connectionStatus !is PrimaryConnection && it.signal.rsrp != null && it.signal.rsrq == null }
+        // Mediatek devices return these fake NR (primary) cells, in NSA mode, most likely when they attempt to connect to an NR cell or have just disconnected.
+        // The only valid values are PCI, PLMN and NR-ARFCN, NCI is 0 or 268435455 (filtered out by CellMapperNR), RSRP -44 and RSRQ -3
+        .filterNot { it is CellNr && isMediatek() && it.nci == null && it.signal.ssRsrp == -44 && it.signal.ssRsrq == -3 && it.signal.csiRsrp == -44 && it.signal.csiRsrq == -3 }
         .toList()
 
 }
