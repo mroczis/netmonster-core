@@ -108,12 +108,12 @@ class CellMapperLteTest30 : SdkTest(Build.VERSION_CODES.R) {
         "Reflection - SNR" {
             mockValidCell().let {
                 every { it.signal.rssnr } returns 300
-                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal(), 1624656855654)?.signal?.snr shouldBe null
+                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal(), 1624656855654)?.signal?.snr shouldBe 30.0
             }
 
             mockValidCell().let {
                 every { it.signal.rssnr } returns 30
-                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal(), 1624656855654)?.signal?.snr shouldBe null
+                it.identity.mapCell(0, it.info.mapConnection(), it.signal.mapSignal(), 1624656855654)?.signal?.snr shouldBe 30.0
             }
 
             mockValidCell().let {

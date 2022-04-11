@@ -1,8 +1,8 @@
 package cz.mroczis.netmonster.core.feature.postprocess
 
-import android.os.Build
 import cz.mroczis.netmonster.core.model.cell.*
 import cz.mroczis.netmonster.core.model.connection.NoneConnection
+import cz.mroczis.netmonster.core.util.isSamsung
 
 /**
  * Well. There's an Android documentation how invalid values should look like.
@@ -15,7 +15,7 @@ import cz.mroczis.netmonster.core.model.connection.NoneConnection
 class SamsungInvalidValuesPostprocessor : ICellPostprocessor {
 
     override fun postprocess(list: List<ICell>): List<ICell> =
-        if (Build.MANUFACTURER.equals("samsung", ignoreCase = true)) {
+        if (isSamsung()) {
             list.map {
                 if (it.connectionStatus is NoneConnection) {
                     it.let(neighbourMetadataFixer)

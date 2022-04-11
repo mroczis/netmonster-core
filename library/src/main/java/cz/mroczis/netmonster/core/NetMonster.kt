@@ -6,7 +6,9 @@ import android.content.Context
 import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
 import cz.mroczis.netmonster.core.db.NetworkTypeTable
+import cz.mroczis.netmonster.core.db.local.ILocalStorage
 import cz.mroczis.netmonster.core.db.model.NetworkType
+import cz.mroczis.netmonster.core.factory.LocalStorageFactory
 import cz.mroczis.netmonster.core.factory.NetMonsterFactory
 import cz.mroczis.netmonster.core.feature.config.PhysicalChannelConfigSource
 import cz.mroczis.netmonster.core.feature.detect.*
@@ -14,6 +16,7 @@ import cz.mroczis.netmonster.core.feature.merge.CellMerger
 import cz.mroczis.netmonster.core.feature.merge.CellSignalMerger
 import cz.mroczis.netmonster.core.feature.merge.CellSource
 import cz.mroczis.netmonster.core.feature.postprocess.*
+import cz.mroczis.netmonster.core.model.NetMonsterConfig
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.config.PhysicalChannelConfig
 import cz.mroczis.netmonster.core.subscription.ISubscriptionManagerCompat
@@ -23,39 +26,46 @@ import cz.mroczis.netmonster.core.util.isDisplayOn
 
 internal class NetMonster(
     private val context: Context,
-    private val subscription: ISubscriptionManagerCompat
+    private val subscription: ISubscriptionManagerCompat,
+    config: NetMonsterConfig
 ) : INetMonster {
 
     private val oldAndNewCellMerger = CellMerger()
     private val newAndSignalCellMerger = CellSignalMerger()
     private val physicalChannelSource by lazy { PhysicalChannelConfigSource() }
+    private val storage: ILocalStorage = LocalStorageFactory.get(context, config)
 
     /**
      * Postprocessors that try to fix / add behaviour to [ITelephonyManagerCompat.getAllCellInfo]
      */
     @SuppressLint("MissingPermission")
-    private val postprocessors = mutableListOf<ICellPostprocessor>().apply {
-        add(SamsungInvalidValuesPostprocessor())
-        add(MocnNetworkPostprocessor(subscription) { subId ->
+    private val postprocessors = listOf(
+        SamsungInvalidValuesPostprocessor(),
+        MocnNetworkPostprocessor(subscription) { subId ->
             getTelephony(subId).getNetworkOperator()
-        }) // fix PLMNs
-        add(InvalidCellsPostprocessor()) // get rid of false-positive cells
-        add(PrimaryCellPostprocessor()) // mark 1st cell as Primary if required
-        add(SubDuplicitiesPostprocessor(subscription) { subId ->
+        }, // fix PLMNs
+        InvalidCellsPostprocessor(), // get rid of false-positive cells
+        PrimaryCellPostprocessor(), // mark 1st cell as Primary if required
+        SubDuplicitiesPostprocessor(subscription) { subId ->
             getTelephony(subId).getNetworkOperator()
-        }) // filter out duplicities, only Dual SIMs
-        add(PlmnPostprocessor()) // guess PLMNs when channels match
-        add(CdmaPlmnPostprocessor()) // guess PLMN for CDMA cells
-        add(SignalStrengthPostprocessor { subId ->
+        }, // filter out duplicities, only Dual SIMs
+        PlmnPostprocessor(), // guess PLMNs when channels match
+        CdmaPlmnPostprocessor(), // guess PLMN for CDMA cells
+        SignalStrengthPostprocessor { subId ->
             getTelephony(subId).getCellLocation().firstOrNull()
-        }) // might add more signal strength indicators
-        add(CellBandwidthPostprocessor { subId ->
+        }, // might add more signal strength indicators
+        CellBandwidthPostprocessor { subId ->
             getTelephony(subId).getServiceState()
-        })
-        add(PhysicalChannelPostprocessor { subId ->
+        },
+        PhysicalChannelPostprocessor { subId ->
             getPhysicalChannelConfiguration(subId)
-        })
-    }
+        },
+        SamsungEndiannessPostprocessor(
+            getCellSkeleton = { getTelephony(it).getTelephonyManager().cellSkeleton },
+            setEnabled = { storage.locationAreaEndiannessIncorrect = true },
+            isEnabled = { storage.locationAreaEndiannessIncorrect },
+        ),
+    )
 
     @WorkerThread
     @RequiresPermission(
@@ -122,13 +132,9 @@ internal class NetMonster(
 
     override fun getNetworkType(subId: Int, vararg detectors: INetworkDetector): NetworkType? {
         val telephony = getTelephony(subId)
-        for (detector in detectors) {
-            detector.detect(this, telephony)?.let {
-                return it
-            }
+        return detectors.firstNotNullOfOrNull { detector ->
+            detector.detect(this, telephony)
         }
-
-        return null
     }
 
     override fun getPhysicalChannelConfiguration(subId: Int): List<PhysicalChannelConfig> =
@@ -136,7 +142,7 @@ internal class NetMonster(
             physicalChannelSource.get(it, subId)
         } ?: emptyList()
 
-    private infix fun getTelephony(subId: Int): ITelephonyManagerCompat {
+    private fun getTelephony(subId: Int): ITelephonyManagerCompat {
         return NetMonsterFactory.getTelephony(context, subId)
     }
 

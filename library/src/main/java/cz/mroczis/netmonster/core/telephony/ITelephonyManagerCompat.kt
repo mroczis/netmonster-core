@@ -194,7 +194,7 @@ interface ITelephonyManagerCompat {
      * Fetches information about current network type and possible override
      * that should be presented to user.
      *
-     * On SDKs lower than [Build.VERSION_CODES.R] always returns [DisplayInfo] with unknwon
+     * On SDKs lower than [Build.VERSION_CODES.R] always returns [DisplayInfo] with unknown
      * network type and none override type
      */
     @WorkerThread

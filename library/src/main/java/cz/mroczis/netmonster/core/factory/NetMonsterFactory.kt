@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import cz.mroczis.netmonster.core.INetMonster
 import cz.mroczis.netmonster.core.NetMonster
+import cz.mroczis.netmonster.core.model.NetMonsterConfig
 import cz.mroczis.netmonster.core.subscription.ISubscriptionManagerCompat
 import cz.mroczis.netmonster.core.subscription.SubscriptionManagerCompat14
 import cz.mroczis.netmonster.core.subscription.SubscriptionManagerCompat22
@@ -39,7 +40,11 @@ object NetMonsterFactory {
     /**
      * Creates new instance of [INetMonster].
      */
-    fun get(context: Context) : INetMonster =
-        NetMonster(context, getSubscription(context))
+    fun get(context: Context, config: NetMonsterConfig = NetMonsterConfig()) : INetMonster =
+        NetMonster(
+            context = context,
+            subscription = getSubscription(context),
+            config = config,
+        )
 
 }
