@@ -112,8 +112,8 @@ class PlmnPostprocessor : ICellPostprocessor {
                         0 -> null
                         1 -> channelMatches[0].network
                         // More networks per one channel, this happens when cell list is not sorted
-                        // in that case we rely just on PrimaryConnection if's available.
-                        else -> channelMatches.firstOrNull { it.connection is PrimaryConnection }?.network
+                        // in that case we rely just on PrimaryConnection if's available and unique.
+                        else -> channelMatches.singleOrNull { it.connection is PrimaryConnection }?.network
                     }
                 }
             }

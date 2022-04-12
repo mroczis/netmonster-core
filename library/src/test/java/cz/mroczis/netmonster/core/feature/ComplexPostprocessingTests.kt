@@ -269,5 +269,139 @@ class ComplexPostprocessingTests : SdkTest(Build.VERSION_CODES.P) {
                 get(3)!!.size shouldBe 3
             }
         }
+
+        "Dual SIM, different MNC, same cell" {
+
+            val netA = Network.map(222, 50)
+            val netB = Network.map(222, 88)
+            val simA = netA
+            val simB = Network.map(222, 8)
+
+            val subManager = object : ISubscriptionManagerCompat {
+                override fun getActiveSubscriptionIds(): List<Int> =
+                    getActiveSubscriptions().map { it.subscriptionId }
+
+                override fun getActiveSubscriptions(): List<SubscribedNetwork> =
+                    listOf(
+                        SubscribedNetwork(0, 1, simA),
+                        SubscribedNetwork(1, 2, simB)
+                    )
+            }
+
+            val serviceStateSimulation: (Int) -> Network? = { subId ->
+                when (subId) {
+                    1 -> netA
+                    2 -> netB
+                    else -> null
+                }
+            }
+
+            val postprocessors = listOf(
+                MocnNetworkPostprocessor(subManager, serviceStateSimulation),
+                InvalidCellsPostprocessor(),
+                PrimaryCellPostprocessor(),
+                SubDuplicitiesPostprocessor(subManager, serviceStateSimulation),
+                PlmnPostprocessor()
+            )
+
+            val cells = mutableListOf<ICell>().apply {
+                add(
+                    CellLte(
+                        network = netA,
+                        eci = 46223,
+                        tac = 3453,
+                        pci = 235,
+                        band = BandTableLte.map(1650),
+                        signal = SignalLte(
+                            rssi = -92,
+                            rsrp = -108.0,
+                            rsrq = -12.0,
+                            snr = null,
+                            cqi = null,
+                            timingAdvance = null
+                        ),
+                        bandwidth = null,
+                        subscriptionId = 1,
+                        connectionStatus = PrimaryConnection(),
+                        timestamp = null
+                    )
+                )
+                add(
+                    CellLte(
+                        network = netB,
+                        eci = 46223,
+                        tac = 3453,
+                        pci = 235,
+                        band = BandTableLte.map(1650),
+                        signal = SignalLte(
+                            rssi = -92,
+                            rsrp = -108.0,
+                            rsrq = -12.0,
+                            snr = null,
+                            cqi = null,
+                            timingAdvance = null
+                        ),
+                        bandwidth = null,
+                        subscriptionId = 2,
+                        connectionStatus = PrimaryConnection(),
+                        timestamp = null
+                    )
+                )
+                add(
+                    CellLte(
+                        network = null,
+                        eci = null,
+                        tac = null,
+                        pci = 236,
+                        band = BandTableLte.map(1650),
+                        signal = SignalLte(
+                            rssi = -110,
+                            rsrp = -120.0,
+                            rsrq = -20.0,
+                            snr = null,
+                            cqi = null,
+                            timingAdvance = null
+                        ),
+                        bandwidth = null,
+                        subscriptionId = 1,
+                        connectionStatus = NoneConnection(),
+                        timestamp = null
+                    )
+                )
+                add(
+                    CellLte(
+                        network = null,
+                        eci = null,
+                        tac = null,
+                        pci = 236,
+                        band = BandTableLte.map(1650),
+                        signal = SignalLte(
+                            rssi = -110,
+                            rsrp = -120.0,
+                            rsrq = -20.0,
+                            snr = null,
+                            cqi = null,
+                            timingAdvance = null
+                        ),
+                        bandwidth = null,
+                        subscriptionId = 2,
+                        connectionStatus = NoneConnection(),
+                        timestamp = null
+                    )
+                )
+            }
+
+            var res = cells.toList()
+            postprocessors.forEach { res = it.postprocess(res) }
+            // Postprocessing does not remove anything
+            res.size shouldBe 4
+            // Postprocessing shouldn't change PLMNs
+            res.forEach{
+                when (it.subscriptionId) {
+                    1 -> it.network shouldBe netA
+                    2 -> it.network shouldBe netB
+                }
+            }
+        }
     }
 }
