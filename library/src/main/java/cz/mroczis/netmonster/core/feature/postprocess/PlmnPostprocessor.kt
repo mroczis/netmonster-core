@@ -13,8 +13,8 @@ class PlmnPostprocessor : ICellPostprocessor {
     private val plmnExtractor = PlmnExtractor()
 
     override fun postprocess(list: List<ICell>): List<ICell> {
-        val plmns: Map<NetworkGeneration, List<PlmnNetwork>> = list.map { it.let(plmnExtractor) }
-            .filterNotNull()
+        val plmns: Map<NetworkGeneration, List<PlmnNetwork>> = list
+            .mapNotNull { it.let(plmnExtractor) }
             .distinct()
             .groupBy { it.generation }
 
@@ -26,30 +26,58 @@ class PlmnPostprocessor : ICellPostprocessor {
      * Extracts data required to assign PLMN to cells that to not have valid PLMN
      */
     private class PlmnExtractor : ICellProcessor<PlmnNetwork?> {
-        override fun processCdma(cell: CellCdma): PlmnNetwork? =
-            null
+        override fun processCdma(cell: CellCdma): PlmnNetwork? = null
 
-        override fun processGsm(cell: CellGsm) =
-            cell.network?.let { PlmnNetwork(it, NetworkGeneration.GSM, cell.connectionStatus, null, cell.lac) }
+        override fun processGsm(cell: CellGsm) = cell.network?.let {
+            PlmnNetwork(
+                subscriptionId = cell.subscriptionId,
+                network = it,
+                generation = NetworkGeneration.GSM,
+                connection = cell.connectionStatus,
+                channelNumber = null,
+                areaCode = cell.lac
+            )
+        }
 
-        override fun processWcdma(cell: CellWcdma) =
-            cell.network?.let { PlmnNetwork(it, NetworkGeneration.WCDMA, cell.connectionStatus, cell.band?.channelNumber) }
+        override fun processWcdma(cell: CellWcdma) = cell.network?.let {
+            PlmnNetwork(
+                subscriptionId = cell.subscriptionId,
+                network = it,
+                generation = NetworkGeneration.WCDMA,
+                connection = cell.connectionStatus,
+                channelNumber = cell.band?.channelNumber
+            )
+        }
 
-        override fun processLte(cell: CellLte) =
-            cell.network?.let { PlmnNetwork(it, NetworkGeneration.LTE, cell.connectionStatus, cell.band?.channelNumber) }
+        override fun processLte(cell: CellLte) = cell.network?.let {
+            PlmnNetwork(
+                subscriptionId = cell.subscriptionId,
+                network = it,
+                generation = NetworkGeneration.LTE,
+                connection = cell.connectionStatus,
+                channelNumber = cell.band?.channelNumber
+            )
+        }
 
-        override fun processTdscdma(cell: CellTdscdma) =
-            cell.network?.let {
-                PlmnNetwork(
-                    it,
-                    NetworkGeneration.TDSCDMA,
-                    cell.connectionStatus,
-                    cell.band?.channelNumber
-                )
-            }
+        override fun processTdscdma(cell: CellTdscdma) = cell.network?.let {
+            PlmnNetwork(
+                subscriptionId = cell.subscriptionId,
+                network = it,
+                generation = NetworkGeneration.TDSCDMA,
+                connection = cell.connectionStatus,
+                channelNumber = cell.band?.channelNumber
+            )
+        }
 
-        override fun processNr(cell: CellNr) =
-            cell.network?.let { PlmnNetwork(it, NetworkGeneration.NR, cell.connectionStatus, cell.band?.channelNumber) }
+        override fun processNr(cell: CellNr) = cell.network?.let {
+            PlmnNetwork(
+                subscriptionId = cell.subscriptionId,
+                network = it,
+                generation = NetworkGeneration.NR,
+                connection = cell.connectionStatus,
+                channelNumber = cell.band?.channelNumber
+            )
+        }
     }
 
     /**
@@ -69,59 +97,53 @@ class PlmnPostprocessor : ICellPostprocessor {
         override fun processCdma(cell: CellCdma) = cell
 
         override fun processGsm(cell: CellGsm) = dictionary[NetworkGeneration.GSM]?.let { plmns ->
-            if (plmns.size == 1 && dictionary.size == 1) {
+            val subscriptionPlmns = plmns.filter { it.subscriptionId == cell.subscriptionId }
+            if (subscriptionPlmns.size == 1) {
                 cell.copy(network = plmns[0].network)
             } else {
-                val lacPlmn = plmns.firstOrNull { it.areaCode == cell.lac }
+                val lacPlmn = subscriptionPlmns.firstOrNull { it.areaCode == cell.lac }
                 if (lacPlmn != null) {
                     cell.copy(network = lacPlmn.network)
                 } else {
                     cell
                 }
             }
-        } ?: getFirstPlmnIfOnly(cell) { cell.copy(network = it)}
+        } ?: getFirstPlmnIfOnly(cell) { cell.copy(network = it) }
 
         override fun processLte(cell: CellLte) =
-            findByChannel(NetworkGeneration.LTE, cell.band?.channelNumber)?.let {
+            findByChannel(NetworkGeneration.LTE, cell.subscriptionId, cell.band?.channelNumber)?.let {
                 cell.copy(network = it)
-            } ?: getFirstPlmnIfOnly(cell) { cell.copy(network = it)}
+            } ?: getFirstPlmnIfOnly(cell) { cell.copy(network = it) }
 
         override fun processNr(cell: CellNr) =
-            findByChannel(NetworkGeneration.NR, cell.band?.channelNumber)?.let {
+            findByChannel(NetworkGeneration.NR, cell.subscriptionId, cell.band?.channelNumber)?.let {
                 cell.copy(network = it)
-            } ?: getFirstPlmnIfOnly(cell) { cell.copy(network = it)}
+            } ?: getFirstPlmnIfOnly(cell) { cell.copy(network = it) }
 
         override fun processTdscdma(cell: CellTdscdma) =
-            findByChannel(NetworkGeneration.TDSCDMA, cell.band?.channelNumber)?.let {
+            findByChannel(NetworkGeneration.TDSCDMA, cell.subscriptionId, cell.band?.channelNumber)?.let {
                 cell.copy(network = it)
-            } ?: getFirstPlmnIfOnly(cell) { cell.copy(network = it)}
-
+            } ?: getFirstPlmnIfOnly(cell) { cell.copy(network = it) }
 
         override fun processWcdma(cell: CellWcdma) =
-            findByChannel(NetworkGeneration.WCDMA, cell.band?.channelNumber)?.let {
+            findByChannel(NetworkGeneration.WCDMA, cell.subscriptionId, cell.band?.channelNumber)?.let {
                 cell.copy(network = it)
-            } ?: getFirstPlmnIfOnly(cell) { cell.copy(network = it)}
+            } ?: getFirstPlmnIfOnly(cell) { cell.copy(network = it) }
 
-        private fun findByChannel(gen: NetworkGeneration, channel: Int?): Network? =
+        private fun findByChannel(gen: NetworkGeneration, subscriptionId: Int, channel: Int?): Network? =
             dictionary[gen]?.let { plmns ->
-                if (plmns.size == 1) {
-                    plmns[0].network
+                val subscriptionPlmns = plmns.filter { it.subscriptionId == subscriptionId }
+                if (subscriptionPlmns.size == 1) {
+                    subscriptionPlmns[0].network
                 } else {
-                    val channelMatches = plmns.filter { it.channelNumber == channel }
-                    when (channelMatches.size) {
-                        0 -> null
-                        1 -> channelMatches[0].network
-                        // More networks per one channel, this happens when cell list is not sorted
-                        // in that case we rely just on PrimaryConnection if's available.
-                        else -> channelMatches.firstOrNull { it.connection is PrimaryConnection }?.network
-                    }
+                    subscriptionPlmns.find { it.channelNumber == channel }?.network
                 }
             }
 
         /**
          * Takes 1st PLMN if it's the only one in [dictionary].
          */
-        private fun getFirstPlmnIfOnly(cell: ICell, callback: (Network) -> ICell) : ICell  =
+        private fun getFirstPlmnIfOnly(cell: ICell, callback: (Network) -> ICell): ICell =
             if (dictionary.size == 1 && dictionary.values.first().size == 1) {
                 callback.invoke(dictionary.values.first()[0].network)
             } else cell
@@ -131,6 +153,7 @@ class PlmnPostprocessor : ICellPostprocessor {
      * Internal data structure that holds all attributes we need to assign PLMN properly
      */
     private data class PlmnNetwork(
+        val subscriptionId: Int,
         val network: Network,
         val generation: NetworkGeneration,
         val connection: IConnection,
