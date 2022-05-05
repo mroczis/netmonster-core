@@ -58,7 +58,10 @@ data class CellNr(
          * Correct min TAC value is 0. Some Samsung phones use it as N/A value.
          */
         const val TAC_MIN = 1L
-        const val TAC_MAX = 16_777_215L
+        /**
+         * Correct max TAC value is 16777215. Pixel 6 use it as N/A value.
+         */
+        const val TAC_MAX = 16_777_214L
 
         const val PCI_MIN = 0L
         const val PCI_MAX = 1007L
