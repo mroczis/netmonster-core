@@ -8,4 +8,8 @@ object DummyStorage : ILocalStorage {
     override var locationAreaEndiannessIncorrect: Boolean
         get() = false
         set(_) {}
+
+    override var reportsLteBandwidthDirectly: Boolean
+        get() = false
+        set(_) {}
 }

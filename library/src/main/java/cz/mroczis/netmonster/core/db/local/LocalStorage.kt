@@ -16,12 +16,17 @@ internal class LocalStorage private constructor(
         get() = prefs.getBoolean(LOCATION_AREA_ENDIANNESS_INCORRECT, false)
         set(value) = prefs.edit().putBoolean(LOCATION_AREA_ENDIANNESS_INCORRECT, value).apply()
 
+    override var reportsLteBandwidthDirectly: Boolean
+        get() = prefs.getBoolean(REPORTS_LTE_BANDWIDTH_DIRECTLY, false)
+        set(value) = prefs.edit().putBoolean(REPORTS_LTE_BANDWIDTH_DIRECTLY, value).apply()
+
     companion object {
 
         @Volatile
         private var instance: LocalStorage? = null
 
         private val LOCATION_AREA_ENDIANNESS_INCORRECT = "area_endianness_flipped_${Build.TIME}"
+        private val REPORTS_LTE_BANDWIDTH_DIRECTLY = "reports_lte_bandwidth_${Build.TIME}"
 
         /**
          * Singleton impl

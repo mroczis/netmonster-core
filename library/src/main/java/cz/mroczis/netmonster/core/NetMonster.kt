@@ -54,9 +54,11 @@ internal class NetMonster(
         SignalStrengthPostprocessor { subId ->
             getTelephony(subId).getCellLocation().firstOrNull()
         }, // might add more signal strength indicators
-        CellBandwidthPostprocessor { subId ->
-            getTelephony(subId).getServiceState()
-        },
+        CellBandwidthPostprocessor(
+            serviceStateGetter = { subId -> getTelephony(subId).getServiceState() },
+            onCellWithDirectBandwidth = { storage.reportsLteBandwidthDirectly = true },
+            isEnabled = { !storage.reportsLteBandwidthDirectly }
+        ) ,
         PhysicalChannelPostprocessor { subId ->
             getPhysicalChannelConfiguration(subId)
         },
