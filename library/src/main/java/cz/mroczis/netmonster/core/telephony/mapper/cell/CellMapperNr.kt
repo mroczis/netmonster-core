@@ -46,12 +46,12 @@ internal fun CellIdentityNr.mapCell(subId: Int, connection: IConnection, signal:
 
 @TargetApi(Build.VERSION_CODES.Q)
 internal fun CellSignalStrengthNr.mapSignal(): SignalNr {
-    val ssRsrp = ssRsrp.inRangeOrNull(SignalNr.RSRP_RANGE)
-    val ssRsrq = ssRsrq.inRangeOrNull(SignalNr.RSRQ_RANGE)
+    val ssRsrp = ssRsrp.inRangeOrNull(SignalNr.RSRP_RANGE) ?: (ssRsrp * -1).inRangeOrNull(SignalNr.RSRP_RANGE)
+    val ssRsrq = ssRsrq.inRangeOrNull(SignalNr.RSRQ_RANGE) ?: (ssRsrq * -1).inRangeOrNull(SignalNr.RSRQ_RANGE)
     val ssSinr = ssSinr.inRangeOrNull(SignalNr.SINR_RANGE)
 
-    val csiRsrp = csiRsrp.inRangeOrNull(SignalNr.RSRP_RANGE)
-    val csiRsrq = csiRsrq.inRangeOrNull(SignalNr.RSRQ_RANGE)
+    val csiRsrp = csiRsrp.inRangeOrNull(SignalNr.RSRP_RANGE) ?: (csiRsrp * -1).inRangeOrNull(SignalNr.RSRP_RANGE)
+    val csiRsrq = csiRsrq.inRangeOrNull(SignalNr.RSRQ_RANGE) ?: (csiRsrq * -1).inRangeOrNull(SignalNr.RSRQ_RANGE)
     val csiSinr = csiSinr.inRangeOrNull(SignalNr.SINR_RANGE)
 
     return SignalNr(
