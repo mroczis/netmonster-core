@@ -45,7 +45,7 @@ internal fun CellSignalStrengthWcdma.mapSignal(): SignalWcdma {
         val rssiFromAsu = asuLevel.toDbm().inRangeOrNull(SignalWcdma.RSSI_RANGE) // ASU -> DBM
         val rssiFromDbm = dbm.inRangeOrNull(SignalWcdma.RSSI_RANGE)
         // In real world those two values must be equal
-        if (rssiFromAsu != rssiFromAsu) {
+        if (rssiFromDbm != rssiFromAsu) {
             rssiFromDbm ?: rssiFromAsu
         } else rssiFromDbm
     }
