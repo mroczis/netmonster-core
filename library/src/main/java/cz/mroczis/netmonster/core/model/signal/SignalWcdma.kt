@@ -49,7 +49,7 @@ data class SignalWcdma(
      * Unit: dB
      */
     @SinceSdk(Build.VERSION_CODES.M)
-    @IntRange(from = ECNO_MIN, to = ECIO_MAX)
+    @IntRange(from = ECIO_MIN, to = ECIO_MAX)
     val ecio: Int?
 ) : ISignal {
 
