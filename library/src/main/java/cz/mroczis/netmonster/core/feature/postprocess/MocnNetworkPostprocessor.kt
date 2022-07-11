@@ -4,6 +4,7 @@ import android.Manifest
 import androidx.annotation.RequiresPermission
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.cell.*
+import cz.mroczis.netmonster.core.model.connection.NoneConnection
 import cz.mroczis.netmonster.core.subscription.ISubscriptionManagerCompat
 
 /**
@@ -34,7 +35,7 @@ class MocnNetworkPostprocessor(
         
         return list.toMutableList().map { cell ->
             val suggestedNetwork = subscriptions[cell.subscriptionId]
-            if ((cell is CellLte || cell.network == null) && suggestedNetwork != null && suggestedNetwork != cell.network) {
+            if ((cell is CellLte && cell.connectionStatus !is NoneConnection || cell.network == null) && suggestedNetwork != null && suggestedNetwork != cell.network) {
                 cell.let(PlmnSwitcher(suggestedNetwork))
             } else {
                 cell
