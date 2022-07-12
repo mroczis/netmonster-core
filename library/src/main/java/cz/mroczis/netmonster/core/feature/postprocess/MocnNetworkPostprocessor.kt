@@ -35,7 +35,10 @@ class MocnNetworkPostprocessor(
         
         return list.toMutableList().map { cell ->
             val suggestedNetwork = subscriptions[cell.subscriptionId]
-            if ((cell is CellLte && cell.connectionStatus !is NoneConnection || cell.network == null) && suggestedNetwork != null && suggestedNetwork != cell.network) {
+            if (suggestedNetwork != null && suggestedNetwork != cell.network &&
+                (cell.network == null || cell is CellLte && cell.connectionStatus !is NoneConnection
+                        && cell.network?.mcc == suggestedNetwork.mcc)
+            ) {
                 cell.let(PlmnSwitcher(suggestedNetwork))
             } else {
                 cell
