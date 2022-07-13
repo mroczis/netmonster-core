@@ -41,9 +41,11 @@ internal class NetMonster(
     @SuppressLint("MissingPermission")
     private val postprocessors = listOf(
         SamsungInvalidValuesPostprocessor(),
-        MocnNetworkPostprocessor(subscription) { subId ->
-            getTelephony(subId).getNetworkOperator()
-        }, // fix PLMNs
+        MocnNetworkPostprocessor(
+            subscription = subscription,
+            networkOperatorGetter = { subId -> getTelephony(subId).getNetworkOperator() },
+            serviceStateGetter = { subId -> getTelephony(subId).getServiceState() },
+        ), // fix PLMNs
         InvalidCellsPostprocessor(), // get rid of false-positive cells
         PrimaryCellPostprocessor(), // mark 1st cell as Primary if required
         SubDuplicitiesPostprocessor(subscription) { subId ->

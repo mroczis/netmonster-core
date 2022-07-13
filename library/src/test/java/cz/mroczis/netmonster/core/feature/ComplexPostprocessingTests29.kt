@@ -1,6 +1,7 @@
 package cz.mroczis.netmonster.core.feature
 
 import android.os.Build
+import android.telephony.ServiceState
 import cz.mroczis.netmonster.core.SdkTest
 import cz.mroczis.netmonster.core.db.BandTableGsm
 import cz.mroczis.netmonster.core.db.BandTableLte
@@ -25,7 +26,7 @@ import io.kotlintest.specs.StringSpec
 class ComplexPostprocessingTests29 : SdkTest(Build.VERSION_CODES.Q) {
 
     init {
-        "Dual SIM, Android 10, both having neighbouring cells, different technologies, same newtwork" {
+        "Dual SIM, Android 10, both having neighbouring cells, different technologies, same network" {
             val cells = mutableListOf<ICell>().apply {
                 add(
                     CellGsm(
@@ -137,15 +138,17 @@ class ComplexPostprocessingTests29 : SdkTest(Build.VERSION_CODES.Q) {
                     )
             }
 
-            val serviceStateSimulation: (Int) -> Network? = { subId ->
+            val networkOperatorSimulation: (Int) -> Network? = { subId ->
                 subManager.getActiveSubscriptions().first { it.subscriptionId == subId }.network
             }
 
+            val serviceStateSimulation: (Int) -> ServiceState = { ServiceState() }
+
             val postprocessors = listOf(
-                MocnNetworkPostprocessor(subManager, serviceStateSimulation),
+                MocnNetworkPostprocessor(subManager, networkOperatorSimulation, serviceStateSimulation),
                 InvalidCellsPostprocessor(),
                 PrimaryCellPostprocessor(),
-                SubDuplicitiesPostprocessor(subManager, serviceStateSimulation),
+                SubDuplicitiesPostprocessor(subManager, networkOperatorSimulation),
                 PlmnPostprocessor()
             )
 
