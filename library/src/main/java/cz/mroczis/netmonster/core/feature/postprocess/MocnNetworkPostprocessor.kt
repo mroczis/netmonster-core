@@ -134,13 +134,8 @@ class MocnNetworkPostprocessor(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !plmnHints.isNullOrEmpty()) {
                 val info = cell.let(CellBasicInfoExtractor)
 
-                val possiblePlmns = plmnHints.filter {
-                    val cidMatch = it.cid == info?.cid
-                    val channelAndCountryMatch = it.channelNumber == info?.channelNumber && it.plmn.mcc == info?.mcc
-                    cidMatch || channelAndCountryMatch
-                }
-
-                if (possiblePlmns.size == 1) {
+                val possiblePlmns = plmnHints.filter { it.plmn.mcc == info?.mcc }
+                if (info?.mcc != null && possiblePlmns.size == 1) {
                     possiblePlmns[0].plmn
                 } else {
                     null
