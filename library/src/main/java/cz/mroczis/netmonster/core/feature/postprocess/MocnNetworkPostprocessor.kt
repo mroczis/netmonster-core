@@ -92,28 +92,28 @@ class MocnNetworkPostprocessor(
         val plmnHints = networkRegistrations?.mapNotNull {
             val rPlmn = Network.map(it.registeredPlmn)
             when (val c = it.cellIdentity) {
-                is CellIdentityGsm -> (Network.map(c.mccString, c.mncString) ?: rPlmn)?.let { plmn ->
+                is CellIdentityGsm -> (rPlmn ?: Network.map(c.mccString, c.mncString))?.let { plmn ->
                     SuggestedPlmn(
                         plmn = plmn,
                         channelNumber = null, // For GSM full CID match is required
                         cid = c.cid.toLong(),
                     )
                 }
-                is CellIdentityWcdma -> (Network.map(c.mccString, c.mncString) ?: rPlmn)?.let { plmn ->
+                is CellIdentityWcdma -> (rPlmn ?: Network.map(c.mccString, c.mncString))?.let { plmn ->
                     SuggestedPlmn(
                         plmn = plmn,
                         channelNumber = c.uarfcn,
                         cid = c.cid.toLong(),
                     )
                 }
-                is CellIdentityLte -> (Network.map(c.mccString, c.mncString) ?: rPlmn)?.let { plmn ->
+                is CellIdentityLte -> (rPlmn ?: Network.map(c.mccString, c.mncString))?.let { plmn ->
                     SuggestedPlmn(
                         plmn = plmn,
                         channelNumber = c.earfcn,
                         cid = c.ci.toLong(),
                     )
                 }
-                is CellIdentityNr -> (Network.map(c.mccString, c.mncString) ?: rPlmn)?.let { plmn ->
+                is CellIdentityNr -> (rPlmn ?: Network.map(c.mccString, c.mncString))?.let { plmn ->
                     SuggestedPlmn(
                         plmn = plmn,
                         channelNumber = c.nrarfcn,
