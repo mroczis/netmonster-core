@@ -1,9 +1,9 @@
 package cz.mroczis.netmonster.core.feature.postprocess
 
+import cz.mroczis.netmonster.core.db.BandTableGsm
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.cell.*
 import cz.mroczis.netmonster.core.model.connection.IConnection
-import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 
 /**
  * Attempts to assign valid PLMN ([Network]) to cells which do not have valid value.
@@ -99,16 +99,28 @@ class PlmnPostprocessor : ICellPostprocessor {
         override fun processGsm(cell: CellGsm) = dictionary[NetworkGeneration.GSM]?.let { plmns ->
             val subscriptionPlmns = plmns.filter { it.subscriptionId == cell.subscriptionId }
             if (subscriptionPlmns.size == 1) {
-                cell.copy(network = plmns[0].network)
+                val network = plmns[0].network
+                cell.copy(
+                    network = network,
+                    band = cell.band?.let { BandTableGsm.map(it.arfcn, mcc = network.mcc) }
+                )
             } else {
                 val lacPlmn = subscriptionPlmns.firstOrNull { it.areaCode == cell.lac }
                 if (lacPlmn != null) {
-                    cell.copy(network = lacPlmn.network)
+                    cell.copy(
+                        network = lacPlmn.network,
+                        band = cell.band?.let { BandTableGsm.map(it.arfcn, mcc = lacPlmn.network.mcc) }
+                    )
                 } else {
                     cell
                 }
             }
-        } ?: getFirstPlmnIfOnly(cell) { cell.copy(network = it) }
+        } ?: getFirstPlmnIfOnly(cell) { network ->
+            cell.copy(
+                network = network,
+                band = cell.band?.let { BandTableGsm.map(it.arfcn, mcc = network.mcc) }
+            )
+        }
 
         override fun processLte(cell: CellLte) =
             findByChannel(NetworkGeneration.LTE, cell.subscriptionId, cell.band?.channelNumber)?.let {
