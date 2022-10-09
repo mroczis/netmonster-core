@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.IntRange
 import cz.mroczis.netmonster.core.model.annotation.DoubleRange
 import cz.mroczis.netmonster.core.model.annotation.SinceSdk
+import kotlin.math.abs
 
 data class SignalLte(
     /**
@@ -104,7 +105,22 @@ data class SignalLte(
         rsrp = rsrp ?: other.rsrp,
         rsrq = rsrq ?: other.rsrq,
         cqi = cqi ?: other.cqi,
-        snr = snr ?: other.snr,
+        snr = if (snr != null && other.snr != null) {
+            // Pixel 6a (bluejay) reports SNR divided by 10 (getAllCellInfo) and correct one (getSignalStrengths)
+            // example: snr = 1; other.snr = 17
+            if (snr / 10 == other.snr) {
+                snr
+            } else if (other.snr / 10 == snr) {
+                other.snr
+            } else if (abs(snr) == 1.0 || abs(snr) == 2.0) {
+                // Try to avoid -1, -2, 1, 2 values that might be actually results of division by 10
+                other.snr
+            } else {
+                snr
+            }
+        } else {
+            snr ?: other.snr
+        },
         timingAdvance = timingAdvance ?: other.timingAdvance
     )
 
@@ -115,6 +131,7 @@ data class SignalLte(
          * More at: [source](https://people.csail.mit.edu/bkph/cellular_repeater_TA.shtml)
          */
         const val ONE_WAY_DISTANCE = 78.12
+
         /**
          * Two-way distance from source to terminal
          *
