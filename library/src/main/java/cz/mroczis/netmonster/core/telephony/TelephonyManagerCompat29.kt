@@ -10,6 +10,7 @@ import androidx.annotation.WorkerThread
 import cz.mroczis.netmonster.core.callback.CellCallbackError
 import cz.mroczis.netmonster.core.callback.CellCallbackSuccess
 import cz.mroczis.netmonster.core.model.cell.ICell
+import cz.mroczis.netmonster.core.model.model.CellError
 import cz.mroczis.netmonster.core.telephony.mapper.CellInfoCallbackMapper
 import cz.mroczis.netmonster.core.util.DirectExecutor
 
@@ -30,16 +31,20 @@ internal open class TelephonyManagerCompat29(
         onSuccess: CellCallbackSuccess,
         onError: CellCallbackError?
     ) {
-        telephony.requestCellInfoUpdate(DirectExecutor(), CellInfoCallbackMapper(
-            success = { cells -> onSuccess.invoke(cellInfoMapper.map(cells)) },
-            error = { errorCode ->
-                if (onError != null) {
-                    onError.invoke(errorCode)
-                } else {
-                    onSuccess.invoke(cellInfoMapper.map(telephony.allCellInfo))
+        try {
+            telephony.requestCellInfoUpdate(DirectExecutor(), CellInfoCallbackMapper(
+                success = { cells -> onSuccess.invoke(cellInfoMapper.map(cells)) },
+                error = { errorCode ->
+                    if (onError != null) {
+                        onError.invoke(errorCode)
+                    } else {
+                        onSuccess.invoke(cellInfoMapper.map(telephony.allCellInfo))
+                    }
                 }
-            }
-        ))
+            ))
+        } catch (e: IllegalStateException) {
+            onError?.invoke(CellError.UNKNOWN)
+        }
     }
 
     @RequiresPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
