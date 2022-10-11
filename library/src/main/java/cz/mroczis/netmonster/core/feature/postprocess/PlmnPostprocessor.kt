@@ -99,14 +99,14 @@ class PlmnPostprocessor : ICellPostprocessor {
         override fun processGsm(cell: CellGsm) = dictionary[NetworkGeneration.GSM]?.let { plmns ->
             val subscriptionPlmns = plmns.filter { it.subscriptionId == cell.subscriptionId }
             if (subscriptionPlmns.size == 1) {
-                val network = plmns[0].network
+                val network = subscriptionPlmns[0].network
                 cell.copy(
                     network = network,
                     band = cell.band?.let { BandTableGsm.map(it.arfcn, mcc = network.mcc) }
                 )
             } else {
                 val lacPlmn = subscriptionPlmns.firstOrNull { it.areaCode == cell.lac }
-                if (lacPlmn != null) {
+                if (lacPlmn != null && lacPlmn.network != cell.network) {
                     cell.copy(
                         network = lacPlmn.network,
                         band = cell.band?.let { BandTableGsm.map(it.arfcn, mcc = lacPlmn.network.mcc) }
