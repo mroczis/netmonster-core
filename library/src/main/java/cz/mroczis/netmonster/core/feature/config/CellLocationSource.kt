@@ -1,23 +1,22 @@
 package cz.mroczis.netmonster.core.feature.config
 
 import android.Manifest
-import android.telephony.CellLocation
-import android.telephony.PhoneStateListener
-import android.telephony.ServiceState
-import android.telephony.TelephonyManager
+import android.annotation.TargetApi
+import android.os.Build
+import android.telephony.*
+import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import cz.mroczis.netmonster.core.cache.TelephonyCache
-import cz.mroczis.netmonster.core.feature.config.CellLocationSource.CellLocationListener
-import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
+import cz.mroczis.netmonster.core.util.SingleEventPhoneStateListener
 
 /**
- * Attempts to fetch fresh [CellLocation] using [CellLocationListener]. If this
+ * Attempts to fetch fresh [CellLocation] using cell location listener. If this
  * approach fails then looks to cache in [TelephonyManager].
  */
 class CellLocationSource {
 
     /**
-     * Registers [CellLocationListener] and awaits data. After 100 milliseconds time outs if
+     * Registers a cell location listener and awaits data. After 1000 milliseconds time outs if
      * nothing is delivered.
      *
      * On Android O and newer directly grabs [ServiceState] from [TelephonyManager].
@@ -33,25 +32,37 @@ class CellLocationSource {
         }
 
     private fun getFresh(telephonyManager: TelephonyManager, subId: Int?): CellLocation? =
-        TelephonyCache.getOrUpdate(subId, PhoneStateListener.LISTEN_CELL_LOCATION) {
-            telephonyManager.requestSingleUpdate<CellLocation>(PhoneStateListener.LISTEN_CELL_LOCATION) { onData ->
-                CellLocationListener(subId, onData)
+        TelephonyCache.getOrUpdate(subId, TelephonyCache.Event.CELL_LOCATION) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                telephonyManager.requestSingleUpdate { cellLocationListener(it) }
+            } else {
+                telephonyManager.requestPhoneStateUpdate { cellLocationListener(subId, it) }
             }
         }
 
     /**
-     * Kotlin friendly PhoneStateListener that grabs [CellLocation]
+     * Kotlin friendly PhoneStateListener that grabs [SignalStrength]
      */
-    private class CellLocationListener(
+    @TargetApi(Build.VERSION_CODES.R)
+    private fun cellLocationListener(
         subId: Int?,
-        private val simStateListener: CellLocationListener.(state: CellLocation) -> Unit
-    ) : PhoneStateListenerPort(subId) {
+        onChanged: UpdateResult<SingleEventPhoneStateListener, CellLocation>
+    ) = object : SingleEventPhoneStateListener(LISTEN_CELL_LOCATION, subId) {
 
+        @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
         override fun onCellLocationChanged(location: CellLocation?) {
             super.onCellLocationChanged(location)
             if (location != null) {
-                simStateListener.invoke(this, location)
+                onChanged(this, location)
             }
         }
     }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun cellLocationListener(onChanged: UpdateResult<TelephonyCallback, CellLocation>) =
+        object : TelephonyCallback(), TelephonyCallback.CellLocationListener {
+            override fun onCellLocationChanged(location: CellLocation) {
+                onChanged(this, location)
+            }
+        }
 }

@@ -1,16 +1,14 @@
 package cz.mroczis.netmonster.core.feature.config
 
+import android.annotation.TargetApi
 import android.os.Build
-import android.telephony.PhoneStateListener
-import android.telephony.ServiceState
-import android.telephony.SignalStrength
-import android.telephony.TelephonyManager
+import android.telephony.*
+import androidx.annotation.RequiresApi
 import cz.mroczis.netmonster.core.cache.TelephonyCache
-import cz.mroczis.netmonster.core.feature.config.SignalStrengthsSource.SignalStrengthsListener
-import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
+import cz.mroczis.netmonster.core.util.SingleEventPhoneStateListener
 
 /**
- * Attempts to fetch fresh [SignalStrength] using [SignalStrengthsListener]. If this
+ * Attempts to fetch fresh [SignalStrength] using signal strength listener. If this
  * approach fails then looks to cache in [TelephonyManager].
  *
  * Cache is available since [Build.VERSION_CODES.P].
@@ -18,7 +16,7 @@ import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
 class SignalStrengthsSource {
 
     /**
-     * Registers [SignalStrengthsListener] and awaits data. After 100 milliseconds time outs if
+     * Registers a signal strength listener and awaits data. After 1000 milliseconds time outs if
      * nothing is delivered.
      *
      * On Android O and newer directly grabs [ServiceState] from [TelephonyManager].
@@ -27,9 +25,11 @@ class SignalStrengthsSource {
         getFresh(telephonyManager, subId) ?: getCached(telephonyManager)
 
     private fun getFresh(telephonyManager: TelephonyManager, subId: Int?): SignalStrength? =
-        TelephonyCache.getOrUpdate(subId, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) {
-            telephonyManager.requestSingleUpdate<SignalStrength>(PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) { onData ->
-                SignalStrengthsListener(subId, onData)
+        TelephonyCache.getOrUpdate(subId, TelephonyCache.Event.SIGNAL_STRENGTHS) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                telephonyManager.requestSingleUpdate { signalStrengthListener(it) }
+            } else {
+                telephonyManager.requestPhoneStateUpdate { signalStrengthListener(subId, it) }
             }
         }
 
@@ -46,16 +46,27 @@ class SignalStrengthsSource {
     /**
      * Kotlin friendly PhoneStateListener that grabs [SignalStrength]
      */
-    private class SignalStrengthsListener(
+    @TargetApi(Build.VERSION_CODES.R)
+    private fun signalStrengthListener(
         subId: Int?,
-        private val simStateListener: SignalStrengthsListener.(state: SignalStrength) -> Unit
-    ) : PhoneStateListenerPort(subId) {
-
+        onChanged: UpdateResult<SingleEventPhoneStateListener, SignalStrength>
+    ) = object : SingleEventPhoneStateListener(LISTEN_SIGNAL_STRENGTHS, subId) {
         override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {
             super.onSignalStrengthsChanged(signalStrength)
             if (signalStrength != null) {
-                simStateListener.invoke(this, signalStrength)
+                onChanged.invoke(this, signalStrength)
             }
         }
     }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun signalStrengthListener(onChanged: UpdateResult<TelephonyCallback, SignalStrength>) =
+        object : TelephonyCallback(), TelephonyCallback.SignalStrengthsListener {
+            override fun onSignalStrengthsChanged(signalStrength: SignalStrength) {
+                onChanged(this, signalStrength)
+            }
+        }
 }
+
+
+

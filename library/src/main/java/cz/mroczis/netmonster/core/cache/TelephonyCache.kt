@@ -27,7 +27,7 @@ internal object TelephonyCache {
      * [event] - one of PhoneStateListener.LISTEN_* constants
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T> getOrUpdate(subId: Int?, event: Int, update: () -> T?): T? {
+    fun <T> getOrUpdate(subId: Int?, event: Event, update: () -> T?): T? {
         // Make sure that there will be only one instance of a key
         val key = synchronized(this) {
             val modelKey = Key(subId = subId, event = event)
@@ -64,7 +64,7 @@ internal object TelephonyCache {
      */
     private data class Key(
         val subId: Int?,
-        val event: Int,
+        val event: Event,
     )
 
     /**
@@ -80,4 +80,12 @@ internal object TelephonyCache {
 
     }
 
+    enum class Event {
+        CELL_LOCATION,
+        DISPLAY_INFO,
+        PHYSICAL_CHANNEL,
+        SERVICE_STATE,
+        SIGNAL_STRENGTHS,
+        ;
+    }
 }

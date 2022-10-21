@@ -5,7 +5,7 @@ import android.telephony.TelephonyManager
 import cz.mroczis.netmonster.core.cache.TelephonyCache
 import cz.mroczis.netmonster.core.feature.config.PhysicalChannelConfigSource.PhysicalChannelListener
 import cz.mroczis.netmonster.core.model.config.PhysicalChannelConfig
-import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
+import cz.mroczis.netmonster.core.util.SingleEventPhoneStateListener
 
 /**
  * Fetches [PhysicalChannelConfig] from [PhysicalChannelListener]. Those data are currently not publicly
@@ -27,10 +27,8 @@ class PhysicalChannelConfigSource {
      */
     fun get(telephonyManager: TelephonyManager, subId: Int): List<PhysicalChannelConfig> =
         if (Build.VERSION.SDK_INT in Build.VERSION_CODES.P..Build.VERSION_CODES.Q) {
-            TelephonyCache.getOrUpdate(subId, LISTEN_PHYSICAL_CHANNEL_CONFIGURATION) {
-                telephonyManager.requestSingleUpdate<List<PhysicalChannelConfig>>(
-                    LISTEN_PHYSICAL_CHANNEL_CONFIGURATION
-                ) { onData ->
+            TelephonyCache.getOrUpdate(subId, TelephonyCache.Event.PHYSICAL_CHANNEL) {
+                telephonyManager.requestPhoneStateUpdate<List<PhysicalChannelConfig>> { onData ->
                     PhysicalChannelListener(subId, onData)
                 }
             } ?: emptyList()
@@ -44,8 +42,8 @@ class PhysicalChannelConfigSource {
      */
     private class PhysicalChannelListener(
         subId: Int?,
-        private val physicalChannelCallback: PhysicalChannelListener.(config: List<PhysicalChannelConfig>) -> Unit
-    ) : PhoneStateListenerPort(subId) {
+        private val physicalChannelCallback: UpdateResult<PhysicalChannelListener, List<PhysicalChannelConfig>>,
+    ) : SingleEventPhoneStateListener(LISTEN_PHYSICAL_CHANNEL_CONFIGURATION, subId) {
 
         override fun onPhysicalChannelConfigurationChanged(configs: List<Any?>) {
             val mapped = configs

@@ -1,23 +1,22 @@
 package cz.mroczis.netmonster.core.feature.config
 
 import android.Manifest
+import android.annotation.TargetApi
 import android.os.Build
-import android.telephony.PhoneStateListener
-import android.telephony.ServiceState
-import android.telephony.TelephonyManager
+import android.telephony.*
+import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import cz.mroczis.netmonster.core.cache.TelephonyCache
-import cz.mroczis.netmonster.core.feature.config.ServiceStateSource.ServiceStateListener
-import cz.mroczis.netmonster.core.util.PhoneStateListenerPort
+import cz.mroczis.netmonster.core.util.SingleEventPhoneStateListener
 
 /**
- * On Android N and older fetches [ServiceState] using [ServiceStateListener].
+ * On Android N and older fetches [ServiceState] using service state listener.
  * On Android O and newer takes [ServiceState] from [TelephonyManager.getServiceState].
  */
 class ServiceStateSource {
 
     /**
-     * Registers [ServiceStateListener] and awaits data. After 100 milliseconds time outs if
+     * Registers service state listener and awaits data. After 1000 milliseconds time outs if
      * nothing is delivered.
      *
      * On Android O and newer directly grabs [ServiceState] from [TelephonyManager].
@@ -36,24 +35,35 @@ class ServiceStateSource {
         }
 
     private fun getPreOreo(telephonyManager: TelephonyManager, subId: Int): ServiceState? =
-        TelephonyCache.getOrUpdate(subId, PhoneStateListener.LISTEN_SERVICE_STATE) {
-            telephonyManager.requestSingleUpdate<ServiceState>(PhoneStateListener.LISTEN_SERVICE_STATE) { onData ->
-                ServiceStateListener(subId, onData)
+        TelephonyCache.getOrUpdate(subId, TelephonyCache.Event.SERVICE_STATE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                telephonyManager.requestSingleUpdate { serviceStateListener (it) }
+            } else {
+                telephonyManager.requestPhoneStateUpdate { serviceStateListener(subId, it) }
             }
         }
 
     /**
      * Kotlin friendly PhoneStateListener that grabs [ServiceState]
      */
-    private class ServiceStateListener(
+    @TargetApi(Build.VERSION_CODES.R)
+    private fun serviceStateListener(
         subId: Int?,
-        private val simStateListener: ServiceStateListener.(state: ServiceState) -> Unit
-    ) : PhoneStateListenerPort(subId) {
-
+        onChanged: UpdateResult<SingleEventPhoneStateListener, ServiceState>
+    ) = object : SingleEventPhoneStateListener(LISTEN_SERVICE_STATE, subId) {
         override fun onServiceStateChanged(serviceState: ServiceState?) {
+            super.onServiceStateChanged(serviceState)
             if (serviceState != null) {
-                simStateListener.invoke(this, serviceState)
+                onChanged.invoke(this, serviceState)
             }
         }
     }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun serviceStateListener(onChanged: UpdateResult<TelephonyCallback, ServiceState>) =
+        object : TelephonyCallback(), TelephonyCallback.ServiceStateListener {
+            override fun onServiceStateChanged(serviceState: ServiceState) {
+                onChanged(this, serviceState)
+            }
+        }
 }

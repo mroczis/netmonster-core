@@ -35,3 +35,8 @@ open class PhoneStateListenerPort(subId: Int?) : PhoneStateListener() {
 
     }
 }
+
+open class SingleEventPhoneStateListener(
+    val event: Int,
+    subId: Int?,
+) : PhoneStateListenerPort(subId)
