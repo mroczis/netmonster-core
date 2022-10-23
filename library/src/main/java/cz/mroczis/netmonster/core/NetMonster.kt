@@ -13,6 +13,7 @@ import cz.mroczis.netmonster.core.factory.NetMonsterFactory
 import cz.mroczis.netmonster.core.feature.config.PhysicalChannelConfigSource
 import cz.mroczis.netmonster.core.feature.detect.*
 import cz.mroczis.netmonster.core.feature.merge.CellMerger
+import cz.mroczis.netmonster.core.feature.merge.CellNetworkRegistrationMerger
 import cz.mroczis.netmonster.core.feature.merge.CellSignalMerger
 import cz.mroczis.netmonster.core.feature.merge.CellSource
 import cz.mroczis.netmonster.core.feature.postprocess.*
@@ -31,7 +32,8 @@ internal class NetMonster(
 ) : INetMonster {
 
     private val oldAndNewCellMerger = CellMerger()
-    private val newAndSignalCellMerger = CellSignalMerger()
+    private val signalMerger = CellSignalMerger()
+    private val networkRegistrationMerger = CellNetworkRegistrationMerger()
     private val physicalChannelSource by lazy { PhysicalChannelConfigSource() }
     private val storage: ILocalStorage = LocalStorageFactory.get(context, config)
 
@@ -77,7 +79,11 @@ internal class NetMonster(
         allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE]
     )
     override fun getCells(): List<ICell> = getCells(
-        CellSource.CELL_LOCATION, CellSource.ALL_CELL_INFO, CellSource.NEIGHBOURING_CELLS, CellSource.SIGNAL_STRENGTH
+        CellSource.CELL_LOCATION,
+        CellSource.ALL_CELL_INFO,
+        CellSource.NEIGHBOURING_CELLS,
+        CellSource.SIGNAL_STRENGTH,
+        CellSource.NETWORK_REGISTRATION_INFO,
     )
 
     @WorkerThread
@@ -87,7 +93,7 @@ internal class NetMonster(
     override fun getCells(vararg sources: CellSource): List<ICell> {
         val subscriptions = subscription.getActiveSubscriptionIds()
         val oldApi = mutableListOf<ICell>().apply {
-            if (sources.contains(CellSource.CELL_LOCATION)) {
+            if (CellSource.CELL_LOCATION in sources) {
                 val serving = subscriptions.map { subId ->
                     getTelephony(subId).getCellLocation()
                 }.flatten().toSet()
@@ -95,7 +101,7 @@ internal class NetMonster(
                 addAll(serving)
             }
 
-            if (sources.contains(CellSource.NEIGHBOURING_CELLS)) {
+            if (CellSource.NEIGHBOURING_CELLS in sources) {
                 val neighbouring = subscriptions.map { subId ->
                     getTelephony(subId).getNeighboringCellInfo()
                 }.flatten().toSet()
@@ -104,7 +110,7 @@ internal class NetMonster(
             }
         }
 
-        val newApi = if (sources.contains(CellSource.ALL_CELL_INFO)) {
+        val newApi = if (CellSource.ALL_CELL_INFO in sources) {
             var allCells = subscriptions.map { subId ->
                 getTelephony(subId).getAllCellInfo()
             }.flatten().toSet().toList()
@@ -113,14 +119,22 @@ internal class NetMonster(
             allCells
         } else emptyList()
 
-        val signalApi = if (sources.contains(CellSource.SIGNAL_STRENGTH)) {
+        val signalApi = if (CellSource.SIGNAL_STRENGTH in sources) {
             subscriptions.mapNotNull { subId ->
                 getTelephony(subId).getSignalStrength()?.toCells(subId)
             }.flatten().toSet().toList()
         } else emptyList()
 
+        val networkRegistrationApi = if (CellSource.NETWORK_REGISTRATION_INFO in sources) {
+            subscriptions.mapNotNull { subId ->
+                getTelephony(subId).getServiceState()?.toCells(subId)
+            }.flatten().toSet().toList()
+
+        } else emptyList()
+
         val mergedOldNew = oldAndNewCellMerger.merge(oldApi, newApi, context.isDisplayOn())
-        return newAndSignalCellMerger.merge(mergedOldNew, signalApi)
+        val mergedWithSignal = signalMerger.merge(mergedOldNew, signalApi)
+        return networkRegistrationMerger.merge(mergedWithSignal, networkRegistrationApi)
     }
 
     @RequiresPermission(

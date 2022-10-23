@@ -45,6 +45,14 @@ enum class CellSource {
      */
     @SinceSdk(Build.VERSION_CODES.Q)
     SIGNAL_STRENGTH,
+
+    /**
+     * Taken from service state - network registration info that contains just
+     * primarily serving cells. If you are willing not to use [CELL_LOCATION] then this
+     * source might add LTE anchor in NR NSA mode to data output.
+     */
+    @SinceSdk(Build.VERSION_CODES.R)
+    NETWORK_REGISTRATION_INFO
     ;
 
 }

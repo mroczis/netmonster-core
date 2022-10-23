@@ -72,6 +72,8 @@ data class SignalTdscdma(
         internal val RSSI_RANGE = RSSI_MIN..RSSI_MAX
         internal val BIT_ERROR_RATE_RANGE = BIT_ERROR_RATE_MIN..BIT_ERROR_RATE_MAX
         internal val RSCP_RANGE = RSCP_MIN..RSCP_MAX
+
+        internal val EMPTY = SignalTdscdma(null, null, null)
     }
 
 }

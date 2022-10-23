@@ -86,5 +86,7 @@ data class SignalGsm(
         internal val RSSI_RANGE = RSSI_MIN..RSSI_MAX
         internal val BIT_ERROR_RATE_RANGE = BIT_ERROR_RATE_MIN..BIT_ERROR_RATE_MAX
         internal val TIMING_ADVANCE_RANGE = TIMING_ADVANCE_MIN..TIMING_ADVANCE_MAX
+
+        internal val EMPTY = SignalGsm(null, null, null)
     }
 }

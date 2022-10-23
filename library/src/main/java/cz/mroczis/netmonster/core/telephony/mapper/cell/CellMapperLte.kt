@@ -23,8 +23,14 @@ import kotlin.math.absoluteValue
  * [CellIdentityLte] -> [CellLte]
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-internal fun CellIdentityLte.mapCell(subId: Int, connection: IConnection, signal: SignalLte, timestamp: Long?): CellLte? {
-    val network = mapNetwork()
+internal fun CellIdentityLte.mapCell(
+    subId: Int,
+    connection: IConnection,
+    signal: SignalLte,
+    timestamp: Long? = null,
+    plmn: Network? = null,
+): CellLte {
+    val network = plmn ?: mapNetwork()
     val ci = ci.inRangeOrNull(CellLte.CID_RANGE)
     val tac = tac.inRangeOrNull(CellLte.TAC_RANGE)
     val pci = pci.inRangeOrNull(CellLte.PCI_RANGE)

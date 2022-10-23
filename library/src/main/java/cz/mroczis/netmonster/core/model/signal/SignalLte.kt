@@ -165,5 +165,6 @@ data class SignalLte(
         internal val CQI_RANGE = CQI_MIN..CQI_MAX
         internal val TIMING_ADVANCE_RANGE = TIMING_ADVANCE_MIN..TIMING_ADVANCE_MAX
 
+        internal val EMPTY = SignalLte(null, null, null, null, null, null)
     }
 }

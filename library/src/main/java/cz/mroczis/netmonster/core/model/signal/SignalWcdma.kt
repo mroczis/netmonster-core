@@ -104,6 +104,8 @@ data class SignalWcdma(
         internal val ECNO_RANGE = ECNO_MIN..ECNO_MAX
         internal val RSCP_RANGE = RSCP_MIN..RSCP_MAX
         internal val ECIO_RANGE = ECIO_MIN..ECIO_MAX
+
+        internal val EMPTY = SignalWcdma(null, null, null, null, null)
     }
 
 }

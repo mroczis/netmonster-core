@@ -75,9 +75,10 @@ internal fun CellIdentityGsm.mapCell(
     subId: Int,
     connection: IConnection,
     signal: SignalGsm,
-    timestamp: Long
+    timestamp: Long? = null,
+    plmn: Network? = null,
 ): CellGsm? {
-    val network = mapNetwork()
+    val network = plmn ?: mapNetwork()
     val cid = cid.inRangeOrNull(CellGsm.CID_RANGE)
     val lac = lac.inRangeOrNull(CellGsm.LAC_RANGE)
 

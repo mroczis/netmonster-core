@@ -103,5 +103,7 @@ data class SignalNr(
         internal val RSRP_RANGE = RSRP_MIN..RSRP_MAX
         internal val RSRQ_RANGE = RSRQ_MIN..RSRQ_MAX
         internal val SINR_RANGE = SINR_MIN..SINR_MAX
+
+        internal val EMPTY = SignalNr(null, null, null, null, null, null)
     }
 }

@@ -16,8 +16,14 @@ import cz.mroczis.netmonster.core.util.inRangeOrNull
  * [CellIdentityNr] -> [CellNr]
  */
 @TargetApi(Build.VERSION_CODES.Q)
-internal fun CellIdentityNr.mapCell(subId: Int, connection: IConnection, signal: SignalNr?, timestamp: Long): CellNr? {
-    val network = Network.map(mccString, mncString)
+internal fun CellIdentityNr.mapCell(
+    subId: Int,
+    connection: IConnection,
+    signal: SignalNr?,
+    timestamp: Long? = null,
+    plmn: Network? = null,
+): CellNr {
+    val network = plmn ?: Network.map(mccString, mncString)
     // 268435455 is LTE max CID and unfortunately used as N/A value on many MTK devices...
     val nci = nci.inRangeOrNull(CellNr.CID_RANGE)?.takeIf { it != Int.MAX_VALUE.toLong() && it != 268435455L }
     val tac = tac.inRangeOrNull(CellNr.TAC_RANGE)

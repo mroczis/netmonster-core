@@ -10,7 +10,7 @@ import cz.mroczis.netmonster.core.model.connection.SecondaryConnection
 /**
  * Attempts to detect NR in NSA mode. Requires valid LTE and NR signal
  */
-fun SignalStrength.toCells(subscriptionId: Int): List<CellNr> =
+internal fun SignalStrength.toCells(subscriptionId: Int): List<CellNr> =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         val lteSignal = getCellSignalStrengths(CellSignalStrengthLte::class.java)
         val nrSignal = getCellSignalStrengths(CellSignalStrengthNr::class.java)

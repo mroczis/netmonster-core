@@ -74,6 +74,7 @@ data class SignalCdma(
         internal val ECIO_RANGE = ECIO_MIN..ECIO_MAX
         internal val SNR_RANGE = SNR_MIN..SNR_MAX
 
+        internal val EMPTY = SignalCdma(null, null, null, null, null)
     }
 
 }

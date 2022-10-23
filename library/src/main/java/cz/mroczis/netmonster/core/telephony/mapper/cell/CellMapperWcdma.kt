@@ -79,8 +79,14 @@ internal fun CellSignalStrengthWcdma.mapSignal(): SignalWcdma {
  * [CellIdentityWcdma] -> [CellWcdma]
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-internal fun CellIdentityWcdma.mapCell(subId: Int, connection: IConnection, signal: SignalWcdma, timestamp: Long): CellWcdma? {
-    val network = mapNetwork()
+internal fun CellIdentityWcdma.mapCell(
+    subId: Int,
+    connection: IConnection,
+    signal: SignalWcdma,
+    timestamp: Long? = null,
+    plmn: Network? = null,
+): CellWcdma? {
+    val network = plmn ?: mapNetwork()
     val lac = lac.inRangeOrNull(CellWcdma.LAC_RANGE)
     val ci = if (lac == null && cid < 100) {
         // Samsung phones (SM-G960F) tend to report LAC = 0 and sequence of CIs starting with 1 (step 1) for

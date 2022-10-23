@@ -39,8 +39,14 @@ internal fun CellSignalStrengthTdscdma.mapSignal(): SignalTdscdma {
  * [CellIdentityTdscdma] -> [CellTdscdma]
  */
 @TargetApi(Build.VERSION_CODES.Q)
-internal fun CellIdentityTdscdma.mapCell(subId: Int, connection: IConnection, signal: SignalTdscdma, timestamp: Long): CellTdscdma? {
-    val network =  Network.map(mccString, mncString)
+internal fun CellIdentityTdscdma.mapCell(
+    subId: Int,
+    connection: IConnection,
+    signal: SignalTdscdma,
+    timestamp: Long? = null,
+    plmn: Network? = null,
+): CellTdscdma? {
+    val network = plmn ?: Network.map(mccString, mncString)
     val ci = cid.inRangeOrNull(CellTdscdma.CID_RANGE)
     val lac = lac.inRangeOrNull(CellTdscdma.LAC_RANGE)
     val cpid = cpid.inRangeOrNull(CellTdscdma.CPID_RANGE)
