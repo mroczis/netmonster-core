@@ -61,6 +61,7 @@ internal class NetMonster(
             onCellWithDirectBandwidth = { storage.reportsLteBandwidthDirectly = true },
             isEnabled = { !storage.reportsLteBandwidthDirectly }
         ) ,
+        InvalidSecondaryCellsPostprocessor(),
         PhysicalChannelPostprocessor { subId ->
             getPhysicalChannelConfiguration(subId)
         },
