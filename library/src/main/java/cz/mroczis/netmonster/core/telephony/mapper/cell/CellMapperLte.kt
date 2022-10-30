@@ -1,6 +1,5 @@
 package cz.mroczis.netmonster.core.telephony.mapper.cell
 
-import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.os.Build
 import android.telephony.CellIdentityLte
@@ -9,6 +8,7 @@ import android.telephony.SignalStrength
 import android.telephony.gsm.GsmCellLocation
 import cz.mroczis.netmonster.core.db.BandTableLte
 import cz.mroczis.netmonster.core.model.Network
+import cz.mroczis.netmonster.core.model.band.AggregatedBandLte
 import cz.mroczis.netmonster.core.model.band.BandLte
 import cz.mroczis.netmonster.core.model.cell.CellLte
 import cz.mroczis.netmonster.core.model.cell.ICell
@@ -17,7 +17,6 @@ import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 import cz.mroczis.netmonster.core.model.signal.SignalLte
 import cz.mroczis.netmonster.core.util.*
 import kotlin.math.abs
-import kotlin.math.absoluteValue
 
 /**
  * [CellIdentityLte] -> [CellLte]
@@ -49,6 +48,15 @@ internal fun CellIdentityLte.mapCell(
         emptyList()
     }
 
+    val aggregatedBands = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && band?.number != null) {
+        val bands = bands
+        if (bands.size > 1 && bands.contains(band.number)) {
+            (bands.toList() - band.number)
+                .mapNotNull { BandTableLte.getByNumber(it) }
+                .map { AggregatedBandLte(it.number, it.name) }
+        } else emptyList()
+    } else emptyList()
+
     val bandwidth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         bandwidth.inRangeOrNull(CellLte.BANDWIDTH_RANGE).takeIf {
             // Sync issue, devices sometimes report invalid combos
@@ -69,7 +77,8 @@ internal fun CellIdentityLte.mapCell(
         signal = signal,
         band = band,
         subscriptionId = subId,
-        timestamp = timestamp
+        timestamp = timestamp,
+        aggregatedBands = aggregatedBands
     )
 }
 
@@ -256,6 +265,7 @@ internal fun GsmCellLocation.mapLte(subId: Int, signalStrength: SignalStrength?,
             connectionStatus = PrimaryConnection(),
             subscriptionId = subId,
             timestamp = null,
+            aggregatedBands = emptyList(),
         )
     } else null
 }

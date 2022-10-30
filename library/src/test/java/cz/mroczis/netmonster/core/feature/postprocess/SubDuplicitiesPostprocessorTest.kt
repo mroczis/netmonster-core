@@ -32,7 +32,8 @@ class SubDuplicitiesPostprocessorTest : SdkTest(Build.VERSION_CODES.P) {
             signal = SignalLte(-51, -87.0, null, null, null, null),
             connectionStatus = PrimaryConnection(),
             subscriptionId = SUB_A,
-            timestamp = null
+            timestamp = null,
+            aggregatedBands = emptyList(),
         )
 
         val aNeighbour1 = CellLte(
@@ -45,7 +46,8 @@ class SubDuplicitiesPostprocessorTest : SdkTest(Build.VERSION_CODES.P) {
             signal = SignalLte(-63, -101.0, null, null, null, null),
             connectionStatus = NoneConnection(),
             subscriptionId = SUB_A,
-            timestamp = null
+            timestamp = null,
+            aggregatedBands = emptyList(),
         )
 
         val aNeighbour2 = aNeighbour1.copy(pci = 424)

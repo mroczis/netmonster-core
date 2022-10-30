@@ -27,6 +27,7 @@ class CdmaPlmnPostProcessorTest : FreeSpec({
         connectionStatus = PrimaryConnection(),
         subscriptionId = 0,
         timestamp = null,
+        aggregatedBands = emptyList(),
     )
 
     val lte23001neighbour = CellLte(
@@ -40,6 +41,7 @@ class CdmaPlmnPostProcessorTest : FreeSpec({
         connectionStatus = NoneConnection(),
         subscriptionId = 0,
         timestamp = null,
+        aggregatedBands = emptyList(),
     )
 
     val lte23011 = CellLte(
@@ -53,6 +55,7 @@ class CdmaPlmnPostProcessorTest : FreeSpec({
         connectionStatus = PrimaryConnection(),
         subscriptionId = 0,
         timestamp = null,
+        aggregatedBands = emptyList(),
     )
 
     val cdmaWithoutPlmn = CellCdma(

@@ -29,6 +29,7 @@ class PlmnPostprocessorTest : FreeSpec({
                     connectionStatus = NoneConnection(),
                     subscriptionId = 0,
                     timestamp = null,
+                    aggregatedBands = emptyList(),
                 )
             )
 
@@ -44,6 +45,7 @@ class PlmnPostprocessorTest : FreeSpec({
                     connectionStatus = NoneConnection(),
                     subscriptionId = 0,
                     timestamp = null,
+                    aggregatedBands = emptyList(),
                 )
             )
         }

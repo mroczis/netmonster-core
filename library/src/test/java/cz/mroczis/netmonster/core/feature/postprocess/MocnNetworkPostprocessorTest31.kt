@@ -87,6 +87,7 @@ class MocnNetworkPostprocessorTest31 : SdkTest(Build.VERSION_CODES.R) {
                         connectionStatus = PrimaryConnection(),
                         subscriptionId = 1,
                         timestamp = null,
+                        aggregatedBands = emptyList(),
                     )
                 )
             }
@@ -112,6 +113,7 @@ class MocnNetworkPostprocessorTest31 : SdkTest(Build.VERSION_CODES.R) {
                         connectionStatus = PrimaryConnection(),
                         subscriptionId = 1,
                         timestamp = null,
+                        aggregatedBands = emptyList(),
                     )
                 )
                 add(
@@ -126,6 +128,7 @@ class MocnNetworkPostprocessorTest31 : SdkTest(Build.VERSION_CODES.R) {
                         connectionStatus = PrimaryConnection(),
                         subscriptionId = 2,
                         timestamp = null,
+                        aggregatedBands = emptyList(),
                     )
                 )
             }

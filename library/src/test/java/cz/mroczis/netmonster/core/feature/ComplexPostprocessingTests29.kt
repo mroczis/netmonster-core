@@ -83,6 +83,7 @@ class ComplexPostprocessingTests29 : SdkTest(Build.VERSION_CODES.Q) {
                         subscriptionId = 3,
                         connectionStatus = PrimaryConnection(),
                         timestamp = null,
+                        aggregatedBands = emptyList(),
                     )
                 )
 
@@ -105,6 +106,7 @@ class ComplexPostprocessingTests29 : SdkTest(Build.VERSION_CODES.Q) {
                         subscriptionId = 3,
                         connectionStatus = NoneConnection(),
                         timestamp = null,
+                        aggregatedBands = emptyList(),
                     )
                 )
 

@@ -121,6 +121,7 @@ class NrNsaStateParserTest : SdkTest(Build.VERSION_CODES.P) {
                         connectionStatus = PrimaryConnection(),
                         subscriptionId = 1,
                         timestamp = null,
+                        aggregatedBands = emptyList(),
                     ),
                     CellNr(
                         network = null,
@@ -157,6 +158,7 @@ class NrNsaStateParserTest : SdkTest(Build.VERSION_CODES.P) {
                         connectionStatus = PrimaryConnection(),
                         subscriptionId = 1,
                         timestamp = null,
+                        aggregatedBands = emptyList(),
                     ),
                     CellNr(
                         network = null,

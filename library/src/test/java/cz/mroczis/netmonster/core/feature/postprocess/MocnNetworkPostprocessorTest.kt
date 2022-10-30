@@ -55,6 +55,7 @@ class MocnNetworkPostprocessorTest : FreeSpec({
                     connectionStatus = PrimaryConnection(),
                     subscriptionId = 1,
                     timestamp = null,
+                    aggregatedBands = emptyList(),
                 )
             )
         }
@@ -80,6 +81,7 @@ class MocnNetworkPostprocessorTest : FreeSpec({
                     connectionStatus = PrimaryConnection(),
                     subscriptionId = 1,
                     timestamp = null,
+                    aggregatedBands = emptyList(),
                 )
             )
             add(
@@ -94,6 +96,7 @@ class MocnNetworkPostprocessorTest : FreeSpec({
                     connectionStatus = PrimaryConnection(),
                     subscriptionId = 2,
                     timestamp = null,
+                    aggregatedBands = emptyList(),
                 )
             )
         }

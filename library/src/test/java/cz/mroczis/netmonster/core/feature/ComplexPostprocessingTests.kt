@@ -81,7 +81,8 @@ class ComplexPostprocessingTests : SdkTest(Build.VERSION_CODES.P) {
                         bandwidth = null,
                         subscriptionId = 1,
                         connectionStatus = PrimaryConnection(),
-                        timestamp = null
+                        timestamp = null,
+                        aggregatedBands = emptyList(),
                     )
                 )
 
@@ -191,6 +192,7 @@ class ComplexPostprocessingTests : SdkTest(Build.VERSION_CODES.P) {
                         subscriptionId = 3,
                         connectionStatus = PrimaryConnection(),
                         timestamp = null,
+                        aggregatedBands = emptyList(),
                     )
                 )
 
@@ -213,6 +215,7 @@ class ComplexPostprocessingTests : SdkTest(Build.VERSION_CODES.P) {
                         subscriptionId = 3,
                         connectionStatus = NoneConnection(),
                         timestamp = null,
+                        aggregatedBands = emptyList(),
                     )
                 )
 

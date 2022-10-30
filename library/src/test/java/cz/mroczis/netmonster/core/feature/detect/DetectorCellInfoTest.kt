@@ -31,6 +31,7 @@ class DetectorCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 connectionStatus = PrimaryConnection(),
                 subscriptionId = 0,
                 timestamp = null,
+                aggregatedBands = emptyList(),
             )
 
             val secondary = primary.copy(
@@ -61,6 +62,7 @@ class DetectorCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 connectionStatus = PrimaryConnection(),
                 subscriptionId = 0,
                 timestamp = null,
+                aggregatedBands = emptyList(),
             )
 
             val secondary = primary.copy(
@@ -93,6 +95,7 @@ class DetectorCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 connectionStatus = PrimaryConnection(),
                 subscriptionId = 0,
                 timestamp = null,
+                aggregatedBands = emptyList(),
             )
 
             val secondary = primary.copy(
@@ -125,6 +128,7 @@ class DetectorCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 connectionStatus = PrimaryConnection(),
                 subscriptionId = 0,
                 timestamp = null,
+                aggregatedBands = emptyList(),
             )
 
             // Classic in Android N+
@@ -168,6 +172,7 @@ class DetectorCellInfoTest : SdkTest(Build.VERSION_CODES.N) {
                 connectionStatus = PrimaryConnection(),
                 subscriptionId = 0,
                 timestamp = null,
+                aggregatedBands = emptyList(),
             )
 
             val secondary = primary.copy(

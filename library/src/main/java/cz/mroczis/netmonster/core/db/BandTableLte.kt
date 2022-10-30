@@ -3,6 +3,7 @@ package cz.mroczis.netmonster.core.db
 import cz.mroczis.netmonster.core.db.model.BandEntity
 import cz.mroczis.netmonster.core.db.model.IBandEntity
 import cz.mroczis.netmonster.core.model.band.BandLte
+import cz.mroczis.netmonster.core.model.band.IBand
 
 /**
  * [3GPP 36.101](https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=2411)
@@ -84,6 +85,9 @@ object BandTableLte {
 
     internal fun get(earfcn: Int): IBandEntity? =
         bands.firstOrNull { it.channelRange.contains(earfcn) }
+
+    internal fun getByNumber(number: Int): IBandEntity? =
+        bands.firstOrNull { it.number == number }
 
 
     /**

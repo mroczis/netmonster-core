@@ -29,19 +29,19 @@ class PhysicalChannelPostprocessorTest : SdkTest(Build.VERSION_CODES.Q) {
             }
 
             val cells = listOf(
-                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 149, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 224, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null)
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 149, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 224, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),)
             )
 
             val result = PhysicalChannelPostprocessor(pccProvider).postprocess(cells)
 
             val expected = listOf(
-                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = SecondaryConnection(isGuess = false), eci = null, tac = null, pci = 149, band = BandTableLte.map(1275), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 224, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null)
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = SecondaryConnection(isGuess = false), eci = null, tac = null, pci = 149, band = BandTableLte.map(1275), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 224, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),)
             )
 
             result shouldBe expected
@@ -57,19 +57,19 @@ class PhysicalChannelPostprocessorTest : SdkTest(Build.VERSION_CODES.Q) {
             }
 
             val cells = listOf(
-                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 149, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 224, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null)
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 149, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 224, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),)
             )
 
             val result = PhysicalChannelPostprocessor(pccProvider).postprocess(cells)
 
             val expected = listOf(
-                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = SecondaryConnection(isGuess = false), eci = null, tac = null, pci = 149, band = BandTableLte.map(1275), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 224, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null)
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = SecondaryConnection(isGuess = false), eci = null, tac = null, pci = 149, band = BandTableLte.map(1275), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 224, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),)
             )
 
             result shouldBe expected
@@ -84,19 +84,19 @@ class PhysicalChannelPostprocessorTest : SdkTest(Build.VERSION_CODES.Q) {
             }
 
             val cells = listOf(
-                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 149, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 224, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null)
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 149, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 224, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),)
             )
 
             val result = PhysicalChannelPostprocessor(pccProvider).postprocess(cells)
 
             val expected = listOf(
-                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 149, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 224, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null)
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 149, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 224, band = BandTableLte.map(1275), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),)
             )
 
             result shouldBe expected
@@ -111,15 +111,15 @@ class PhysicalChannelPostprocessorTest : SdkTest(Build.VERSION_CODES.Q) {
             }
 
             val cells = listOf(
-                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null)
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),)
             )
 
             val result = PhysicalChannelPostprocessor(pccProvider).postprocess(cells)
 
             val expected = listOf(
-                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null)
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 149, band = BandTableLte.map(2950), bandwidth = 20_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 63, band = BandTableLte.map(2950), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),)
             )
 
             result shouldBe expected
@@ -135,17 +135,17 @@ class PhysicalChannelPostprocessorTest : SdkTest(Build.VERSION_CODES.Q) {
             }
 
             val cells = listOf(
-                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null)
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),)
             )
 
             val result = PhysicalChannelPostprocessor(pccProvider).postprocess(cells)
 
             val expected = listOf(
-                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = SecondaryConnection(isGuess = false), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null)
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = SecondaryConnection(isGuess = false), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),)
             )
 
             result shouldBe expected
@@ -162,19 +162,19 @@ class PhysicalChannelPostprocessorTest : SdkTest(Build.VERSION_CODES.Q) {
             }
 
             val cells = listOf(
-                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null)
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),)
             )
 
             val result = PhysicalChannelPostprocessor(pccProvider).postprocess(cells)
 
             val expected = listOf(
-                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = SecondaryConnection(isGuess = false), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = SecondaryConnection(isGuess = false), eci = null, tac = null, pci = 94, band = BandTableLte.map(3000), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null)
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = SecondaryConnection(isGuess = false), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = SecondaryConnection(isGuess = false), eci = null, tac = null, pci = 94, band = BandTableLte.map(3000), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),)
             )
 
             result shouldBe expected
@@ -191,22 +191,22 @@ class PhysicalChannelPostprocessorTest : SdkTest(Build.VERSION_CODES.Q) {
             }
 
             val cells = listOf(
-                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(1579), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null)
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(1579), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),)
             )
 
             val result = PhysicalChannelPostprocessor(pccProvider).postprocess(cells)
 
             // Do not merge cause we have 2 possible configs but 3 candidates
             val expected = listOf(
-                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(1579), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null),
-                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null)
+                CellLte(connectionStatus = PrimaryConnection(), eci = 1, tac = 1, pci = 118, band = BandTableLte.map(6200), bandwidth = 10_000, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(251), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 94, band = BandTableLte.map(1579), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),),
+                CellLte(connectionStatus = NoneConnection(), eci = null, tac = null, pci = 105, band = BandTableLte.map(3000), bandwidth = null, signal = LTE_SIGNAL, subscriptionId = SUB_ID, network = null, timestamp = null, aggregatedBands = emptyList(),)
             )
 
             result shouldBe expected

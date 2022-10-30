@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.LinearLayout
 import cz.mroczis.netmonster.core.model.cell.*
+import cz.mroczis.netmonster.core.util.nullIf
 
 class CellView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -27,6 +28,9 @@ class CellView @JvmOverloads constructor(
             cell.tac?.let { addView("TAC", it) }
             cell.pci?.let { addView("PCI", it) }
             cell.bandwidth?.let { addView("BW", it) }
+            cell.aggregatedBands.joinToString { "${it.name} (#${it.number})" }.takeIf { it.isNotEmpty() }?.let {
+                addView("Agg. Bands", it)
+            }
 
             cell.timestamp?.let { addView("Timestamp", it) }
             cell.signal.let { signal ->

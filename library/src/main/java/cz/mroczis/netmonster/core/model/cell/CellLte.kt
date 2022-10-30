@@ -5,6 +5,7 @@ import androidx.annotation.IntRange
 import cz.mroczis.netmonster.core.Milliseconds
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.annotation.SinceSdk
+import cz.mroczis.netmonster.core.model.band.AggregatedBandLte
 import cz.mroczis.netmonster.core.model.band.BandLte
 import cz.mroczis.netmonster.core.model.connection.IConnection
 import cz.mroczis.netmonster.core.model.signal.SignalLte
@@ -33,6 +34,13 @@ data class CellLte(
 
     @SinceSdk(Build.VERSION_CODES.N)
     override val band: BandLte?,
+
+    /**
+     * In case of carrier aggregation these bands are aggregated to this cell.
+     * If this list is empty then it does not necessarily mean that aggregation is not in place.
+     */
+    @SinceSdk(Build.VERSION_CODES.R)
+    val aggregatedBands: List<AggregatedBandLte>,
 
     /**
      * Bandwidth in kHz or null if unavailable

@@ -28,6 +28,7 @@ class PrimaryCellPostprocessorTest : FreeSpec({
                 connectionStatus = NoneConnection(),
                 subscriptionId = 0,
                 timestamp = null,
+                aggregatedBands = emptyList(),
             ))
 
             add(CellLte(
@@ -41,6 +42,7 @@ class PrimaryCellPostprocessorTest : FreeSpec({
                 connectionStatus = NoneConnection(),
                 subscriptionId = 0,
                 timestamp = null,
+                aggregatedBands = emptyList(),
             ))
         }
 
