@@ -6,26 +6,26 @@ import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 /**
  * Merges cells from older API and newer API.
  */
-class CellMerger : ICellMerger {
+class CellMerger {
 
     private val primaryMerger : ICellMerger = CellMergerPrimary()
     private val otherMerger : ICellMerger = CellMergerNotPrimary()
 
-    override fun merge(oldApi: List<ICell>, newApi: List<ICell>, displayOn : Boolean) : List<ICell> {
-        val oldPrimary = oldApi.filter { it.connectionStatus is PrimaryConnection }
-        val newPrimary = newApi.filter { it.connectionStatus is PrimaryConnection }
+    fun merge(oldApi: List<ICell>, newApi: List<ICell>, displayOn : Boolean, subscriptions: List<Int>) : List<ICell> =
+        subscriptions.flatMap { subId ->
+            val old = oldApi.filter { it.subscriptionId == subId }
+            val new = newApi.filter { it.subscriptionId == subId }
 
-        val oldOther = oldApi.toMutableList().apply {
-            removeAll(oldPrimary)
-        }
-        val newOther = newApi.toMutableList().apply {
-            removeAll(newPrimary)
-        }
+            val oldPrimary = old.filter { it.connectionStatus is PrimaryConnection }
+            val newPrimary = new.filter { it.connectionStatus is PrimaryConnection }
 
-        return mutableListOf<ICell>().apply {
-            addAll(primaryMerger.merge(oldPrimary, newPrimary, displayOn))
-            addAll(otherMerger.merge(oldOther, newOther, displayOn))
-        }
-    }
+            val oldOther = old.toMutableList().apply {
+                removeAll(oldPrimary)
+            }
+            val newOther = new.toMutableList().apply {
+                removeAll(newPrimary)
+            }
 
+            primaryMerger.merge(oldPrimary, newPrimary, displayOn) + otherMerger.merge(oldOther, newOther, displayOn)
+        }
 }
