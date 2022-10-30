@@ -1,6 +1,7 @@
 package cz.mroczis.netmonster.core.feature.merge
 
 import cz.mroczis.netmonster.core.model.cell.*
+import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 
 /**
  * Merges cells with cells from network registration info.
@@ -15,13 +16,22 @@ class CellNetworkRegistrationMerger {
 
     private infix fun List<ICell>.containsSimilar(other: ICell) = any { candidate ->
         if (candidate.subscriptionId == other.subscriptionId) {
+            val bothPrimaryConnection = candidate.connectionStatus is PrimaryConnection && other.connectionStatus is PrimaryConnection
+            val sameNetworkGeneration = candidate.javaClass == other.javaClass
+
+            if (bothPrimaryConnection && sameNetworkGeneration) {
+                // Happens when data are not synced across the system - multiple primary cells are reported at the same time
+                // in such case ignore network registration source
+                return true
+            }
+
             when (candidate) {
-                is CellGsm -> (other as? CellGsm)?.cid == candidate.cid
-                is CellWcdma -> (other as? CellWcdma)?.ci == candidate.ci
-                is CellLte -> (other as? CellLte)?.eci == candidate.eci
-                is CellNr -> (other as? CellNr)?.nci == candidate.nci
-                is CellCdma -> (other as? CellCdma)?.bid == candidate.bid
-                is CellTdscdma -> (other as? CellTdscdma)?.ci == candidate.ci
+                is CellGsm -> other is CellGsm && other.cid == candidate.cid
+                is CellWcdma -> other is CellWcdma && other.ci == candidate.ci
+                is CellLte -> other is CellLte && other.eci == candidate.eci
+                is CellNr -> other is CellNr && other.nci == candidate.nci
+                is CellCdma -> other is CellCdma && other.bid == candidate.bid
+                is CellTdscdma -> other is CellTdscdma && other.ci == candidate.ci
                 else -> false
             }
         } else false
