@@ -9,6 +9,8 @@ import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.band.BandNr
 import cz.mroczis.netmonster.core.model.cell.CellNr
 import cz.mroczis.netmonster.core.model.connection.IConnection
+import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
+import cz.mroczis.netmonster.core.model.connection.SecondaryConnection
 import cz.mroczis.netmonster.core.model.signal.SignalNr
 import cz.mroczis.netmonster.core.util.inRangeOrNull
 
@@ -42,8 +44,15 @@ internal fun CellIdentityNr.mapCell(
         nci = nci,
         tac = tac,
         pci = pci,
-        connectionStatus = connection,
-        signal = signal ?: SignalNr(),
+        connectionStatus = if (nci == null && connection is PrimaryConnection) {
+            // Pixel 7 (Pro) whilst actively connected to NSA NR returns only one NR cell saying it's a primary one
+            // Cell must be NR SA in order to serve independently. Hence without proper NCI primary connection
+            // is not permitted
+            SecondaryConnection(isGuess = false)
+        } else {
+            connection
+        },
+        signal = signal ?: SignalNr (),
         band = band,
         subscriptionId = subId,
         timestamp = timestamp

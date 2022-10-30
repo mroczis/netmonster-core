@@ -13,20 +13,23 @@ import cz.mroczis.netmonster.core.model.connection.SecondaryConnection
  */
 class InvalidSecondaryCellsPostprocessor : ICellPostprocessor {
 
-    override fun postprocess(list: List<ICell>): List<ICell> {
-        val invalid = list.all { it.connectionStatus is PrimaryConnection || (it.connectionStatus as? SecondaryConnection)?.isGuess == false }
-        return if (invalid) {
-            list.map {
-                if ((it.connectionStatus as? SecondaryConnection)?.isGuess == false) {
-                    it.let(CellConnectionSwitcher)
-                } else {
-                    it
+    override fun postprocess(list: List<ICell>): List<ICell> =
+        list.groupBy { it.subscriptionId }.flatMap { (_, cells) ->
+            val invalid = list.all { it.connectionStatus is PrimaryConnection || (it.connectionStatus as? SecondaryConnection)?.isGuess == false }
+            if (invalid) {
+                val hasPrimary = cells.any { it.connectionStatus is PrimaryConnection }
+                cells.map { cell ->
+                    if ((cell.connectionStatus as? SecondaryConnection)?.isGuess == false && hasPrimary) {
+                        cell.let(CellConnectionSwitcher)
+                    } else {
+                        cell
+                    }
                 }
+            } else {
+                list
             }
-        } else {
-            list
         }
-    }
+
 
     private object CellConnectionSwitcher : ICellProcessor<ICell> {
         override fun processCdma(cell: CellCdma): ICell = cell.copy(connectionStatus = NoneConnection())
