@@ -132,9 +132,9 @@ internal class NetMonster(
 
         } else emptyList()
 
-        val mergedOldNew = oldAndNewCellMerger.merge(oldApi, newApi, context.isDisplayOn(), subscriptions)
-        val mergedWithSignal = signalMerger.merge(mergedOldNew, signalApi)
-        return networkRegistrationMerger.merge(mergedWithSignal, networkRegistrationApi)
+        val mergedWithRegistration = networkRegistrationMerger.merge(newApi, networkRegistrationApi)
+        val mergedOldNew = oldAndNewCellMerger.merge(oldApi, mergedWithRegistration, context.isDisplayOn(), subscriptions)
+        return signalMerger.merge(mergedOldNew, signalApi)
     }
 
     @RequiresPermission(
