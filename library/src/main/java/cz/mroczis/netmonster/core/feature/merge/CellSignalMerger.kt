@@ -1,10 +1,12 @@
 package cz.mroczis.netmonster.core.feature.merge
 
+import cz.mroczis.netmonster.core.model.cell.CellLte
 import cz.mroczis.netmonster.core.model.cell.CellNr
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.connection.NoneConnection
 import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 import cz.mroczis.netmonster.core.model.connection.SecondaryConnection
+import cz.mroczis.netmonster.core.model.signal.SignalLte
 
 /**
  * Merges data from new API represented by [CellSource.ALL_CELL_INFO] and
@@ -13,50 +15,70 @@ import cz.mroczis.netmonster.core.model.connection.SecondaryConnection
 internal class CellSignalMerger {
 
     /**
-     * Merge in this case adds cell from [signalApi] if [newApi] does not contain
-     * NR cell that is bound to same the subscription id and is primary.
+     * Merge in this case adds nr cells from [signalApi] if [newApi] does not contain
+     * NR cell that is bound to same the subscription id and is primary, it also adds LTE signal
+     * if it's missing in the LTE primary cell
      */
-    fun merge(newApi: List<ICell>, signalApi: List<CellNr>): List<ICell> {
+    fun merge(newApi: List<ICell>, signalApi: List<ICell>): List<ICell> {
         val nrCells = newApi.filterIsInstance(CellNr::class.java)
-        val nonPresentNr = signalApi.toMutableList().filter { signalCell ->
+        val signalApiNr = signalApi.filterIsInstance(CellNr::class.java)
+        val nonPresentNr = signalApiNr.toMutableList().filter { signalCell ->
             nrCells.find {
                 it.subscriptionId == signalCell.subscriptionId && it.connectionStatus is PrimaryConnection
             } == null
         }
 
-        return if (nonPresentNr.isEmpty()) {
-            newApi
-        } else {
-            if (nrCells.size == 1 && signalApi.size == 1) {
+        val newApiMutable = newApi.toMutableList()
+
+        if (nonPresentNr.isNotEmpty()) {
+            if (nrCells.size == 1 && signalApiNr.size == 1) {
                 // Usually NR in NSA, signal source has correct signal, CellInfo source has PSC and ARFCN, must merge manually
                 // HUAWEI CDY-NX9A
-                val mergedCell = nrCells[0] mergeWith signalApi[0]
-                newApi.toMutableList().apply {
+                val mergedCell = nrCells[0] mergeWith signalApiNr[0]
+                newApiMutable.apply {
                     remove(nrCells[0])
                     add(mergedCell)
                 }
-            } else if (nrCells.size > 1 && signalApi.size == 1) {
+            } else if (nrCells.size > 1 && signalApiNr.size == 1) {
                 // Multiple NR cells (two sims with working 5G), decide using subscription id
-                val targetSub = signalApi[0].subscriptionId
+                val targetSub = signalApiNr[0].subscriptionId
                 val sourceCell = nrCells.find { it.subscriptionId == targetSub }
                 if (sourceCell != null) {
-                    val mergedCell = sourceCell mergeWith signalApi[0]
-                    newApi.toMutableList().apply {
+                    val mergedCell = sourceCell mergeWith signalApiNr[0]
+                    newApiMutable.apply {
                         remove(nrCells[0])
                         add(mergedCell)
                     }
                 } else {
                     // No matching sub, pass everything
-                    newApi.toMutableList().apply {
+                    newApiMutable.apply {
                         addAll(nonPresentNr)
-                    }.toList()
+                    }
                 }
             } else {
-                newApi.toMutableList().apply {
+                newApiMutable.apply {
                     addAll(nonPresentNr)
-                }.toList()
+                }
             }
         }
+
+        val ltePCCnoSignal = newApi.filterIsInstance(CellLte::class.java)
+            .filter { it.connectionStatus is PrimaryConnection && it.signal == SignalLte.EMPTY }
+        if (ltePCCnoSignal.isNotEmpty()) {
+            val signalApiLte = signalApi.filterIsInstance(CellLte::class.java)
+            ltePCCnoSignal.forEach { ltePCC ->
+                signalApiLte.find { it.subscriptionId == ltePCC.subscriptionId }
+                    ?.let {
+                        val mergedCell = ltePCC mergeWith it
+                        newApiMutable.apply {
+                            remove(ltePCC)
+                            add(mergedCell)
+                        }
+                    }
+            }
+        }
+
+        return newApiMutable.toList()
     }
 
 
@@ -77,6 +99,10 @@ internal class CellSignalMerger {
             ssRsrq = signal.ssRsrq minOr other.signal.ssRsrq,
             ssSinr = signal.ssSinr minOr other.signal.ssSinr
         )
+    )
+
+    private infix fun CellLte.mergeWith(other: CellLte): CellLte = copy(
+        signal = other.signal.merge(signal)
     )
 
     /**
