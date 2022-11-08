@@ -58,7 +58,7 @@ data class SignalNr(
     internal constructor() : this(null, null, null, null, null, null)
 
     override val dbm: Int?
-        get() = csiRsrp
+        get() = ssRsrp
 
     /**
      * Same as [csiRsrp] just different unit.
