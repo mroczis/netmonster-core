@@ -57,7 +57,7 @@ class CellMapperNrTest29 : SdkTest(Build.VERSION_CODES.Q) {
                 }
 
                 signal.apply {
-                    dbm shouldBe CSI_RSRP
+                    dbm shouldBe SS_RSRP
                     csiRsrp shouldBe CSI_RSRP
                     csiRsrq shouldBe CSI_RSRQ
                     csiSinr shouldBe CSI_SINR
