@@ -19,7 +19,7 @@ class InvalidSecondaryCellsPostprocessor : ICellPostprocessor {
             if (invalid) {
                 val hasPrimary = cells.any { it.connectionStatus is PrimaryConnection }
                 cells.map { cell ->
-                    if ((cell.connectionStatus as? SecondaryConnection)?.isGuess == false && hasPrimary) {
+                    if ((cell.connectionStatus as? SecondaryConnection)?.isGuess == false && (hasPrimary || (cell as? CellNr)?.network == null)) {
                         cell.let(CellConnectionSwitcher)
                     } else {
                         cell
