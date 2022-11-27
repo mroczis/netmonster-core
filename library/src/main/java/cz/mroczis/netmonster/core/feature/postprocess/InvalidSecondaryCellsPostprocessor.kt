@@ -26,7 +26,7 @@ class InvalidSecondaryCellsPostprocessor : ICellPostprocessor {
                     }
                 }
             } else {
-                list
+                cells
             }
         }
 

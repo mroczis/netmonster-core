@@ -149,6 +149,7 @@ class ComplexPostprocessingTests29 : SdkTest(Build.VERSION_CODES.Q) {
             val postprocessors = listOf(
                 MocnNetworkPostprocessor(subManager, networkOperatorSimulation, serviceStateSimulation),
                 InvalidCellsPostprocessor(),
+                InvalidSecondaryCellsPostprocessor(),
                 PrimaryCellPostprocessor(),
                 SubDuplicitiesPostprocessor(subManager, networkOperatorSimulation),
                 PlmnPostprocessor()
