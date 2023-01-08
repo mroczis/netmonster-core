@@ -3,7 +3,6 @@ package cz.mroczis.netmonster.core.db
 import cz.mroczis.netmonster.core.db.model.BandEntity
 import cz.mroczis.netmonster.core.db.model.IBandEntity
 import cz.mroczis.netmonster.core.model.band.BandLte
-import cz.mroczis.netmonster.core.model.band.IBand
 
 /**
  * [3GPP 36.101](https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=2411)
@@ -83,8 +82,28 @@ object BandTableLte {
         BandEntity(70_596..70_645, "410", 88)
     )
 
-    internal fun get(earfcn: Int): IBandEntity? =
-        bands.firstOrNull { it.channelRange.contains(earfcn) }
+    /**
+     * Some devices report max EARFCN as 2^16, however max possible value is higher.
+     * Returned values are equal to remainder after division by 2^16.
+     * Example: 1275 (b3) in Canada eventually equals to 66811 = 1275 + 2^16 (b66)
+     * This map contains mapping of MCC to ranges that are 100 % invalid and 2^16 should be added to an EARFCN.
+     *
+     * For ranges explanation have a look at: https://github.com/mroczis/netmonster-core/issues/59#issuecomment-1374842154
+     */
+    private val integerOverflowFix = mapOf(
+        "228" to listOf(1_950..1_999, 3_930..4_779), // Switzerland, b67 (non-overlapping part with b3) + b75
+        "302" to listOf(900..1_799, 3_050..3_399), // Canada, b66 + b71
+        "310" to listOf(1_200..1_799, 3_050..3_399), // USA, b66 (non-overlapping part with b2) + b71
+        "466" to listOf(900..1_199), // Taiwan, b66 (non-overlapping part with b3)
+        "730" to listOf(900..1_799), // Chile, b66
+    )
+
+    internal fun get(earfcn: Int, mcc: String? = null): IBandEntity? =
+        if (mcc != null && integerOverflowFix[mcc]?.any { range -> earfcn in range } == true) {
+            bands.firstOrNull { it.channelRange.contains(earfcn + 65536) }
+        } else {
+            bands.firstOrNull { it.channelRange.contains(earfcn) }
+        }
 
     internal fun getByNumber(number: Int): IBandEntity? =
         bands.firstOrNull { it.number == number }
@@ -94,13 +113,18 @@ object BandTableLte {
      * Attempts to find current band information depending on [earfcn].
      * If no such band is found then result [BandLte] will contain only [BandLte.downlinkEarfcn].
      */
-    fun map(earfcn: Int): BandLte {
-        val raw = get(earfcn)
+    fun map(earfcn: Int, mcc: String? = null): BandLte {
+        val raw = get(earfcn, mcc)
         return BandLte(
             downlinkEarfcn = earfcn,
             number = raw?.number,
             name = raw?.name
         )
     }
+
+    private data class CountryOverride(
+        val range: IntRange,
+        val addition: Int,
+    )
 
 }

@@ -39,7 +39,7 @@ internal fun CellIdentityLte.mapCell(
     } else null
 
     val band = if (earfcn != null) {
-        BandTableLte.map(earfcn)
+        BandTableLte.map(earfcn = earfcn, mcc = network?.mcc)
     } else null
 
     val suggestedBands = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

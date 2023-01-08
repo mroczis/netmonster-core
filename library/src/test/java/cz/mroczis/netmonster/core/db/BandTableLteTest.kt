@@ -18,5 +18,11 @@ class BandTableLteTest : FreeSpec() {
                 name shouldBe "800"
             }
         }
+
+        "EARFCN overflow band fix" {
+            BandTableLte.map(1_275, mcc = null).number shouldBe 3
+            BandTableLte.map(1_275, mcc = "230").number shouldBe 3
+            BandTableLte.map(1_275, mcc = "302").number shouldBe 66
+        }
     }
 }
