@@ -36,6 +36,7 @@ class BandTableNrTest : FreeSpec() {
         // Multiple bands with different name that have nothing in common
         "Band 77,78 overlap" {
             BandTableNr.get(653_144) shouldBe null
+            BandTableNr.get(632_000) shouldBe null
         }
 
         // Bands that overlap but have common name
