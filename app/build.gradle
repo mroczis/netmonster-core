@@ -35,6 +35,7 @@ android {
         jvmTarget = '1.8'
     }
 
+    namespace 'cz.mroczis.netmonster.sample'
 }
 
 dependencies {

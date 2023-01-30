@@ -72,7 +72,7 @@ object BandTableNr {
                     // Note that not all bands do support 5 MHz BW but it's the smallest possible value
                     // Also we assume that there are no gaps non-5 MHz between blocks and 1st assigned one's
                     // arfcn is the lowest possible for given band
-                    val startFrequency = getFrequency(candidate.channelRange.last)
+                    val startFrequency = getFrequency(candidate.channelRange.first)
                     val frequency = getFrequency(arfcn)
 
                     (startFrequency - frequency).rem(SMALLEST_BANDWIDTH) == 0
