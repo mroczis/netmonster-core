@@ -72,6 +72,7 @@ internal class NetMonster(
             setEnabled = { storage.locationAreaEndiannessIncorrect = true },
             isEnabled = { storage.locationAreaEndiannessIncorrect },
         ),
+        PixelTensorPostprocessor(),
     )
 
     @WorkerThread
