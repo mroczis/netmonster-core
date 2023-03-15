@@ -92,7 +92,7 @@ object BandTableLte {
      */
     private val integerOverflowFix = mapOf(
         "228" to listOf(1_950..1_999, 3_930..4_779), // Switzerland, b67 (non-overlapping part with b3) + b75
-        "302" to listOf(1_200..1_799, 3_050..3_399), // Canada, b66 (non-overlapping part with b2) + b71
+        "302" to listOf(1_200..1_799), // Canada, b66 (non-overlapping part with b2)
         "310" to listOf(1_200..1_799, 3_050..3_399), // USA, b66 (non-overlapping part with b2) + b71
         "311" to listOf(1_200..1_799, 3_050..3_399), // USA, b66 (non-overlapping part with b2) + b71
         "466" to listOf(900..1_199), // Taiwan, b66 (non-overlapping part with b3)
