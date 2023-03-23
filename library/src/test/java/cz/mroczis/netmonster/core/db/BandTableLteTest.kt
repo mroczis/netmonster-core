@@ -23,6 +23,8 @@ class BandTableLteTest : FreeSpec() {
             BandTableLte.map(1_275, mcc = null).number shouldBe 3
             BandTableLte.map(1_275, mcc = "230").number shouldBe 3
             BandTableLte.map(1_275, mcc = "302").number shouldBe 66
+            BandTableLte.map(3_050, mcc = "310").number shouldBe 71
+            BandTableLte.map(1_275, mcc = "302").number shouldBe 7
         }
     }
 }
