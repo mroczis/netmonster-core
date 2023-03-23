@@ -38,9 +38,9 @@ object BandTableNr {
         BandEntity(376_000..384_000, "1900", 39),
         BandEntity(386_000..398_000, "1900", 2),
         BandEntity(386_000..399_000, "1900", 25),
-        BandEntity(399_000..404_000, "2000", 70),
+        BandEntity(399_000..404_000, "AWS", 70),
         BandEntity(402_000..405_000, "2000", 34),
-        BandEntity(422_000..440_000, "2100", 66),
+        BandEntity(422_000..440_000, "AWS", 66),
         BandEntity(422_000..434_000, "2100", 1),
         BandEntity(422_000..440_000, "2100", 65),
         BandEntity(460_000..480_000, "2300", 40),
@@ -53,7 +53,9 @@ object BandTableNr {
         BandEntity(620_000..680_000, "3700", 77),
         BandEntity(620_000..653_333, "3500", 78),
         BandEntity(636_667..646_666, "3600", 48),
-        BandEntity(693_334..733_333, "4500", 79)
+        BandEntity(693_334..733_333, "4500", 79),
+        BandEntity(743_334..795_000, "5200", 46),
+        BandEntity(790_334..795_000, "5900", 47),
     )
 
     internal fun get(arfcn: Int, bandHints: IntArray = intArrayOf()): IBandEntity? {
