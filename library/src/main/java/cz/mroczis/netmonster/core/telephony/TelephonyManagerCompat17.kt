@@ -8,6 +8,7 @@ import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.callback.CellCallbackError
 import cz.mroczis.netmonster.core.callback.CellCallbackSuccess
 import cz.mroczis.netmonster.core.model.cell.ICell
@@ -24,7 +25,7 @@ import cz.mroczis.netmonster.core.util.DirectExecutor
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 internal open class TelephonyManagerCompat17(
     context: Context,
-    subId: Int = Integer.MAX_VALUE
+    subId: SubscriptionId = Int.MAX_VALUE
 ) : TelephonyManagerCompat14(context, subId){
 
 

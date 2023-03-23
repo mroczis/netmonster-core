@@ -7,6 +7,7 @@ import android.telephony.cdma.CdmaCellLocation
 import android.telephony.gsm.GsmCellLocation
 import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.db.NetworkTypeTable
 import cz.mroczis.netmonster.core.db.model.NetworkType
 import cz.mroczis.netmonster.core.feature.config.CellLocationSource
@@ -62,7 +63,7 @@ class CellLocationMapper(
     }
 
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE])
-    private fun map(model: GsmCellLocation, signalStrength: SignalStrength?, subId: Int): ICell? {
+    private fun map(model: GsmCellLocation, signalStrength: SignalStrength?, subId: SubscriptionId): ICell? {
         val network = NetworkTypeTable.get(telephony.networkType)
         val cid = model.cid
         val plmn = getNetworkOperator.invoke()
@@ -105,7 +106,7 @@ class CellLocationMapper(
      */
     @WorkerThread
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION])
-    private fun getUpdatedLocationAndSignal(subId: Int?): ScanResult =
+    private fun getUpdatedLocationAndSignal(subId: SubscriptionId?): ScanResult =
         ScanResult(
             location = cellLocationSource.get(telephony, subId),
             signal = signalStrengthSource.get(telephony, subId)

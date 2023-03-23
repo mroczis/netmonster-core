@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import cz.mroczis.netmonster.core.INetMonster
 import cz.mroczis.netmonster.core.NetMonster
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.model.NetMonsterConfig
 import cz.mroczis.netmonster.core.subscription.ISubscriptionManagerCompat
 import cz.mroczis.netmonster.core.subscription.SubscriptionManagerCompat14
@@ -23,7 +24,7 @@ object NetMonsterFactory {
      * Creates new instance of [ITelephonyManagerCompat] that is bound to specified
      * subscription id ([subId]) if applicable for current Android version.
      */
-    fun getTelephony(context: Context, subId: Int = Integer.MAX_VALUE): ITelephonyManagerCompat =
+    fun getTelephony(context: Context, subId: SubscriptionId = Integer.MAX_VALUE): ITelephonyManagerCompat =
         when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> TelephonyManagerCompat30(context, subId)
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> TelephonyManagerCompat29(context, subId)

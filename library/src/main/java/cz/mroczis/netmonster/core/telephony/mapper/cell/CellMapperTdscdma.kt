@@ -4,6 +4,7 @@ import android.annotation.TargetApi
 import android.os.Build
 import android.telephony.CellIdentityTdscdma
 import android.telephony.CellSignalStrengthTdscdma
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.db.BandTableTdscdma
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.band.BandTdscdma
@@ -40,7 +41,7 @@ internal fun CellSignalStrengthTdscdma.mapSignal(): SignalTdscdma {
  */
 @TargetApi(Build.VERSION_CODES.Q)
 internal fun CellIdentityTdscdma.mapCell(
-    subId: Int,
+    subId: SubscriptionId,
     connection: IConnection,
     signal: SignalTdscdma,
     timestamp: Long? = null,

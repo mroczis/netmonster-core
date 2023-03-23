@@ -3,6 +3,7 @@ package cz.mroczis.netmonster.core.feature.postprocess
 import android.Manifest
 import android.os.Build
 import androidx.annotation.RequiresPermission
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
@@ -24,7 +25,7 @@ import cz.mroczis.netmonster.core.subscription.ISubscriptionManagerCompat
  */
 class SubDuplicitiesPostprocessor(
     private val subscription: ISubscriptionManagerCompat,
-    private val networkOperatorGetter: (subId: Int) -> Network?
+    private val networkOperatorGetter: (subId: SubscriptionId) -> Network?
 ) : ICellPostprocessor {
 
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])

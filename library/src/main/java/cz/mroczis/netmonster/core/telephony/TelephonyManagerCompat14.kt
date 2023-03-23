@@ -10,6 +10,7 @@ import android.telephony.SignalStrength
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.callback.CellCallbackError
 import cz.mroczis.netmonster.core.callback.CellCallbackSuccess
 import cz.mroczis.netmonster.core.db.NetworkTypeTable
@@ -35,7 +36,7 @@ import java.util.concurrent.TimeUnit
  */
 internal open class TelephonyManagerCompat14(
     protected val context: Context,
-    protected val subId: Int
+    protected val subId: SubscriptionId
 ) : ITelephonyManagerCompat {
 
     protected val telephony: TelephonyManager

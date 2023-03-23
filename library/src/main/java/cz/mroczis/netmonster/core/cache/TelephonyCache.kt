@@ -2,6 +2,7 @@ package cz.mroczis.netmonster.core.cache
 
 import android.telephony.TelephonyManager
 import cz.mroczis.netmonster.core.Milliseconds
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.cache.TelephonyCache.LIFETIME
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -27,7 +28,7 @@ internal object TelephonyCache {
      * [event] - one of PhoneStateListener.LISTEN_* constants
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T> getOrUpdate(subId: Int?, event: Event, update: () -> T?): T? {
+    fun <T> getOrUpdate(subId: SubscriptionId?, event: Event, update: () -> T?): T? {
         // Make sure that there will be only one instance of a key
         val key = synchronized(this) {
             val modelKey = Key(subId = subId, event = event)
@@ -63,7 +64,7 @@ internal object TelephonyCache {
      * Key here serves as a set of unique identifiers required to perform data update
      */
     private data class Key(
-        val subId: Int?,
+        val subId: SubscriptionId?,
         val event: Event,
     )
 

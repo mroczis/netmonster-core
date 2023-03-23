@@ -6,6 +6,7 @@ import android.os.Build
 import android.telephony.*
 import androidx.annotation.RequiresPermission
 import cz.mroczis.netmonster.core.Milliseconds
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.telephony.mapper.cell.mapCell
 import cz.mroczis.netmonster.core.telephony.mapper.cell.mapConnection
@@ -16,7 +17,7 @@ import cz.mroczis.netmonster.core.telephony.mapper.cell.mapSignal
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 class CellInfoMapper(
-    private val subId: Int
+    private val subId: SubscriptionId
 ) : ICellMapper<List<CellInfo>?> {
 
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)

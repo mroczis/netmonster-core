@@ -7,6 +7,7 @@ import android.telephony.CellSignalStrengthGsm
 import android.telephony.CellSignalStrengthWcdma
 import android.telephony.SignalStrength
 import android.telephony.gsm.GsmCellLocation
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.db.BandTableGsm
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.band.BandGsm
@@ -72,7 +73,7 @@ private fun CellSignalStrengthWcdma.mapWcdmaSignalToGsm(): SignalGsm {
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 internal fun CellIdentityGsm.mapCell(
-    subId: Int,
+    subId: SubscriptionId,
     connection: IConnection,
     signal: SignalGsm,
     timestamp: Long? = null,
@@ -131,7 +132,7 @@ internal fun CellIdentityGsm.mapNetwork(): Network? =
 
 @Suppress("DEPRECATION")
 internal fun GsmCellLocation.mapGsm(
-    subId: Int,
+    subId: SubscriptionId,
     signalStrength: SignalStrength?,
     network: Network?,
 ): ICell? {

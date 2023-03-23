@@ -73,6 +73,10 @@ internal class NetMonster(
             isEnabled = { storage.locationAreaEndiannessIncorrect },
         ),
         PixelTensorPostprocessor(),
+        TimingAdvancePostprocessor(
+            setValidTaDetected = { id -> storage.setReportsLteTimingAdvance(id, true) },
+            wasValidTaDetected = { id -> storage.getReportsLteTimingAdvance(id) }
+        ),
     )
 
     @WorkerThread
@@ -141,7 +145,7 @@ internal class NetMonster(
     @RequiresPermission(
         allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE]
     )
-    override fun getNetworkType(subId: Int): NetworkType = getNetworkType(
+    override fun getNetworkType(subId: SubscriptionId): NetworkType = getNetworkType(
         subId,
         DetectorHspaDc(),
         DetectorLteAdvancedNrServiceState(),
@@ -150,19 +154,19 @@ internal class NetMonster(
         DetectorAosp() // best to keep last when all other strategies fail
     ) ?: NetworkTypeTable.get(NetworkType.UNKNOWN)
 
-    override fun getNetworkType(subId: Int, vararg detectors: INetworkDetector): NetworkType? {
+    override fun getNetworkType(subId: SubscriptionId, vararg detectors: INetworkDetector): NetworkType? {
         val telephony = getTelephony(subId)
         return detectors.firstNotNullOfOrNull { detector ->
             detector.detect(this, telephony)
         }
     }
 
-    override fun getPhysicalChannelConfiguration(subId: Int): List<PhysicalChannelConfig> =
+    override fun getPhysicalChannelConfiguration(subId: SubscriptionId): List<PhysicalChannelConfig> =
         getTelephony(subId).getTelephonyManager()?.let {
             physicalChannelSource.get(it, subId)
         } ?: emptyList()
 
-    private fun getTelephony(subId: Int): ITelephonyManagerCompat {
+    private fun getTelephony(subId: SubscriptionId): ITelephonyManagerCompat {
         return NetMonsterFactory.getTelephony(context, subId)
     }
 

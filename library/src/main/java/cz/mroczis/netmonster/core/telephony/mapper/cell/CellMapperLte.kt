@@ -6,6 +6,7 @@ import android.telephony.CellIdentityLte
 import android.telephony.CellSignalStrengthLte
 import android.telephony.SignalStrength
 import android.telephony.gsm.GsmCellLocation
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.db.BandTableLte
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.band.AggregatedBandLte
@@ -23,7 +24,7 @@ import kotlin.math.abs
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 internal fun CellIdentityLte.mapCell(
-    subId: Int,
+    subId: SubscriptionId,
     connection: IConnection,
     signal: SignalLte,
     timestamp: Long? = null,
@@ -200,7 +201,7 @@ internal fun CellIdentityLte.mapNetwork(): Network? =
     }
 
 @Suppress("DEPRECATION")
-internal fun GsmCellLocation.mapLte(subId: Int, signalStrength: SignalStrength?, network: Network?): ICell? {
+internal fun GsmCellLocation.mapLte(subId: SubscriptionId, signalStrength: SignalStrength?, network: Network?): ICell? {
     val ci = cid.inRangeOrNull(CellLte.CID_RANGE)
     val tac = lac.inRangeOrNull(CellLte.TAC_RANGE)
 

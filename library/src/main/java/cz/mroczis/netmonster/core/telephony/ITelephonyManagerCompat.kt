@@ -8,6 +8,7 @@ import android.telephony.SignalStrength
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.callback.CellCallbackError
 import cz.mroczis.netmonster.core.callback.CellCallbackSuccess
 import cz.mroczis.netmonster.core.db.model.NetworkType
@@ -27,7 +28,7 @@ interface ITelephonyManagerCompat {
     /**
      * Current subscriber id, [Int.MAX_VALUE] if invalid or unspecified
      */
-    fun getSubscriberId(): Int
+    fun getSubscriberId(): SubscriptionId
 
     /**
      * Requests all available cell information from all radios on the device including the

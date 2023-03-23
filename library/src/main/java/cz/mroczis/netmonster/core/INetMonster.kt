@@ -78,7 +78,7 @@ interface INetMonster {
     @RequiresPermission(
         allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE]
     )
-    fun getNetworkType(subId: Int) : NetworkType
+    fun getNetworkType(subId: SubscriptionId) : NetworkType
 
     /**
      * Attempts to detect current network type using selected [detectors].
@@ -100,7 +100,7 @@ interface INetMonster {
      * @param detectors - set of detectors that are used to determine [NetworkType]
      */
     @WorkerThread
-    fun getNetworkType(subId: Int, vararg detectors: INetworkDetector) : NetworkType?
+    fun getNetworkType(subId: SubscriptionId, vararg detectors: INetworkDetector) : NetworkType?
 
     /**
      * Obtains synchronously currently active configurations for physical channel.
@@ -123,6 +123,6 @@ interface INetMonster {
         sdkInt = Build.VERSION_CODES.Q,
         fallbackBehaviour = "Way to access this data was removed, expect empty list on Android Q+"
     )
-    fun getPhysicalChannelConfiguration(subId: Int) : List<PhysicalChannelConfig>
+    fun getPhysicalChannelConfiguration(subId: SubscriptionId) : List<PhysicalChannelConfig>
 
 }

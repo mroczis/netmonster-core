@@ -7,6 +7,7 @@ import android.os.Build
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.callback.CellCallbackError
 import cz.mroczis.netmonster.core.callback.CellCallbackSuccess
 import cz.mroczis.netmonster.core.model.cell.ICell
@@ -21,7 +22,7 @@ import cz.mroczis.netmonster.core.util.DirectExecutor
 @TargetApi(Build.VERSION_CODES.Q)
 internal open class TelephonyManagerCompat29(
     context: Context,
-    subId: Int = Integer.MAX_VALUE
+    subId: SubscriptionId = Int.MAX_VALUE
 ) : TelephonyManagerCompat17(context, subId) {
 
 

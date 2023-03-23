@@ -4,6 +4,7 @@ import android.annotation.TargetApi
 import android.os.Build
 import android.telephony.*
 import androidx.annotation.RequiresApi
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.cache.TelephonyCache
 import cz.mroczis.netmonster.core.util.SingleEventPhoneStateListener
 
@@ -21,10 +22,10 @@ class SignalStrengthsSource {
      *
      * On Android O and newer directly grabs [ServiceState] from [TelephonyManager].
      */
-    fun get(telephonyManager: TelephonyManager, subId: Int?): SignalStrength? =
+    fun get(telephonyManager: TelephonyManager, subId: SubscriptionId?): SignalStrength? =
         getFresh(telephonyManager, subId) ?: getCached(telephonyManager)
 
-    private fun getFresh(telephonyManager: TelephonyManager, subId: Int?): SignalStrength? =
+    private fun getFresh(telephonyManager: TelephonyManager, subId: SubscriptionId?): SignalStrength? =
         TelephonyCache.getOrUpdate(subId, TelephonyCache.Event.SIGNAL_STRENGTHS) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 telephonyManager.requestSingleUpdate { signalStrengthListener(it) }
@@ -48,7 +49,7 @@ class SignalStrengthsSource {
      */
     @TargetApi(Build.VERSION_CODES.R)
     private fun signalStrengthListener(
-        subId: Int?,
+        subId: SubscriptionId?,
         onChanged: UpdateResult<SingleEventPhoneStateListener, SignalStrength>
     ) = object : SingleEventPhoneStateListener(LISTEN_SIGNAL_STRENGTHS, subId) {
         override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {

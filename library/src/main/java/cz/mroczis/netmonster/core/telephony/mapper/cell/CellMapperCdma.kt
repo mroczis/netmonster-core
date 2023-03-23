@@ -6,6 +6,7 @@ import android.telephony.CellIdentityCdma
 import android.telephony.CellSignalStrengthCdma
 import android.telephony.SignalStrength
 import android.telephony.cdma.CdmaCellLocation
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.cell.CellCdma
 import cz.mroczis.netmonster.core.model.cell.ICell
@@ -40,7 +41,7 @@ internal fun CellSignalStrengthCdma.mapSignal(): SignalCdma {
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 internal fun CellIdentityCdma.mapCell(
-    subId: Int,
+    subId: SubscriptionId,
     connection: IConnection,
     signal: SignalCdma,
     timestamp: Long? = null,
@@ -69,7 +70,7 @@ internal fun CellIdentityCdma.mapCell(
 }
 
 @Suppress("DEPRECATION")
-internal fun CdmaCellLocation.mapCdma(subId: Int, signal: SignalStrength?): ICell? {
+internal fun CdmaCellLocation.mapCdma(subId: SubscriptionId, signal: SignalStrength?): ICell? {
     val bid = baseStationId.inRangeOrNull(CellCdma.BID_RANGE)
     val nid = networkId.inRangeOrNull(CellCdma.NID_RANGE)
     val sid = systemId.inRangeOrNull(CellCdma.SID_RANGE)

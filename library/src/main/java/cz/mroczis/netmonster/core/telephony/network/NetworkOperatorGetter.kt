@@ -4,6 +4,7 @@ import android.Manifest
 import android.os.Build
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.telephony.ITelephonyManagerCompat
 import java.lang.reflect.Method
@@ -59,15 +60,15 @@ internal class NetworkOperatorGetter : INetworkGetter {
             ?: getFromServiceState(telephony)
             ?: getFromNetworkOperator(telephony.getTelephonyManager())
 
-    private fun getFromReflection(telephony: TelephonyManager?, subId: Int) =
+    private fun getFromReflection(telephony: TelephonyManager?, subId: SubscriptionId) =
         if (existingMethods.isNotEmpty() && telephony != null) {
-            existingMethods.mapNotNull { method ->
+            existingMethods.firstNotNullOfOrNull { method ->
                 try {
                     Network.map(method.invoke(telephony, subId) as? String)
                 } catch (ignored: Throwable) {
                     null
                 }
-            }.firstOrNull()
+            }
         } else null
 
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])

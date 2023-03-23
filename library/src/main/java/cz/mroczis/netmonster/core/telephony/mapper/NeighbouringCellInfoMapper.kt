@@ -3,6 +3,7 @@ package cz.mroczis.netmonster.core.telephony.mapper
 import android.os.Build
 import android.telephony.NeighboringCellInfo
 import android.telephony.TelephonyManager
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.db.NetworkTypeTable
 import cz.mroczis.netmonster.core.db.model.NetworkType
 import cz.mroczis.netmonster.core.model.Network
@@ -31,7 +32,7 @@ import cz.mroczis.netmonster.core.util.inRangeOrNull
 @Suppress("DEPRECATION")
 class NeighbouringCellInfoMapper(
     private val telephony: TelephonyManager,
-    private val subId: Int
+    private val subId: SubscriptionId
 ) : ICellMapper<List<NeighboringCellInfo>?> {
 
     override fun map(model: List<NeighboringCellInfo>?): List<ICell> {

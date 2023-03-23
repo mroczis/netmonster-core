@@ -1,5 +1,7 @@
 package cz.mroczis.netmonster.core.db.local
 
+import cz.mroczis.netmonster.core.SubscriptionId
+
 interface ILocalStorage {
 
     /**
@@ -15,4 +17,16 @@ interface ILocalStorage {
      * LTE cell directly via getAllCellInfo() method
      */
     var reportsLteBandwidthDirectly: Boolean
+
+    /**
+     * Changes if this device reposted at least timing advance in LTE network
+     * higher than 0 for given subscription ([id])
+     */
+    fun setReportsLteTimingAdvance(id: SubscriptionId, reports: Boolean)
+
+    /**
+     * True if this device reposted at least timing advance in LTE network
+     * higher than 0 for given subscription ([id])
+     */
+    fun getReportsLteTimingAdvance(id: SubscriptionId): Boolean
 }

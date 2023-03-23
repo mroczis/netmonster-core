@@ -1,6 +1,7 @@
 package cz.mroczis.netmonster.core.feature.postprocess
 
 import android.telephony.ServiceState
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.db.BandTableLte
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.SubscribedNetwork
@@ -27,7 +28,7 @@ class MocnNetworkPostprocessorTest : FreeSpec({
             )
     }
 
-    val networkOperatorSimulation: (Int) -> Network? = { subId ->
+    val networkOperatorSimulation: (SubscriptionId) -> Network? = { subId ->
         when (subId) {
             1 -> pairB
             2 -> pairA

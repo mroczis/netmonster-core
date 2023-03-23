@@ -9,6 +9,7 @@ import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.cache.TelephonyCache
 import cz.mroczis.netmonster.core.model.DisplayInfo
 import cz.mroczis.netmonster.core.telephony.mapper.toDisplayInfo
@@ -27,7 +28,7 @@ class DisplayInfoSource {
      */
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     @Suppress("DEPRECATION")
-    fun get(telephonyManager: TelephonyManager, subId: Int?): DisplayInfo =
+    fun get(telephonyManager: TelephonyManager, subId: SubscriptionId?): DisplayInfo =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             getFresh(telephonyManager, subId)?.toDisplayInfo()
         } else {
@@ -35,7 +36,7 @@ class DisplayInfoSource {
         } ?: DisplayInfo()
 
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
-    private fun getFresh(telephonyManager: TelephonyManager, subId: Int?): TelephonyDisplayInfo? =
+    private fun getFresh(telephonyManager: TelephonyManager, subId: SubscriptionId?): TelephonyDisplayInfo? =
         TelephonyCache.getOrUpdate(subId, TelephonyCache.Event.DISPLAY_INFO) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 telephonyManager.requestSingleUpdate { displayInfoListener(it) }
@@ -49,7 +50,7 @@ class DisplayInfoSource {
      */
     @TargetApi(Build.VERSION_CODES.R)
     private fun displayInfoListener(
-        subId: Int?,
+        subId: SubscriptionId?,
         onChanged: UpdateResult<SingleEventPhoneStateListener, TelephonyDisplayInfo>
     ) = object : SingleEventPhoneStateListener(LISTEN_DISPLAY_INFO_CHANGED, subId) {
 

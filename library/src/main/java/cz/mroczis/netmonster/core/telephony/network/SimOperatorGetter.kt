@@ -2,6 +2,7 @@ package cz.mroczis.netmonster.core.telephony.network
 
 import android.os.Build
 import android.telephony.TelephonyManager
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.telephony.ITelephonyManagerCompat
 import java.lang.reflect.Method
@@ -51,15 +52,15 @@ internal class SimOperatorGetter : INetworkGetter {
         getFromReflection(telephony.getTelephonyManager(), telephony.getSubscriberId())
             ?: getFromSimOperator(telephony.getTelephonyManager())
 
-    private fun getFromReflection(telephony: TelephonyManager?, subId: Int) =
+    private fun getFromReflection(telephony: TelephonyManager?, subId: SubscriptionId) =
         if (existingMethods.isNotEmpty() && telephony != null) {
-            existingMethods.mapNotNull { method ->
+            existingMethods.firstNotNullOfOrNull { method ->
                 try {
                     Network.map(method.invoke(telephony, subId) as? String)
                 } catch (ignored: Throwable) {
                     null
                 }
-            }.firstOrNull()
+            }
         } else null
 
     private fun getFromSimOperator(telephony: TelephonyManager?) =

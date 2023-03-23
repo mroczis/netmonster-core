@@ -6,6 +6,7 @@ import android.os.Build
 import android.telephony.*
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.cache.TelephonyCache
 import cz.mroczis.netmonster.core.util.SingleEventPhoneStateListener
 
@@ -23,7 +24,7 @@ class CellLocationSource {
      */
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION])
     @Suppress("DEPRECATION")
-    fun get(telephonyManager: TelephonyManager, subId: Int?): CellLocation? =
+    fun get(telephonyManager: TelephonyManager, subId: SubscriptionId?): CellLocation? =
         getFresh(telephonyManager, subId) ?: try {
             telephonyManager.cellLocation
         } catch (e : NullPointerException) {
@@ -31,7 +32,7 @@ class CellLocationSource {
             null
         }
 
-    private fun getFresh(telephonyManager: TelephonyManager, subId: Int?): CellLocation? =
+    private fun getFresh(telephonyManager: TelephonyManager, subId: SubscriptionId?): CellLocation? =
         TelephonyCache.getOrUpdate(subId, TelephonyCache.Event.CELL_LOCATION) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 telephonyManager.requestSingleUpdate { cellLocationListener(it) }
@@ -45,7 +46,7 @@ class CellLocationSource {
      */
     @TargetApi(Build.VERSION_CODES.R)
     private fun cellLocationListener(
-        subId: Int?,
+        subId: SubscriptionId?,
         onChanged: UpdateResult<SingleEventPhoneStateListener, CellLocation>
     ) = object : SingleEventPhoneStateListener(LISTEN_CELL_LOCATION, subId) {
 

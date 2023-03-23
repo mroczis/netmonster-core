@@ -121,7 +121,8 @@ data class SignalLte(
         } else {
             snr ?: other.snr
         },
-        timingAdvance = timingAdvance ?: other.timingAdvance
+        // Discriminating 0 TA from other source in purpose
+        timingAdvance = timingAdvance ?: other.timingAdvance?.takeIf { it > 0 }
     )
 
     companion object {

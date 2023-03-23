@@ -37,7 +37,7 @@ class SignalStrengthPostprocessor(
 
     /**
      * Merges [ISignal] for two [ICell]. Prioritising data that are saved in
-     * [ICell] that is modified, not [category].
+     * [ICell] that is modified, not [candidate].
      *
      * [ISignal] is merged only if primary cell indicator (usually CID) match.
      */

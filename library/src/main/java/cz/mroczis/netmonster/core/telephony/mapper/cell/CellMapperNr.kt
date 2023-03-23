@@ -4,6 +4,7 @@ import android.annotation.TargetApi
 import android.os.Build
 import android.telephony.CellIdentityNr
 import android.telephony.CellSignalStrengthNr
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.db.BandTableNr
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.band.BandNr
@@ -19,7 +20,7 @@ import cz.mroczis.netmonster.core.util.inRangeOrNull
  */
 @TargetApi(Build.VERSION_CODES.Q)
 internal fun CellIdentityNr.mapCell(
-    subId: Int,
+    subId: SubscriptionId,
     connection: IConnection,
     signal: SignalNr?,
     timestamp: Long? = null,

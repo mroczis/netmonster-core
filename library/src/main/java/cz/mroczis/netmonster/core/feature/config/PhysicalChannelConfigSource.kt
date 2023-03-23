@@ -2,6 +2,7 @@ package cz.mroczis.netmonster.core.feature.config
 
 import android.os.Build
 import android.telephony.TelephonyManager
+import cz.mroczis.netmonster.core.SubscriptionId
 import cz.mroczis.netmonster.core.cache.TelephonyCache
 import cz.mroczis.netmonster.core.feature.config.PhysicalChannelConfigSource.PhysicalChannelListener
 import cz.mroczis.netmonster.core.model.config.PhysicalChannelConfig
@@ -25,7 +26,7 @@ class PhysicalChannelConfigSource {
      * Registers [PhysicalChannelListener] and awaits for data. After 500 milliseconds time outs if
      * nothing is delivered.
      */
-    fun get(telephonyManager: TelephonyManager, subId: Int): List<PhysicalChannelConfig> =
+    fun get(telephonyManager: TelephonyManager, subId: SubscriptionId): List<PhysicalChannelConfig> =
         if (Build.VERSION.SDK_INT in Build.VERSION_CODES.P..Build.VERSION_CODES.Q) {
             TelephonyCache.getOrUpdate(subId, TelephonyCache.Event.PHYSICAL_CHANNEL) {
                 telephonyManager.requestPhoneStateUpdate<List<PhysicalChannelConfig>> { onData ->
@@ -41,7 +42,7 @@ class PhysicalChannelConfigSource {
      * Kotlin friendly PhoneStateListener
      */
     private class PhysicalChannelListener(
-        subId: Int?,
+        subId: SubscriptionId?,
         private val physicalChannelCallback: UpdateResult<PhysicalChannelListener, List<PhysicalChannelConfig>>,
     ) : SingleEventPhoneStateListener(LISTEN_PHYSICAL_CHANNEL_CONFIGURATION, subId) {
 
