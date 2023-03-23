@@ -99,12 +99,15 @@ object BandTableLte {
         "730" to listOf(900..1_799), // Chile, b66
     )
 
-    internal fun get(earfcn: Int, mcc: String? = null): IBandEntity? =
+    internal fun getFixedEarfcn(earfcn: Int, mcc: String?) =
         if (mcc != null && integerOverflowFix[mcc]?.any { range -> earfcn in range } == true) {
-            bands.firstOrNull { it.channelRange.contains(earfcn + 65536) }
+            earfcn + 65536
         } else {
-            bands.firstOrNull { it.channelRange.contains(earfcn) }
+            earfcn
         }
+
+    internal fun get(earfcn: Int): IBandEntity? =
+        bands.firstOrNull { it.channelRange.contains(earfcn) }
 
     internal fun getByNumber(number: Int): IBandEntity? =
         bands.firstOrNull { it.number == number }
@@ -115,9 +118,10 @@ object BandTableLte {
      * If no such band is found then result [BandLte] will contain only [BandLte.downlinkEarfcn].
      */
     fun map(earfcn: Int, mcc: String? = null): BandLte {
-        val raw = get(earfcn, mcc)
+        val fixedEarfcn = getFixedEarfcn(earfcn, mcc)
+        val raw = get(fixedEarfcn)
         return BandLte(
-            downlinkEarfcn = earfcn,
+            downlinkEarfcn = fixedEarfcn,
             number = raw?.number,
             name = raw?.name
         )
