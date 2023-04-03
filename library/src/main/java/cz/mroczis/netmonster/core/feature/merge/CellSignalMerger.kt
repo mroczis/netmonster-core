@@ -1,5 +1,6 @@
 package cz.mroczis.netmonster.core.feature.merge
 
+import cz.mroczis.netmonster.core.model.cell.CellLte
 import cz.mroczis.netmonster.core.model.cell.CellNr
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.connection.NoneConnection
@@ -18,7 +19,7 @@ internal class CellSignalMerger {
      */
     fun merge(newApi: List<ICell>, signalApi: List<CellNr>): List<ICell> {
         val nrCells = newApi.filterIsInstance(CellNr::class.java)
-        val nonPresentNr = signalApi.toMutableList().filter { signalCell ->
+        val nonPresentNr = signalApi.filter { signalCell ->
             nrCells.find {
                 it.subscriptionId == signalCell.subscriptionId && it.connectionStatus is PrimaryConnection
             } == null
@@ -52,9 +53,15 @@ internal class CellSignalMerger {
                     }.toList()
                 }
             } else {
-                newApi.toMutableList().apply {
-                    addAll(nonPresentNr)
-                }.toList()
+                // Merge data from Signal API + add PLMN if possible
+                newApi + nonPresentNr.map { nrCell ->
+                    if (nrCell.network == null) {
+                        val network = (newApi.find { it.subscriptionId == nrCell.subscriptionId && it is CellLte } as? CellLte)?.network
+                        nrCell.copy(network = network)
+                    } else {
+                        nrCell
+                    }
+                }
             }
         }
     }

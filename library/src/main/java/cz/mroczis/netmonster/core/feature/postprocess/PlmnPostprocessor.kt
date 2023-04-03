@@ -138,7 +138,7 @@ class PlmnPostprocessor : ICellPostprocessor {
         override fun processNr(cell: CellNr) =
             findByChannel(NetworkGeneration.NR, cell.subscriptionId, cell.band?.channelNumber)?.let {
                 cell.copy(network = it)
-            } ?: getFirstPlmnIfOnly(cell) { cell.copy(network = it) }
+            } ?: getFirstPlmnIfOnly(cell, allowSubscriptionOverride = NetworkGeneration.LTE) { cell.copy(network = it) }
 
         override fun processTdscdma(cell: CellTdscdma) =
             findByChannel(NetworkGeneration.TDSCDMA, cell.subscriptionId, cell.band?.channelNumber)?.let {
@@ -178,11 +178,26 @@ class PlmnPostprocessor : ICellPostprocessor {
 
         /**
          * Takes 1st PLMN if it's the only one in [dictionary].
+         * If there are multiple matching entries and there's unique combination "subscription id + network generation" then PLMN of serving cell is returned
+         * (common case is that in NR NSA PLMN of LTE cell gets assigned to a NSA cell)
          */
-        private fun getFirstPlmnIfOnly(cell: ICell, callback: (Network) -> ICell): ICell =
+        private fun getFirstPlmnIfOnly(
+            cell: ICell,
+            allowSubscriptionOverride: NetworkGeneration? = null,
+            callback: (Network) -> ICell
+        ): ICell =
             if (dictionary.size == 1 && dictionary.values.first().size == 1) {
                 callback.invoke(dictionary.values.first()[0].network)
-            } else cell
+            } else if (allowSubscriptionOverride != null && dictionary[allowSubscriptionOverride] != null) {
+                val subEntries = dictionary[allowSubscriptionOverride]!!.filter { it.subscriptionId == cell.subscriptionId }
+                if (subEntries.size == 1) {
+                    callback.invoke(subEntries[0].network)
+                } else {
+                    cell
+                }
+            } else {
+                cell
+            }
     }
 
     /**
