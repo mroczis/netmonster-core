@@ -47,7 +47,7 @@ object BandTableNr {
         BandEntity(470_000..472_000, "2300", 30),
         BandEntity(496_700..499_000, "2500", 53),
         BandEntity(499_200..537_999, "2500", 41),
-        BandEntity(499_200..538_000, "2600", 90),
+        BandEntity(499_200..538_000, "2500", 90),
         BandEntity(514_000..524_000, "2600", 38),
         BandEntity(524_000..538_000, "2600", 7),
         BandEntity(620_000..680_000, "3700", 77),
@@ -58,10 +58,16 @@ object BandTableNr {
         BandEntity(790_334..795_000, "5900", 47),
     )
 
-    internal fun get(arfcn: Int, bandHints: IntArray = intArrayOf()): IBandEntity? {
-        val candidates = bands
+    /**
+     * Lists all bands that do fit [arfcn] and are among [bandHints] (if not empty)
+     */
+    internal fun getAll(arfcn: Int, bandHints: IntArray = intArrayOf()) : List<BandEntity> =
+        bands
             .filter { it.channelRange.contains(arfcn) }
             .filter { bandHints.isEmpty() || (it.number != null && bandHints.contains(it.number)) }
+
+    internal fun get(arfcn: Int, bandHints: IntArray = intArrayOf()): IBandEntity? {
+        val candidates = getAll(arfcn = arfcn, bandHints = bandHints)
 
         when {
             candidates.isEmpty() -> return null
@@ -124,18 +130,24 @@ object BandTableNr {
     }
 
     /**
-     * Attempts to find current band information depending on [arfcn].
-     * If no such band is found then result [BandNr] will contain only [BandNr.downlinkArfcn].
+     * Attempts to find *ALL* bands that do fit ARFCN + bandHints
      */
-    fun map(arfcn: Int, bandHints: IntArray = intArrayOf()): BandNr {
-        val raw = get(arfcn, bandHints)
-        return BandNr(
-            downlinkArfcn = arfcn,
-            downlinkFrequency = getFrequency(arfcn),
-            number = raw?.number,
-            name = raw?.name
-        )
-    }
+    fun mapAll(arfcn: Int, bandHints: IntArray = intArrayOf()) : List<BandNr> =
+        getAll(arfcn = arfcn, bandHints).map { it.toBandNr(arfcn = arfcn) }
+
+    /**
+     * Attempts to find current band information depending on [arfcn].
+     * If no such band is found or there are multiple candidates then result [BandNr] will contain only [BandNr.downlinkArfcn].
+     */
+    fun map(arfcn: Int, bandHints: IntArray = intArrayOf()): BandNr =
+        get(arfcn, bandHints).toBandNr(arfcn = arfcn)
+
+    private fun IBandEntity?.toBandNr(arfcn: Int) = BandNr(
+        downlinkArfcn = arfcn,
+        downlinkFrequency = getFrequency(arfcn),
+        number = this?.number,
+        name = this?.name
+    )
 
 }
 
