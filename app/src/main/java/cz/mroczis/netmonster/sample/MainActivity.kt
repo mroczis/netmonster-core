@@ -14,6 +14,9 @@ import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.NetworkInfo
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
@@ -36,7 +39,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import java.lang.reflect.Method
 import kotlin.random.Random
-
+import android.net.wifi.WifiInfo
 
 /**
  * Activity periodically updates data (once in [REFRESH_RATIO] ms) when it's on foreground.
@@ -141,7 +144,7 @@ class MainActivity : AppCompatActivity() {
     private fun loop() {
         updateCellularData()
         updateWifiData()
-        updateBluetoothData()
+
         handler.postDelayed(REFRESH_RATIO) { loop() }
     }
 
@@ -173,13 +176,53 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     @SuppressLint("MissingPermission")
     private fun updateWifiData(){
-        wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        val wifiInfo: MutableList<android.net.wifi.ScanResult>? = wifiManager.scanResults
-        println("------------------------")
-        println(wifiInfo)
+        val storage = ArrayList<String>()
+        wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
+        val wifiInfo = wifiManager.scanResults
+        val connectedWifi = getConnectedWifiSSID(context)
+
+
+        for (scanResult in wifiInfo) {
+            val temp = ArrayList<String>()
+            temp.add(scanResult.toString())
+            storage.add(temp.toString())
+        }
+
     }
+
+
+    data class WifiList(
+        val wifiInfo: WifiInfo,
+        val isConnected: Boolean = true
+    )
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    fun getConnectedWifiSSID(context: Context): ArrayList<String> {
+        val storage = ArrayList<String>()
+        val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo: NetworkInfo? = connectivityManager.activeNetworkInfo
+
+        if (networkInfo != null && networkInfo.isConnected && networkInfo.type == ConnectivityManager.TYPE_WIFI) {
+            val networkCapabilities = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            } else {
+                TODO("VERSION.SDK_INT < M")
+            }
+
+            if (networkCapabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true) {
+                val wifiInfo = wifiManager.connectionInfo
+                val customWifiInfo = WifiList(wifiInfo)
+                storage.add(customWifiInfo.toString())
+
+            }
+        }
+        return storage
+    }
+
 
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
@@ -216,6 +259,7 @@ class MainActivity : AppCompatActivity() {
                             override fun onScanResult(callbackType: Int, result: ScanResult) {
                                 if (result.device.address == device.address) {
                                     val rssi = result.rssi
+
                                     Log.i("pairedDevices", "paired device: $deviceName at $macAddress + $rssi dBM " + isConnected(device))
                                     // Handle the RSSI value here or save it to a variable
                                 }else{
@@ -266,5 +310,22 @@ class MainActivity : AppCompatActivity() {
 
 }
 
+
+
+
+//SSID: "eduroam", BSSID: 08:ec:f5:c0:4a:60, capabilities: [WPA2-EAP/SHA1-CCMP][RSN-EAP/SHA1-CCMP][ESS], level: -67, frequency: 2437, timestamp: 1197807768191, distance: ?(cm), distanceSd: ?(cm), passpoint: no, ChannelBandwidth: 0, centerFreq0: 2437, centerFreq1: 0, standard: 11n, 80211mcResponder: is not supported, Radio Chain Infos: null, interface name: wlan0,
+//    SSID: "eduroam", BSSID: 70:6d:15:3a:5a:ef, capabilities: [WPA2-EAP/SHA1-CCMP][RSN-EAP/SHA1-CCMP][ESS], level: -74, frequency: 5320, timestamp: 1197807768233, distance: ?(cm), distanceSd: ?(cm), passpoint: no, ChannelBandwidth: 1, centerFreq0: 5310, centerFreq1: 0, standard: 11ac, 80211mcResponder: is not supported, Radio Chain Infos: null, interface name: wlan0,
+//    SSID: "HelsinkiUni Guest", BSSID: 08:ec:f5:c0:4a:61, capabilities: [WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS], level: -67, frequency: 2437, timestamp: 1197807768187, distance: ?(cm), distanceSd: ?(cm), passpoint: no, ChannelBandwidth: 0, centerFreq0: 2437, centerFreq1: 0, standard: 11n, 80211mcResponder: is not supported, Radio Chain Infos: null, interface name: wlan0,
+//    SSID: "Ubikampus", BSSID: 08:ec:f5:c0:4a:62, capabilities: [ESS], level: -67, frequency: 2437, timestamp: 1197807768092, distance: ?(cm), distanceSd: ?(cm), passpoint: no, ChannelBandwidth: 0, centerFreq0: 2437, centerFreq1: 0, standard: 11n, 80211mcResponder: is not supported, Radio Chain Infos: null, interface name: wlan0,
+//    SSID: "HelsinkiUni Guest", BSSID: 70:6d:15:3a:5a:ee, capabilities: [WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS], level: -74, frequency: 5320, timestamp: 1197807768240, distance: ?(cm), distanceSd: ?(cm), passpoint: no, ChannelBandwidth: 1, centerFreq0: 5310, centerFreq1: 0, standard: 11ac, 80211mcResponder: is not supported, Radio Chain Infos: null, interface name: wlan0,
+//    SSID: "Ubikampus", BSSID: bc:26:c7:94:8e:4d, capabilities: [ESS], level: -60, frequency: 5180, timestamp: 1197807768121, distance: ?(cm), distanceSd: ?(cm), passpoint: no, ChannelBandwidth: 1, centerFreq0: 5190, centerFreq1: 0, standard: 11ac, 80211mcResponder: is not supported, Radio Chain Infos: null, interface name: wlan0,
+//    SSID: "eduroam", BSSID: 70:6d:15:48:12:4f, capabilities: [WPA2-EAP/SHA1-CCMP][RSN-EAP/SHA1-CCMP][ESS], level: -83, frequency: 5500, timestamp: 1197807768264, distance: ?(cm), distanceSd: ?(cm), passpoint: no, ChannelBandwidth: 1, centerFreq0: 5510, centerFreq1: 0, standard: 11ac, 80211mcResponder: is not supported, Radio Chain Infos: null, interface name: wlan0,
+//    SSID: "eduroam", BSSID: bc:26:c7:94:8e:4f, capabilities: [WPA2-EAP/SHA1-CCMP][RSN-EAP/SHA1-CCMP][ESS], level: -61, frequency: 5180, timestamp: 1197807768212, distance: ?(cm), distanceSd: ?(cm), passpoint: no, ChannelBandwidth: 1, centerFreq0: 5190, centerFreq1: 0, standard: 11ac, 80211mcResponder: is not supported, Radio Chain Infos: null, interface name: wlan0,
+//    SSID: "eduroam", BSSID: b4:de:31:fa:1f:c0, capabilities: [WPA2-EAP/SHA1-CCMP][RSN-EAP/SHA1-CCMP][ESS], level: -79, frequency: 2412, timestamp: 1197807768151, distance: ?(cm), distanceSd: ?(cm), passpoint: no, ChannelBandwidth: 0, centerFreq0: 2412, centerFreq1: 0, standard: 11n, 80211mcResponder: is not supported, Radio Chain Infos: null, interface name: wlan0,
+//    SSID: "HelsinkiUni Guest", BSSID: bc:26:c7:94:8e:4e, capabilities: [WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS], level: -60, frequency: 5180, timestamp: 1197807768218, distance: ?(cm), distanceSd: ?(cm), passpoint: no, ChannelBandwidth: 1, centerFreq0: 5190, centerFreq1: 0, standard: 11ac, 80211mcResponder: is not supported, Radio Chain Infos: null, interface name: wlan0,
+//    SSID: "HelsinkiUni", BSSID: b4:de:31:fa:1f:c1, capabilities: [WPA2-EAP/SHA1-CCMP][RSN-EAP/SHA1-CCMP][ESS], level: -81, frequency: 2412, timestamp: 1197807768156, distance: ?(cm), distanceSd: ?(cm), passpoint: no, ChannelBandwidth: 0, centerFreq0: 2412, centerFreq1: 0, standard: 11n, 80211mcResponder: is not supported, Radio Chain Infos: null, interface name: wlan0,
+//    SSID: "Ubikampus", BSSID: 70:6d:15:36:9c:c2, capabilities: [ESS], level: -88, frequency: 2462, timestamp: 11978077
+//
+//
 
 
