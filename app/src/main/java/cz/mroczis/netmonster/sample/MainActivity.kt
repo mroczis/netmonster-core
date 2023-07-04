@@ -2,32 +2,34 @@ package cz.mroczis.netmonster.sample
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.os.postDelayed
+import com.google.gson.Gson
 import cz.mroczis.netmonster.core.factory.NetMonsterFactory
-import cz.mroczis.netmonster.core.feature.merge.CellSource
-import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.sample.MainActivity.Companion.REFRESH_RATIO
 import cz.mroczis.netmonster.sample.databinding.ActivityMainBinding
 import org.eclipse.paho.client.mqttv3.MqttClient
-
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttException
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import kotlin.random.Random
-import java.io.ByteArrayOutputStream
-import java.io.ObjectOutputStream
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+
 
 /**
  * Activity periodically updates data (once in [REFRESH_RATIO] ms) when it's on foreground.
@@ -45,6 +47,9 @@ class MainActivity : AppCompatActivity() {
     private val adapter = MainAdapter()
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var wifiManager: WifiManager
+
+
 
 
 //    val brokerUri = "tcp://10.0.2.2:1883" // Replace with your MQTT broker URI
@@ -64,6 +69,13 @@ class MainActivity : AppCompatActivity() {
             setContentView(root)
             recycler.adapter = adapter
         }
+
+        val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
+        registerReceiver(receiver, filter)
+
+
+
+
     }
 
     private fun connectToMqttBroker() {
@@ -81,6 +93,8 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onResume() {
         super.onResume()
 
@@ -119,10 +133,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun loop() {
         updateData()
         handler.postDelayed(REFRESH_RATIO) { loop() }
     }
+
+
 
 
     @SuppressLint("MissingPermission")
@@ -133,24 +150,49 @@ class MainActivity : AppCompatActivity() {
             adapter.data = merged
 
             val gson = Gson()
-            val mergedJson = gson.toJson(merged)
 
+
+            val separated = " \n${merged.joinToString(separator = "\n")}"
+            val mergedJson = gson.toJson(separated)
             println("--------------------------------------------------------")
-            Log.d("NTM-RES", " \n${merged.joinToString(separator = "\n")}")
+            Log.d("NTM-RES", separated)
             println("--------------------------------------------------------")
 
-            val mqttMessage = MqttMessage(mergedJson.toByteArray())
+            val mqttMessage = MqttMessage(separated.toByteArray())
             mqttMessage.qos = 0
             mqttMessage.isRetained = false
             mqttClient.publish("dt/message", mqttMessage)
-
         }
 
+
+
+//        wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+//        val wifiInfo: MutableList<ScanResult>? = wifiManager.scanResults
+//        println("------------------------")
+//        println(wifiInfo)
 
 
     }
 
 
-}
+
+
+    private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            println("sdjskdhkjshdkjshdkjs")
+            val action = intent.action
+            if (BluetoothDevice.ACTION_FOUND == action) {
+                val rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE).toInt()
+                println("Bluetooth")
+                println("Bluetooth")
+                println("Bluetooth")
+                println(rssi)
+            }
+        }
+    }
+
+
+
+    }
 
 
