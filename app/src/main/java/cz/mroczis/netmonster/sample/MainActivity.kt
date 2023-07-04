@@ -2,12 +2,16 @@ package cz.mroczis.netmonster.sample
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
-import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothManager
-import android.bluetooth.BluetoothProfile
+import android.bluetooth.le.BluetoothLeScanner
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanFilter
+import android.bluetooth.le.ScanResult
+import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
@@ -39,6 +43,7 @@ import kotlin.random.Random
  */
 
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
     var context: Context = this
     companion object {
@@ -112,6 +117,7 @@ class MainActivity : AppCompatActivity() {
         }
 
 
+
     }
 
     override fun onPause() {
@@ -133,7 +139,9 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun loop() {
-        updateData()
+        updateCellularData()
+        updateWifiData()
+        updateBluetoothData()
         handler.postDelayed(REFRESH_RATIO) { loop() }
     }
 
@@ -142,7 +150,7 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     @SuppressLint("MissingPermission")
-    private fun updateData() {
+    private fun updateCellularData() {
 
         NetMonsterFactory.get(this).apply {
             val merged = getCells()
@@ -163,43 +171,32 @@ class MainActivity : AppCompatActivity() {
             mqttClient.publish("dt/message", mqttMessage)
         }
 
+    }
 
-
-//        val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-//        val adapter = bluetoothManager.getAdapter()
-
-
-
-
-//        wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-//        val wifiInfo: MutableList<ScanResult>? = wifiManager.scanResults
-//        println("------------------------")
-//        println(wifiInfo)
-
-        getPairedBluetoothDevices(context)
-
-
-
-
-
-
+    @SuppressLint("MissingPermission")
+    private fun updateWifiData(){
+        wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val wifiInfo: MutableList<android.net.wifi.ScanResult>? = wifiManager.scanResults
+        println("------------------------")
+        println(wifiInfo)
     }
 
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    fun getPairedBluetoothDevices(context: Context): List<BluetoothDevice> {
+    @SuppressLint("MissingPermission")
+    private fun updateBluetoothData(){
+        getPairedBluetoothDevice(context)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    fun getPairedBluetoothDevice(context: Context): Nothing? {
         val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val bluetoothAdapter = bluetoothManager.adapter
-
-
         val deviceList: MutableList<BluetoothDevice> = mutableListOf()
+        var retunedData = null
 
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
-            == PackageManager.PERMISSION_GRANTED
-        ) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
             val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
-            println("permitted")
             pairedDevices?.let {
                 for (device: BluetoothDevice in it) {
                     val deviceName = device.name
@@ -209,21 +206,51 @@ class MainActivity : AppCompatActivity() {
                     } else {
                         null
                     }
-                    
 
 
-                    Log.i(
-                        " pairedDevices ",
-                        "paired device: $deviceName at $macAddress + $aliasing " + isConnected(device)
-                    )
+
+                    // Get RSSI
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        val scanner: BluetoothLeScanner? = bluetoothAdapter.bluetoothLeScanner
+                        val scanCallback: ScanCallback = object : ScanCallback() {
+                            override fun onScanResult(callbackType: Int, result: ScanResult) {
+                                if (result.device.address == device.address) {
+                                    val rssi = result.rssi
+                                    Log.i("pairedDevices", "paired device: $deviceName at $macAddress + $rssi dBM " + isConnected(device))
+                                    // Handle the RSSI value here or save it to a variable
+                                }else{
+                                    val rssi = null
+                                    Log.i("pairedDevices", "paired device: $deviceName at $macAddress + $rssi dBM " + isConnected(device))
+                                }
+
+                            }
+                        }
+
+                        // Check for location permission
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                            // Start scanning for devices
+                            val scanFilters: MutableList<ScanFilter> = ArrayList()
+                            val settings: ScanSettings = ScanSettings.Builder().build()
+                            scanner?.startScan(scanFilters, settings, scanCallback)
+
+                            // Stop scanning after a certain duration (e.g., 5 seconds)
+                            val handler = Handler()
+                            handler.postDelayed({
+                                scanner?.stopScan(scanCallback)
+                            }, REFRESH_RATIO)
+                        } else {
+                            // Request location permission
+
+
+                        }
+                    }
                 }
             }
-        }else{
-            println("not permitted")
         }
 
-        return deviceList
+    return retunedData
     }
+
 
 
     private fun isConnected(device: BluetoothDevice): Boolean {
@@ -234,10 +261,6 @@ class MainActivity : AppCompatActivity() {
             throw IllegalStateException(e)
         }
     }
-
-
-
-
 
 
 
