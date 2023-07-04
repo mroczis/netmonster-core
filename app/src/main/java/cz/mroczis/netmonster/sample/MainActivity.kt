@@ -4,10 +4,11 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.content.BroadcastReceiver
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothProfile
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
 import android.os.Build
@@ -17,6 +18,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.os.postDelayed
 import com.google.gson.Gson
@@ -28,6 +30,7 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttException
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
+import java.lang.reflect.Method
 import kotlin.random.Random
 
 
@@ -69,11 +72,6 @@ class MainActivity : AppCompatActivity() {
             setContentView(root)
             recycler.adapter = adapter
         }
-
-        val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
-        registerReceiver(receiver, filter)
-
-
 
 
     }
@@ -142,6 +140,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     @SuppressLint("MissingPermission")
     private fun updateData() {
 
@@ -166,33 +165,83 @@ class MainActivity : AppCompatActivity() {
 
 
 
+//        val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+//        val adapter = bluetoothManager.getAdapter()
+
+
+
+
 //        wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 //        val wifiInfo: MutableList<ScanResult>? = wifiManager.scanResults
 //        println("------------------------")
 //        println(wifiInfo)
 
+        getPairedBluetoothDevices(context)
+
+
+
+
+
 
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    fun getPairedBluetoothDevices(context: Context): List<BluetoothDevice> {
+        val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val bluetoothAdapter = bluetoothManager.adapter
 
 
-    private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            println("sdjskdhkjshdkjshdkjs")
-            val action = intent.action
-            if (BluetoothDevice.ACTION_FOUND == action) {
-                val rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE).toInt()
-                println("Bluetooth")
-                println("Bluetooth")
-                println("Bluetooth")
-                println(rssi)
+        val deviceList: MutableList<BluetoothDevice> = mutableListOf()
+
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
+            println("permitted")
+            pairedDevices?.let {
+                for (device: BluetoothDevice in it) {
+                    val deviceName = device.name
+                    val macAddress = device.address
+                    val aliasing = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        device.alias
+                    } else {
+                        null
+                    }
+                    
+
+
+                    Log.i(
+                        " pairedDevices ",
+                        "paired device: $deviceName at $macAddress + $aliasing " + isConnected(device)
+                    )
+                }
             }
+        }else{
+            println("not permitted")
+        }
+
+        return deviceList
+    }
+
+
+    private fun isConnected(device: BluetoothDevice): Boolean {
+        return try {
+            val m: Method = device.javaClass.getMethod("isConnected")
+            m.invoke(device) as Boolean
+        } catch (e: Exception) {
+            throw IllegalStateException(e)
         }
     }
 
 
 
-    }
+
+
+
+
+}
+
 
 
