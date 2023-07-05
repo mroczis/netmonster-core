@@ -12,7 +12,10 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -60,6 +63,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var wifiManager: WifiManager
+    private lateinit var receiver: BroadcastReceiver
 
 
 
@@ -145,7 +149,7 @@ class MainActivity : AppCompatActivity() {
     private fun loop() {
         updateCellularData()
         updateWifiData()
-
+        updateBluetoothData()
         handler.postDelayed(REFRESH_RATIO) { loop() }
     }
 
@@ -199,7 +203,7 @@ class MainActivity : AppCompatActivity() {
             storage.add(temp.toString())
         }
 
-        storage.add(connectedWifi.get(0))
+        storage.add(connectedWifi.toString())
 
         publishMqttMessage(storage.toString().toByteArray())
 
@@ -240,7 +244,8 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     @SuppressLint("MissingPermission")
     private fun updateBluetoothData(){
-        getPairedBluetoothDevice(context)
+//        getPairedBluetoothDevice(context)
+        scanForDevices()
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
@@ -256,6 +261,7 @@ class MainActivity : AppCompatActivity() {
                 for (device: BluetoothDevice in it) {
                     val deviceName = device.name
                     val macAddress = device.address
+
                     val aliasing = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         device.alias
                     } else {
@@ -275,7 +281,7 @@ class MainActivity : AppCompatActivity() {
                                     Log.i("pairedDevices", "paired device: $deviceName at $macAddress + $rssi dBM " + isConnected(device))
                                     // Handle the RSSI value here or save it to a variable
                                 }else{
-                                    val rssi = null
+                                    val rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
                                     Log.i("pairedDevices", "paired device: $deviceName at $macAddress + $rssi dBM " + isConnected(device))
                                 }
 
@@ -305,6 +311,91 @@ class MainActivity : AppCompatActivity() {
         }
 
     return retunedData
+    }
+
+
+
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    private fun scanForDevices(): String {
+        val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val bluetoothAdapter = bluetoothManager.adapter
+        // Register a BroadcastReceiver to listen for Bluetooth device discovery
+        val storage = ArrayList<String>()
+        val receiver = object : BroadcastReceiver() {
+
+            override fun onReceive(context: Context, intent: Intent) {
+                val action = intent.action
+                if (BluetoothDevice.ACTION_FOUND == action) {
+                    // A Bluetooth device is found
+
+                    val device =
+                        intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+                    device?.let {
+                        val tempStorage = ArrayList<String>()
+                        val deviceName = if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
+                            == PackageManager.PERMISSION_GRANTED
+                        ) {
+                            device.name
+
+                        } else {
+                            "Unknown"
+                        }
+
+
+                        val deviceAddress = device.address
+                        val linkSpeed = device.bluetoothClass?.majorDeviceClass
+                        val rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
+                        val connection = isConnected(device)
+
+                        if(deviceName == null){
+                            tempStorage.add("Unknown")
+                        }else{
+                            tempStorage.add(deviceName)
+                        }
+
+                        tempStorage.add(deviceAddress)
+                        tempStorage.add(rssi.toString())
+                        tempStorage.add(linkSpeed.toString())
+                        tempStorage.add(connection.toString())
+
+
+                    }
+
+
+                }
+
+
+
+                if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED == action) {
+                    publishMqttMessage(storage.toString().toByteArray())
+                    println(storage)
+
+                }
+
+
+
+
+            }
+
+
+        }
+
+
+
+        // Register the BroadcastReceiver
+        val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+        registerReceiver(receiver, filter)
+        // Start Bluetooth device discovery
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            bluetoothAdapter.startDiscovery()
+
+        }
+
+        return "None"
+
     }
 
 
