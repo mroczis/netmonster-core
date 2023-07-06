@@ -76,6 +76,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -85,6 +86,9 @@ class MainActivity : AppCompatActivity() {
             setContentView(root)
             recycler.adapter = adapter
         }
+        scanForDevices()
+
+
 
 
     }
@@ -116,12 +120,17 @@ class MainActivity : AppCompatActivity() {
         ) {
             connectToMqttBroker()
             loop()
+
+
+
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             requestPermissions(arrayOf(
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.READ_PHONE_STATE
             ), 0)
+
+
         }
 
 
@@ -149,7 +158,7 @@ class MainActivity : AppCompatActivity() {
     private fun loop() {
         updateCellularData()
         updateWifiData()
-        updateBluetoothData()
+//        updateBluetoothData()
         handler.postDelayed(REFRESH_RATIO) { loop() }
     }
 
@@ -195,7 +204,7 @@ class MainActivity : AppCompatActivity() {
         val wifiInfo = wifiManager.scanResults
         val connectedWifi = getConnectedWifiSSID(context)
 
-        println(connectedWifi)
+
 
         for (scanResult in wifiInfo) {
             val temp = ArrayList<String>()
@@ -204,6 +213,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         storage.add(connectedWifi.toString())
+        println(storage)
 
         publishMqttMessage(storage.toString().toByteArray())
 
@@ -245,7 +255,7 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun updateBluetoothData(){
 //        getPairedBluetoothDevice(context)
-        scanForDevices()
+//        scanForDevices()
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
@@ -357,6 +367,8 @@ class MainActivity : AppCompatActivity() {
                         tempStorage.add(rssi.toString())
                         tempStorage.add(linkSpeed.toString())
                         tempStorage.add(connection.toString())
+                        storage.add(tempStorage.toString())
+
 
 
                     }
@@ -369,11 +381,10 @@ class MainActivity : AppCompatActivity() {
                 if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED == action) {
                     publishMqttMessage(storage.toString().toByteArray())
                     println(storage)
+                    storage.clear()
+                    scanForDevices()
 
                 }
-
-
-
 
             }
 
