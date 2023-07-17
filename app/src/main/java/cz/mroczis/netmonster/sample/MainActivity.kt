@@ -2,16 +2,9 @@ package cz.mroczis.netmonster.sample
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothManager
-import android.bluetooth.le.BluetoothLeScanner
-import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanFilter
-import android.bluetooth.le.ScanResult
-import android.bluetooth.le.ScanSettings
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -25,14 +18,15 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.os.postDelayed
-import com.google.gson.Gson
 import cz.mroczis.netmonster.core.factory.NetMonsterFactory
+import cz.mroczis.netmonster.core.feature.merge.CellSource
+import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.sample.MainActivity.Companion.REFRESH_RATIO
 import cz.mroczis.netmonster.sample.databinding.ActivityMainBinding
 import org.eclipse.paho.client.mqttv3.MqttClient
@@ -40,10 +34,9 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttException
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
+import org.json.JSONObject
 import java.lang.reflect.Method
 import kotlin.random.Random
-import android.net.wifi.WifiInfo
-import java.io.DataInput
 
 /**
  * Activity periodically updates data (once in [REFRESH_RATIO] ms) when it's on foreground.
@@ -52,10 +45,12 @@ import java.io.DataInput
 
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
-    var context: Context = this
+    private var context: Context = this
     companion object {
         private const val REFRESH_RATIO = 5_000L
     }
+
+
 
 
     private val handler = Handler(Looper.getMainLooper())
@@ -63,12 +58,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var wifiManager: WifiManager
-    private lateinit var receiver: BroadcastReceiver
 
 
 
 
-//    val brokerUri = "tcp://10.0.2.2:1883" // Replace with your MQTT broker URI
+
+    //    val brokerUri = "tcp://10.0.2.2:1883" // Replace with your MQTT broker URI
     private val brokerUri = "tcp://broker.hivemq.com:1883" //
     private val clientId = "publish-${Random.nextInt(0, 1000)}"
     private val persistence = MemoryPersistence()
@@ -87,10 +82,6 @@ class MainActivity : AppCompatActivity() {
             recycler.adapter = adapter
         }
         scanForDevices()
-
-
-
-
     }
 
     private fun connectToMqttBroker() {
@@ -158,10 +149,27 @@ class MainActivity : AppCompatActivity() {
     private fun loop() {
         updateCellularData()
         updateWifiData()
-//        updateBluetoothData()
         handler.postDelayed(REFRESH_RATIO) { loop() }
     }
 
+    @SuppressLint("HardwareIds")
+    private fun getSystemDetail(): String {
+        val deviceDetail= JSONObject()
+
+        deviceDetail.put("Model","${Build.MODEL}")
+        deviceDetail.put("BuildID","${Build.ID}")
+        deviceDetail.put("AndroidID","${
+            Settings.Secure.getString(
+                contentResolver,
+                Settings.Secure.ANDROID_ID
+            )
+        }")
+        deviceDetail.put("Manufacture","${Build.MANUFACTURER}")
+        deviceDetail.put("Brand","${Build.BRAND}")
+
+        println(deviceDetail)
+        return deviceDetail.toString()
+    }
 
 
 
@@ -170,28 +178,29 @@ class MainActivity : AppCompatActivity() {
     private fun updateCellularData() {
 
         NetMonsterFactory.get(this).apply {
-            val merged = getCells()
-            adapter.data = merged
+            val subset : List<ICell> = getCells( // subset of available sources
+                CellSource.ALL_CELL_INFO,
+                CellSource.CELL_LOCATION
+            )
 
-            val gson = Gson()
 
 
-            val separated = " \n${merged.joinToString(separator = "\n")}"
-            val mergedJson = gson.toJson(separated)
-            println("--------------------------------------------------------")
+            adapter.data = subset
+            val separated = " \n${subset.joinToString(separator = "\n")}"
             Log.d("NTM-RES", separated)
-            println("--------------------------------------------------------")
-            publishMqttMessage(separated.toByteArray())
+            publishMqttMessage(subset.toString().toByteArray(), "dt/message/cell")
+
+
         }
 
     }
 
 
-    fun publishMqttMessage(data: ByteArray) {
+    fun publishMqttMessage(data: ByteArray, topic: String) {
         val mqttMessage = MqttMessage(data)
         mqttMessage.qos = 0
         mqttMessage.isRetained = false
-        mqttClient.publish("dt/message", mqttMessage)
+        mqttClient.publish(topic.toString(), mqttMessage)
     }
 
 
@@ -199,35 +208,59 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     @SuppressLint("MissingPermission")
     private fun updateWifiData(){
-        val storage = ArrayList<String>()
+
         wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
         val wifiInfo = wifiManager.scanResults
         val connectedWifi = getConnectedWifiSSID(context)
 
-
+        val wifiDetails= JSONObject()
+        val storage = ArrayList<String>()
+        wifiDetails.put("Receiver","${getSystemDetail()}")
 
         for (scanResult in wifiInfo) {
-            val temp = ArrayList<String>()
-            temp.add(scanResult.toString())
-            storage.add(temp.toString())
+            val tempObject = JSONObject()
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                tempObject.put("SSID","${scanResult.wifiSsid}")
+            }
+            tempObject.put("BSSID","${scanResult.BSSID}")
+            tempObject.put("capabilities","${scanResult.capabilities}")
+            tempObject.put("Level","${scanResult.level}")
+            tempObject.put("Frequency","${scanResult.frequency}")
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                tempObject.put("Frequency","${scanResult.channelWidth}")
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                tempObject.put("centerFreq0","${scanResult.centerFreq0}")
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                tempObject.put("centerFreq1","${scanResult.centerFreq1}")
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                tempObject.put("WifiStandard","${scanResult.wifiStandard}")
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                tempObject.put("mcResponder80211","${scanResult.is80211mcResponder}")
+            }
+
+            storage.add(tempObject.toString())
+
         }
+        wifiDetails.put("received_signals","${storage}")
+        wifiDetails.put("primary","${connectedWifi}")
 
-        storage.add(connectedWifi.toString())
-        println(storage)
+        print(wifiDetails)
 
-        publishMqttMessage(storage.toString().toByteArray())
+        publishMqttMessage(wifiDetails.toString().toByteArray(), "dt/message/wifi")
 
     }
 
 
-    data class WifiList(
-        val wifiInfo: WifiInfo,
-        val isConnected: Boolean = true
-    )
-
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    fun getConnectedWifiSSID(context: Context): ArrayList<String> {
-        val storage = ArrayList<String>()
+    fun getConnectedWifiSSID(context: Context): String {
+
+        val connectedWifiDetails= JSONObject()
         val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkInfo: NetworkInfo? = connectivityManager.activeNetworkInfo
@@ -241,86 +274,36 @@ class MainActivity : AppCompatActivity() {
 
             if (networkCapabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true) {
                 val wifiInfo = wifiManager.connectionInfo
-                val customWifiInfo = WifiList(wifiInfo)
-                storage.add(customWifiInfo.toString())
 
-            }
-        }
-        return storage
-    }
+                connectedWifiDetails.put("SSID","${wifiInfo.ssid}")
+                connectedWifiDetails.put("SSID","${wifiInfo.bssid}")
+                connectedWifiDetails.put("RSSI","${wifiInfo.rssi}")
+                connectedWifiDetails.put("Link_speed","${wifiInfo.linkSpeed}")
+                connectedWifiDetails.put("Frequency", "${wifiInfo.frequency}")
 
-
-
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    @SuppressLint("MissingPermission")
-    private fun updateBluetoothData(){
-//        getPairedBluetoothDevice(context)
-//        scanForDevices()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    fun getPairedBluetoothDevice(context: Context): Nothing? {
-        val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        val bluetoothAdapter = bluetoothManager.adapter
-        val deviceList: MutableList<BluetoothDevice> = mutableListOf()
-        var retunedData = null
-
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
-            val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
-            pairedDevices?.let {
-                for (device: BluetoothDevice in it) {
-                    val deviceName = device.name
-                    val macAddress = device.address
-
-                    val aliasing = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        device.alias
-                    } else {
-                        null
-                    }
-
-
-
-                    // Get RSSI
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        val scanner: BluetoothLeScanner? = bluetoothAdapter.bluetoothLeScanner
-                        val scanCallback: ScanCallback = object : ScanCallback() {
-                            override fun onScanResult(callbackType: Int, result: ScanResult) {
-                                if (result.device.address == device.address) {
-                                    val rssi = result.rssi
-
-                                    Log.i("pairedDevices", "paired device: $deviceName at $macAddress + $rssi dBM " + isConnected(device))
-                                    // Handle the RSSI value here or save it to a variable
-                                }else{
-                                    val rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
-                                    Log.i("pairedDevices", "paired device: $deviceName at $macAddress + $rssi dBM " + isConnected(device))
-                                }
-
-                            }
-                        }
-
-                        // Check for location permission
-                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                            // Start scanning for devices
-                            val scanFilters: MutableList<ScanFilter> = ArrayList()
-                            val settings: ScanSettings = ScanSettings.Builder().build()
-                            scanner?.startScan(scanFilters, settings, scanCallback)
-
-                            // Stop scanning after a certain duration (e.g., 5 seconds)
-                            val handler = Handler()
-                            handler.postDelayed({
-                                scanner?.stopScan(scanCallback)
-                            }, REFRESH_RATIO)
-                        } else {
-                            // Request location permission
-
-
-                        }
-                    }
+                connectedWifiDetails.put("hidden_SSID","${wifiInfo.hiddenSSID}")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    connectedWifiDetails.put("security_type","${wifiInfo.currentSecurityType}")
                 }
+                connectedWifiDetails.put("supplicant_state","${wifiInfo.supplicantState}")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    connectedWifiDetails.put("wifi_standard","${wifiInfo.wifiStandard}")
+                    connectedWifiDetails.put("max_Supported_Tx_Link_Speed","${wifiInfo.maxSupportedTxLinkSpeedMbps}")
+                    connectedWifiDetails.put("max_Supported_Rx_Link_Speed","${wifiInfo.maxSupportedRxLinkSpeedMbps}")
+                }
+
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    connectedWifiDetails.put("tx_link_speed", "${wifiInfo.txLinkSpeedMbps}")
+                    connectedWifiDetails.put("rx_link_speed", "${wifiInfo.rxLinkSpeedMbps}")
+                }
+                connectedWifiDetails.put("netID", "${wifiInfo.networkId}")
+                connectedWifiDetails.put("isConnected", "true")
+
+
             }
         }
-
-    return retunedData
+        return connectedWifiDetails.toString()
     }
 
 
@@ -330,7 +313,10 @@ class MainActivity : AppCompatActivity() {
         val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val bluetoothAdapter = bluetoothManager.adapter
         // Register a BroadcastReceiver to listen for Bluetooth device discovery
+
         val storage = ArrayList<String>()
+        val bluetoothDetails= JSONObject()
+
         val receiver = object : BroadcastReceiver() {
 
             override fun onReceive(context: Context, intent: Intent) {
@@ -341,57 +327,51 @@ class MainActivity : AppCompatActivity() {
                     val device =
                         intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
                     device?.let {
-                        val tempStorage = ArrayList<String>()
-                        val deviceName = if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
+
+                        val tempDetails = JSONObject()
+
+
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
                             == PackageManager.PERMISSION_GRANTED
                         ) {
-                            device.name
+                            val deviceName = device.name
+                            val deviceAddress = device.address
+                            val linkSpeed = device.bluetoothClass?.majorDeviceClass
+                            val rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
+                            val connection = isConnected(device)
 
-                        } else {
-                            "Unknown"
+                            if(deviceName != null){
+                                tempDetails.put("Name", "${deviceName}")
+                                tempDetails.put("MAC", "${deviceAddress}")
+                                tempDetails.put("RSSI", "${rssi.toString()}")
+                                tempDetails.put("linkspeed", "${linkSpeed.toString()}")
+
+                                val conn_status = connection.toString()
+
+                                tempDetails.put("isconnected", "${conn_status}")
+
+                                storage.add(tempDetails.toString())
+
+
+                            }
                         }
-
-
-                        val deviceAddress = device.address
-                        val linkSpeed = device.bluetoothClass?.majorDeviceClass
-                        val rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
-                        val connection = isConnected(device)
-
-                        if(deviceName == null){
-                            tempStorage.add("Unknown")
-                        }else{
-                            tempStorage.add(deviceName)
-                        }
-
-                        tempStorage.add(deviceAddress)
-                        tempStorage.add(rssi.toString())
-                        tempStorage.add(linkSpeed.toString())
-                        tempStorage.add(connection.toString())
-                        storage.add(tempStorage.toString())
-
-
-
                     }
-
-
                 }
-
-
-
                 if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED == action) {
-                    publishMqttMessage(storage.toString().toByteArray())
-                    println(storage)
-                    storage.clear()
+                    bluetoothDetails.put("received_signals", storage.distinct().toString())
+                    bluetoothDetails.put("Receiver","${getSystemDetail()}")
+
+                    println("bluetooth")
+                    println(bluetoothDetails)
+
+                    publishMqttMessage(bluetoothDetails.toString().toByteArray(), "dt/message/bluetooth")
                     scanForDevices()
 
                 }
 
             }
 
-
         }
-
-
 
         // Register the BroadcastReceiver
         val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
@@ -409,8 +389,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-
-
     private fun isConnected(device: BluetoothDevice): Boolean {
         return try {
             val m: Method = device.javaClass.getMethod("isConnected")
@@ -421,8 +399,9 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
 }
+
+
 
 
 

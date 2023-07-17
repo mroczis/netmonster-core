@@ -8,15 +8,15 @@
         android:orientation="vertical">
 
     <TextView
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@color/window_background"
-            android:elevation="1dp"
-            android:gravity="center"
-            android:text="@string/app_name"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            tools:ignore="UnusedAttribute" />
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/window_background"
+        android:elevation="1dp"
+        android:gravity="center"
+        android:text="INGESTOR"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        tools:ignore="UnusedAttribute" />
 
     <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler"
