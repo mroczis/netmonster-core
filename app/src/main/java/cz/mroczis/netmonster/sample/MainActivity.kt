@@ -37,6 +37,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import org.json.JSONObject
 import java.lang.reflect.Method
 import kotlin.random.Random
+import com.google.gson.Gson
 
 /**
  * Activity periodically updates data (once in [REFRESH_RATIO] ms) when it's on foreground.
@@ -180,15 +181,25 @@ class MainActivity : AppCompatActivity() {
         NetMonsterFactory.get(this).apply {
             val subset : List<ICell> = getCells( // subset of available sources
                 CellSource.ALL_CELL_INFO,
-                CellSource.CELL_LOCATION
+                CellSource.CELL_LOCATION,
+
             )
-
-
 
             adapter.data = subset
             val separated = " \n${subset.joinToString(separator = "\n")}"
             Log.d("NTM-RES", separated)
-            publishMqttMessage(subset.toString().toByteArray(), "dt/message/cell")
+
+
+
+            //this is testing
+            val gson = Gson()
+            val mergedJson = gson.toJson(subset)
+            val cellDetails = JSONObject()
+            cellDetails.put("Receiver","${getSystemDetail()}")
+            cellDetails.put("received_signals","${mergedJson}")
+
+            publishMqttMessage(cellDetails.toString().toByteArray(), "dt/message/cell")
+
 
 
         }
