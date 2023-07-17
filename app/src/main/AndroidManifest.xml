@@ -20,7 +20,7 @@
 
     <application
             android:allowBackup="false"
-            android:icon="@mipmap/ic_launcher"
+            android:icon="@mipmap/ingestor_launcher_fixed"
             android:label="Ingestor"
             android:supportsRtl="true"
             android:theme="@style/NetMonster"
