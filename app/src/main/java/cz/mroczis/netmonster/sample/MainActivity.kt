@@ -6,10 +6,13 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.BroadcastReceiver
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.NetworkInfo
@@ -22,8 +25,17 @@ import android.provider.Settings
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.os.postDelayed
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
+import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
+import com.google.android.gms.location.LocationRequest.PRIORITY_NO_POWER
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.CancellationTokenSource
+import com.google.android.gms.tasks.Task
+import com.google.gson.Gson
 import cz.mroczis.netmonster.core.factory.NetMonsterFactory
 import cz.mroczis.netmonster.core.feature.merge.CellSource
 import cz.mroczis.netmonster.core.model.cell.ICell
@@ -36,8 +48,11 @@ import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import org.json.JSONObject
 import java.lang.reflect.Method
+import kotlin.math.abs
+import kotlin.math.log10
+import kotlin.math.pow
 import kotlin.random.Random
-import com.google.gson.Gson
+
 
 /**
  * Activity periodically updates data (once in [REFRESH_RATIO] ms) when it's on foreground.
@@ -59,9 +74,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var wifiManager: WifiManager
-
-
-
 
 
     //    val brokerUri = "tcp://10.0.2.2:1883" // Replace with your MQTT broker URI
@@ -125,8 +137,6 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-
-
     }
 
     override fun onPause() {
@@ -150,6 +160,7 @@ class MainActivity : AppCompatActivity() {
     private fun loop() {
         updateCellularData()
         updateWifiData()
+
         handler.postDelayed(REFRESH_RATIO) { loop() }
     }
 
@@ -168,6 +179,7 @@ class MainActivity : AppCompatActivity() {
         deviceDetail.put("Manufacture","${Build.MANUFACTURER}")
         deviceDetail.put("Brand","${Build.BRAND}")
 
+
         println(deviceDetail)
         return deviceDetail.toString()
     }
@@ -179,11 +191,12 @@ class MainActivity : AppCompatActivity() {
     private fun updateCellularData() {
 
         NetMonsterFactory.get(this).apply {
-            val subset : List<ICell> = getCells( // subset of available sources
+            val subset : List<ICell> = getCells(
+                // subset of available sources
                 CellSource.ALL_CELL_INFO,
                 CellSource.CELL_LOCATION,
 
-            )
+                )
 
             adapter.data = subset
             val separated = " \n${subset.joinToString(separator = "\n")}"
@@ -244,6 +257,8 @@ class MainActivity : AppCompatActivity() {
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 tempObject.put("centerFreq0","${scanResult.centerFreq0}")
+                val distance = calculateDistance(scanResult.level, scanResult.centerFreq0)
+                tempObject.put("Distance", "${distance}")
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 tempObject.put("centerFreq1","${scanResult.centerFreq1}")
@@ -291,6 +306,9 @@ class MainActivity : AppCompatActivity() {
                 connectedWifiDetails.put("RSSI","${wifiInfo.rssi}")
                 connectedWifiDetails.put("Link_speed","${wifiInfo.linkSpeed}")
                 connectedWifiDetails.put("Frequency", "${wifiInfo.frequency}")
+
+                val distance = calculateDistance(wifiInfo.rssi, wifiInfo.frequency)
+                connectedWifiDetails.put("Distance", "${distance}")
 
                 connectedWifiDetails.put("hidden_SSID","${wifiInfo.hiddenSSID}")
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -361,6 +379,10 @@ class MainActivity : AppCompatActivity() {
 
                                 tempDetails.put("isconnected", "${conn_status}")
 
+                                val distance =
+                                    linkSpeed?.let { it1 -> calculateDistance(rssi.toInt(), it1.toInt()) }
+                                tempDetails.put("Distance", "${distance}")
+
                                 storage.add(tempDetails.toString())
 
 
@@ -408,6 +430,18 @@ class MainActivity : AppCompatActivity() {
             throw IllegalStateException(e)
         }
     }
+
+
+    private fun calculateDistance(signalLevelInDb: Int, freqInMHz: Int): Double {
+        val exp = (27.55 - (20 * log10(freqInMHz.toDouble())) + abs(signalLevelInDb)) / 20.0
+        val distance = 10.0.pow(exp)
+        return "%.2f".format(distance).toDouble()
+    }
+
+    
+
+
+
 
 
 }
