@@ -8,9 +8,10 @@ android {
 
     defaultConfig {
         applicationId "cz.mroczis.netmonster.sample"
-        minSdkVersion 14
+        minSdkVersion 21
         targetSdkVersion 33
         versionCode 1
+        multiDexEnabled true
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -48,6 +49,7 @@ dependencies {
     implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
     implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'com.google.android.gms:play-services-location:17.1.0'
+    implementation 'com.android.support:multidex:1.0.3'
 
 
 }
