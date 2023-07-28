@@ -314,7 +314,7 @@ class MainActivity : AppCompatActivity() {
                 val wifiInfo = wifiManager.connectionInfo
 
                 connectedWifiDetails.put("SSID","${wifiInfo.ssid}")
-                connectedWifiDetails.put("SSID","${wifiInfo.bssid}")
+                connectedWifiDetails.put("BSSID","${wifiInfo.bssid}")
                 connectedWifiDetails.put("RSSI","${wifiInfo.rssi}")
                 connectedWifiDetails.put("Link_speed","${wifiInfo.linkSpeed}")
                 connectedWifiDetails.put("Frequency", "${wifiInfo.frequency}")
@@ -348,7 +348,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     private fun scanForDevices(): String {
         val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -370,6 +369,7 @@ class MainActivity : AppCompatActivity() {
                     device?.let {
 
                         val tempDetails = JSONObject()
+                        val signalDetail = JSONObject()
 
 
                         if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
@@ -377,23 +377,26 @@ class MainActivity : AppCompatActivity() {
                         ) {
                             val deviceName = device.name
                             val deviceAddress = device.address
-                            val linkSpeed = device.bluetoothClass?.majorDeviceClass
+
+
                             val rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
                             val connection = isConnected(device)
 
                             if(deviceName != null){
                                 tempDetails.put("Name", "${deviceName}")
                                 tempDetails.put("MAC", "${deviceAddress}")
-                                tempDetails.put("RSSI", "${rssi.toString()}")
-                                tempDetails.put("linkspeed", "${linkSpeed.toString()}")
+                                signalDetail.put("RSSI", rssi.toInt())
+
 
                                 val conn_status = connection.toString()
 
-                                tempDetails.put("isconnected", "${conn_status}")
+                                signalDetail.put("isconnected", "${conn_status}")
 
-                                val distance =
-                                    linkSpeed?.let { it1 -> calculateDistance(rssi.toInt(), it1.toInt()) }
-                                tempDetails.put("Distance", "${distance}")
+
+
+                                val distance = calculateDistancewithOnlyRssi(rssi.toInt())
+                                signalDetail.put("Distance", distance.toFloat())
+                                tempDetails.put("signal", signalDetail)
 
                                 storage.add(tempDetails.toString())
 
@@ -449,6 +452,12 @@ class MainActivity : AppCompatActivity() {
         val distance = 10.0.pow(exp)
         return "%.2f".format(distance).toDouble()
     }
+
+    private fun calculateDistancewithOnlyRssi(rssi: Int): Double {
+        val distance = 10.0.pow((-69 - rssi) / (10 * 2))
+        return "%.2f".format(distance).toDouble()
+    }
+
 
     @SuppressLint("MissingPermission")
     private fun requestLocationUpdates() {
