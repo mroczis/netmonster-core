@@ -175,7 +175,7 @@ class MainActivity : AppCompatActivity() {
 
         deviceDetail.put("Model","${Build.MODEL}")
         deviceDetail.put("BuildID","${Build.ID}")
-        deviceDetail.put("AndroidID","${
+        deviceDetail.put("receiverID","${
             Settings.Secure.getString(
                 contentResolver,
                 Settings.Secure.ANDROID_ID
@@ -186,7 +186,7 @@ class MainActivity : AppCompatActivity() {
 
         val sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE)
         val locationData = sharedPreferences.getString("locationData", "")
-        deviceDetail.put("locationData","${locationData}")
+        deviceDetail.put("locationData",{locationData})
 
 
         println(deviceDetail)
@@ -220,7 +220,7 @@ class MainActivity : AppCompatActivity() {
             val gson = Gson()
             val mergedJson = gson.toJson(subset)
             val cellDetails = JSONObject()
-            cellDetails.put("Receiver","${getSystemDetail()}")
+            cellDetails.put("receiver","${getSystemDetail()}")
             cellDetails.put("received_signals","${mergedJson}")
 
             publishMqttMessage(cellDetails.toString().toByteArray(), "dt/message/cell")
@@ -251,7 +251,7 @@ class MainActivity : AppCompatActivity() {
 
         val wifiDetails= JSONObject()
         val storage = ArrayList<String>()
-        wifiDetails.put("Receiver","${getSystemDetail()}")
+        wifiDetails.put("receiver","${getSystemDetail()}")
 
         for (scanResult in wifiInfo) {
             val tempObject = JSONObject()
@@ -407,7 +407,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED == action) {
                     bluetoothDetails.put("received_signals", storage.distinct().toString())
-                    bluetoothDetails.put("Receiver","${getSystemDetail()}")
+                    bluetoothDetails.put("receiver","${getSystemDetail()}")
 
                     println("bluetooth")
                     println(bluetoothDetails)
@@ -469,8 +469,8 @@ class MainActivity : AppCompatActivity() {
                     val latitude = location.latitude
                     val longitude = location.longitude
 
-                    locationDetails.put("latitide", "${location.latitude}")
-                    locationDetails.put("longitude", "${location.longitude}")
+                    locationDetails.put("latitide", {location.latitude})
+                    locationDetails.put("longitude", {location.longitude})
 
 
 
