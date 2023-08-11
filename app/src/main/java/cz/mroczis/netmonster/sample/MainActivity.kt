@@ -45,6 +45,7 @@ import kotlin.math.pow
 import kotlin.random.Random
 
 
+
 /**
  * Activity periodically updates data (once in [REFRESH_RATIO] ms) when it's on foreground.
  */
@@ -173,6 +174,10 @@ class MainActivity : AppCompatActivity() {
     private fun getSystemDetail(): String {
         val deviceDetail= JSONObject()
 
+        val manager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val info = manager.connectionInfo
+
+
         deviceDetail.put("Model","${Build.MODEL}")
         deviceDetail.put("BuildID","${Build.ID}")
         deviceDetail.put("receiverID","${
@@ -184,9 +189,12 @@ class MainActivity : AppCompatActivity() {
         deviceDetail.put("Manufacture","${Build.MANUFACTURER}")
         deviceDetail.put("Brand","${Build.BRAND}")
 
+        deviceDetail.put("MAC","${info.macAddress.toUpperCase()}")
+
+
         val sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE)
         val locationData = sharedPreferences.getString("locationData", "")
-        deviceDetail.put("locationData",{locationData})
+        deviceDetail.put("locationData", "${locationData}")
 
 
         println(deviceDetail)
@@ -347,6 +355,122 @@ class MainActivity : AppCompatActivity() {
         return connectedWifiDetails.toString()
     }
 
+    private fun checkBluetoothDeviceType(int: Int): String {
+        var strings="";
+        if(int == 1076){
+            strings="AUDIO_VIDEO_CAMCORDER"
+        }else if (int == 1056){
+            strings = "AUDIO_VIDEO_CAR_AUDIO"
+        }else if (int == 1032){
+            strings = "AUDIO_VIDEO_HANDSFREE"
+        }else if (int == 1056){
+            strings = "AUDIO_VIDEO_HEADPHONES"
+        }else if (int == 1048){
+            strings = "AUDIO_VIDEO_HIFI_AUDIO"
+        }else if (int == 1064){
+            strings = "AUDIO_VIDEO_LOUDSPEAKER"
+        }else if (int == 1044){
+            strings = "AUDIO_VIDEO_CAR_AUDIO"
+        }else if (int == 1040){
+            strings = "AUDIO_VIDEO_MICROPHONE"
+        }else if (int == 1052){
+            strings = "AUDIO_VIDEO_PORTABLE_AUDIO"
+        }else if (int == 1060){
+            strings = "AUDIO_VIDEO_SET_TOP_BOX"
+        }else if (int == 1024){
+            strings = "AUDIO_VIDEO_UNCATEGORIZED"
+        }else if (int == 1068){
+            strings = "AUDIO_VIDEO_VCR"
+        }else if (int == 1072){
+            strings = "AUDIO_VIDEO_VIDEO_CAMERA"
+        }else if (int == 1088){
+            strings = "AUDIO_VIDEO_VIDEO_CONFERENCING"
+        }else if (int == 1084){
+            strings = "AUDIO_VIDEO_VIDEO_DISPLAY_AND_LOUDSPEAKER"
+        }else if (int == 1096){
+            strings = "AUDIO_VIDEO_VIDEO_GAMING_TOY"
+        }else if (int == 1080){
+            strings = "AUDIO_VIDEO_VIDEO_MONITOR"
+        }else if (int == 1028){
+            strings = "AUDIO_VIDEO_WEARABLE_HEADSET"
+        }else if (int == 260){
+            strings = "COMPUTER_DESKTOP"
+        }else if (int == 272){
+            strings = "COMPUTER_HANDHELD_PC_PDA"
+        }else if (int == 268){
+            strings = "COMPUTER_LAPTOP"
+        }else if (int == 276){
+            strings = "COMPUTER_PALM_SIZE_PC_PDA"
+        }else if (int == 264){
+            strings = "COMPUTER_SERVER"
+        }else if (int == 256){
+            strings = "COMPUTER_UNCATEGORIZED"
+        }else if (int == 280){
+            strings = "COMPUTER_WEARABLE"
+        }else if (int == 2308){
+            strings = "HEALTH_BLOOD_PRESSURE"
+        }else if (int == 2332){
+            strings = "HEALTH_DATA_DISPLAY"
+        }else if (int == 2320){
+            strings = "HEALTH_GLUCOSE"
+        }else if (int == 2324){
+            strings = "HEALTH_PULSE_OXIMETER"
+        }else if (int == 2328){
+            strings = "HEALTH_PULSE_RATE"
+        }else if (int == 2312){
+            strings = "HEALTH_THERMOMETER"
+        }else if (int == 2304){
+            strings = "HEALTH_UNCATEGORIZED"
+        }else if (int == 2316){
+            strings = "HEALTH_WEIGHING"
+        }else if (int == 1344){
+            strings = "PERIPHERAL_KEYBOARD"
+        }else if (int == 1472){
+            strings = "PERIPHERAL_KEYBOARD_POINTING"
+        }else if (int == 1280){
+            strings = "PERIPHERAL_NON_KEYBOARD_NON_POINTING"
+        }else if (int == 1408){
+            strings = "PERIPHERAL_POINTING"
+        }else if (int == 516){
+            strings = "PHONE_CELLULAR"
+        }else if (int == 520){
+            strings = "PHONE_CORDLESS"
+        }else if (int == 532){
+            strings = "PHONE_ISDN"
+        }else if (int == 528){
+            strings = "PHONE_MODEM_OR_GATEWAY"
+        }else if (int == 524){
+            strings = "PHONE_SMART"
+        }else if (int == 512){
+            strings = "PHONE_UNCATEGORIZED"
+        }else if (int == 2064){
+            strings = "TOY_CONTROLLER"
+        }else if (int == 2060){
+            strings = "TOY_DOLL_ACTION_FIGURE"
+        }else if (int == 2068){
+            strings = "TOY_GAME"
+        }else if (int == 2052){
+            strings = "TOY_ROBOT"
+        }else if (int == 2048){
+            strings = "TOY_UNCATEGORIZED"
+        }else if (int == 2056){
+            strings = "TOY_VEHICLE"
+        }else if (int == 1812){
+            strings = "WEARABLE_GLASSES"
+        }else if (int == 1808){
+            strings = "WEARABLE_HELMET"
+        }else if (int == 1804){
+            strings = "WEARABLE_JACKET"
+        }else if (int == 1800){
+            strings = "WEARABLE_UNCATEGORIZED"
+        }else if (int == 1796){
+            strings = "WEARABLE_WRIST_WATCH"
+        }else{
+            strings = "unknown"
+        }
+
+        return strings;
+    }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     private fun scanForDevices(): String {
@@ -377,6 +501,7 @@ class MainActivity : AppCompatActivity() {
                         ) {
                             val deviceName = device.name
                             val deviceAddress = device.address
+                            val typeint = device.bluetoothClass.deviceClass
 
 
                             val rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
@@ -385,7 +510,10 @@ class MainActivity : AppCompatActivity() {
                             if(deviceName != null){
                                 tempDetails.put("Name", "${deviceName}")
                                 tempDetails.put("MAC", "${deviceAddress}")
+                                tempDetails.put("Type", "${checkBluetoothDeviceType(typeint)}")
+
                                 signalDetail.put("RSSI", rssi.toInt())
+
 
 
                                 val conn_status = connection.toString()
@@ -466,11 +594,9 @@ class MainActivity : AppCompatActivity() {
             .addOnSuccessListener { location: Location? ->
                 // Got last known location. In some rare situations, this can be null.
                 location?.let {
-                    val latitude = location.latitude
-                    val longitude = location.longitude
 
-                    locationDetails.put("latitide", {location.latitude})
-                    locationDetails.put("longitude", {location.longitude})
+                    locationDetails.put("latitide", "${location.latitude.toFloat()}")
+                    locationDetails.put("longitude", "${location.longitude.toFloat()}")
 
 
 
