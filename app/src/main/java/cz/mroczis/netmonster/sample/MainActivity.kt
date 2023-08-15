@@ -15,6 +15,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.NetworkInfo
 import android.net.wifi.WifiManager
+import android.net.wifi.WifiSsid
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -43,6 +44,7 @@ import kotlin.math.abs
 import kotlin.math.log10
 import kotlin.math.pow
 import kotlin.random.Random
+
 
 
 
@@ -248,6 +250,22 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    fun formatSSID(input: String): String {
+        if (input.isEmpty()) {
+            return ""
+        }
+
+        var result = input
+
+        if (input.first() == '"' && input.last() == '"') {
+            result = result.substring(1, result.length - 1)
+        }
+
+        return result
+    }
+
+
+
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     @SuppressLint("MissingPermission")
@@ -255,36 +273,54 @@ class MainActivity : AppCompatActivity() {
 
         wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
         val wifiInfo = wifiManager.scanResults
+
+
+
         val connectedWifi = getConnectedWifiSSID(context)
 
         val wifiDetails= JSONObject()
         val storage = ArrayList<String>()
-        wifiDetails.put("receiver","${getSystemDetail()}")
+        wifiDetails.put("receiver",getSystemDetail().toString())
+
 
         for (scanResult in wifiInfo) {
             val tempObject = JSONObject()
 
+
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                tempObject.put("SSID","${scanResult.wifiSsid}")
+                tempObject.put("SSID",formatSSID(scanResult.wifiSsid.toString()))
             }
+
+
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                tempObject.put("security_type","${scanResult.securityTypes}")
+            }
+
+
+            
+
+
             tempObject.put("BSSID","${scanResult.BSSID}")
+
             tempObject.put("capabilities","${scanResult.capabilities}")
-            tempObject.put("Level","${scanResult.level}")
-            tempObject.put("Frequency","${scanResult.frequency}")
+            tempObject.put("RSSI",scanResult.level.toInt())
+            tempObject.put("Frequency",scanResult.frequency.toInt())
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                tempObject.put("Frequency","${scanResult.channelWidth}")
+                tempObject.put("channel_width",scanResult.channelWidth)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                tempObject.put("centerFreq0","${scanResult.centerFreq0}")
+                tempObject.put("centerFreq0",scanResult.centerFreq0.toInt())
                 val distance = calculateDistance(scanResult.level, scanResult.centerFreq0)
-                tempObject.put("Distance", "${distance}")
+                tempObject.put("Distance", distance.toFloat())
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                tempObject.put("centerFreq1","${scanResult.centerFreq1}")
+                tempObject.put("centerFreq1",scanResult.centerFreq1.toInt())
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                tempObject.put("WifiStandard","${scanResult.wifiStandard}")
+                tempObject.put("wifi_standard",scanResult.wifiStandard.toInt())
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 tempObject.put("mcResponder80211","${scanResult.is80211mcResponder}")
@@ -293,8 +329,8 @@ class MainActivity : AppCompatActivity() {
             storage.add(tempObject.toString())
 
         }
-        wifiDetails.put("received_signals","${storage}")
-        wifiDetails.put("primary","${connectedWifi}")
+        wifiDetails.put("received_signals",storage)
+        wifiDetails.put("primary",connectedWifi)
 
         print(wifiDetails)
 
@@ -321,14 +357,16 @@ class MainActivity : AppCompatActivity() {
             if (networkCapabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true) {
                 val wifiInfo = wifiManager.connectionInfo
 
-                connectedWifiDetails.put("SSID","${wifiInfo.ssid}")
+
+
+                connectedWifiDetails.put("SSID", formatSSID(wifiInfo.ssid.toString()))
                 connectedWifiDetails.put("BSSID","${wifiInfo.bssid}")
-                connectedWifiDetails.put("RSSI","${wifiInfo.rssi}")
-                connectedWifiDetails.put("Link_speed","${wifiInfo.linkSpeed}")
-                connectedWifiDetails.put("Frequency", "${wifiInfo.frequency}")
+                connectedWifiDetails.put("RSSI",wifiInfo.rssi.toInt())
+                connectedWifiDetails.put("Link_speed",wifiInfo.linkSpeed.toInt())
+                connectedWifiDetails.put("Frequency", wifiInfo.frequency.toInt())
 
                 val distance = calculateDistance(wifiInfo.rssi, wifiInfo.frequency)
-                connectedWifiDetails.put("Distance", "${distance}")
+                connectedWifiDetails.put("Distance", distance.toFloat())
 
                 connectedWifiDetails.put("hidden_SSID","${wifiInfo.hiddenSSID}")
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -336,15 +374,15 @@ class MainActivity : AppCompatActivity() {
                 }
                 connectedWifiDetails.put("supplicant_state","${wifiInfo.supplicantState}")
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    connectedWifiDetails.put("wifi_standard","${wifiInfo.wifiStandard}")
-                    connectedWifiDetails.put("max_Supported_Tx_Link_Speed","${wifiInfo.maxSupportedTxLinkSpeedMbps}")
-                    connectedWifiDetails.put("max_Supported_Rx_Link_Speed","${wifiInfo.maxSupportedRxLinkSpeedMbps}")
+                    connectedWifiDetails.put("wifi_standard",wifiInfo.wifiStandard.toInt())
+                    connectedWifiDetails.put("max_Supported_Tx_Link_Speed",wifiInfo.maxSupportedTxLinkSpeedMbps.toInt())
+                    connectedWifiDetails.put("max_Supported_Rx_Link_Speed",wifiInfo.maxSupportedRxLinkSpeedMbps.toInt())
                 }
 
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    connectedWifiDetails.put("tx_link_speed", "${wifiInfo.txLinkSpeedMbps}")
-                    connectedWifiDetails.put("rx_link_speed", "${wifiInfo.rxLinkSpeedMbps}")
+                    connectedWifiDetails.put("tx_link_speed", wifiInfo.txLinkSpeedMbps.toInt())
+                    connectedWifiDetails.put("rx_link_speed", wifiInfo.rxLinkSpeedMbps.toInt())
                 }
                 connectedWifiDetails.put("netID", "${wifiInfo.networkId}")
                 connectedWifiDetails.put("isConnected", "true")
@@ -595,8 +633,8 @@ class MainActivity : AppCompatActivity() {
                 // Got last known location. In some rare situations, this can be null.
                 location?.let {
 
-                    locationDetails.put("latitide", "${location.latitude.toFloat()}")
-                    locationDetails.put("longitude", "${location.longitude.toFloat()}")
+                    locationDetails.put("latitide", location.latitude.toFloat())
+                    locationDetails.put("longitude", location.longitude.toFloat())
 
 
 
