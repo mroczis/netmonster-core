@@ -274,8 +274,6 @@ class MainActivity : AppCompatActivity() {
         wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
         val wifiInfo = wifiManager.scanResults
 
-
-
         val connectedWifi = getConnectedWifiSSID(context)
 
         val wifiDetails= JSONObject()
@@ -285,6 +283,8 @@ class MainActivity : AppCompatActivity() {
 
         for (scanResult in wifiInfo) {
             val tempObject = JSONObject()
+            val signalDetail = JSONObject()
+
 
 
 
@@ -292,29 +292,27 @@ class MainActivity : AppCompatActivity() {
                 tempObject.put("SSID",formatSSID(scanResult.wifiSsid.toString()))
             }
 
-
+            tempObject.put("BSSID","${scanResult.BSSID}")
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 tempObject.put("security_type","${scanResult.securityTypes}")
             }
 
 
-            
-
-
-            tempObject.put("BSSID","${scanResult.BSSID}")
-
             tempObject.put("capabilities","${scanResult.capabilities}")
-            tempObject.put("RSSI",scanResult.level.toInt())
+            signalDetail.put("RSSI",scanResult.level.toInt())
             tempObject.put("Frequency",scanResult.frequency.toInt())
+
+
+            val distance = calculateDistance(scanResult.level, scanResult.frequency)
+            signalDetail.put("Distance", distance.toFloat())
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 tempObject.put("channel_width",scanResult.channelWidth)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 tempObject.put("centerFreq0",scanResult.centerFreq0.toInt())
-                val distance = calculateDistance(scanResult.level, scanResult.centerFreq0)
-                tempObject.put("Distance", distance.toFloat())
+
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 tempObject.put("centerFreq1",scanResult.centerFreq1.toInt())
@@ -326,13 +324,59 @@ class MainActivity : AppCompatActivity() {
                 tempObject.put("mcResponder80211","${scanResult.is80211mcResponder}")
             }
 
-            storage.add(tempObject.toString())
+
+            //check if there is any connected wifi networks
+
+            if(connectedWifi.length() > 0 && connectedWifi.getString("BSSID") == scanResult.BSSID){
+
+                val signalObject = connectedWifi.getJSONObject("signal")
+                val Link_speed = signalObject.getInt("Link_speed")
+                val RSSI = signalObject.getInt("RSSI")
+                val hidden_SSID = connectedWifi.getString("hidden_SSID")
+                val supplicant_state= connectedWifi.getString("supplicant_state")
+                val max_Supported_Tx_Link_Speed = connectedWifi.getInt("max_Supported_Tx_Link_Speed")
+                val max_Supported_Rx_Link_Speed = connectedWifi.getInt("max_Supported_Rx_Link_Speed")
+                val tx_link_speed = connectedWifi.getInt("tx_link_speed")
+                val rx_link_speed = signalObject.getInt("rx_link_speed")
+                val netID= connectedWifi.getString("netID")
+                val security_type = connectedWifi.getString("security_type")
+                val isConnected="true"
+
+                tempObject.put("Link_speed",Link_speed)
+                tempObject.put("hidden_SSID",hidden_SSID)
+                tempObject.put("supplicant_state",supplicant_state)
+                tempObject.put("max_Supported_Tx_Link_Speed",max_Supported_Tx_Link_Speed)
+                tempObject.put("max_Supported_Rx_Link_Speed",max_Supported_Rx_Link_Speed)
+                tempObject.put("tx_link_speed",tx_link_speed)
+                signalDetail.put("rx_link_speed",rx_link_speed)
+                signalDetail.put("RSSI",RSSI)
+                tempObject.put("netID",netID)
+                signalDetail.put("isConnected", isConnected)
+                tempObject.put("signal",signalDetail)
+                tempObject.put("security_type",security_type)
+
+                storage.add(0, tempObject.toString())
+            }else{
+                tempObject.put("Link_speed","")
+                tempObject.put("hidden_SSID","")
+                tempObject.put("supplicant_state","")
+                tempObject.put("max_Supported_Tx_Link_Speed","")
+                tempObject.put("max_Supported_Rx_Link_Speed","")
+                tempObject.put("tx_link_speed","")
+                signalDetail.put("rx_link_speed","")
+                tempObject.put("netID","")
+                signalDetail.put("isConnected", "")
+                tempObject.put("signal",signalDetail)
+
+                storage.add(tempObject.toString())
+
+            }
+            /*  added later to synchronize with connected wifi  */
 
         }
         wifiDetails.put("received_signals",storage)
-        wifiDetails.put("primary",connectedWifi)
 
-        print(wifiDetails)
+
 
         publishMqttMessage(wifiDetails.toString().toByteArray(), "dt/message/wifi")
 
@@ -340,9 +384,10 @@ class MainActivity : AppCompatActivity() {
 
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    fun getConnectedWifiSSID(context: Context): String {
+    fun getConnectedWifiSSID(context: Context): JSONObject {
 
         val connectedWifiDetails= JSONObject()
+        val signalDetail = JSONObject()
         val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkInfo: NetworkInfo? = connectivityManager.activeNetworkInfo
@@ -358,15 +403,14 @@ class MainActivity : AppCompatActivity() {
                 val wifiInfo = wifiManager.connectionInfo
 
 
-
                 connectedWifiDetails.put("SSID", formatSSID(wifiInfo.ssid.toString()))
                 connectedWifiDetails.put("BSSID","${wifiInfo.bssid}")
-                connectedWifiDetails.put("RSSI",wifiInfo.rssi.toInt())
-                connectedWifiDetails.put("Link_speed",wifiInfo.linkSpeed.toInt())
+                signalDetail.put("RSSI",wifiInfo.rssi.toInt())
+                signalDetail.put("Link_speed",wifiInfo.linkSpeed.toInt())
                 connectedWifiDetails.put("Frequency", wifiInfo.frequency.toInt())
 
                 val distance = calculateDistance(wifiInfo.rssi, wifiInfo.frequency)
-                connectedWifiDetails.put("Distance", distance.toFloat())
+                signalDetail.put("Distance", distance.toFloat())
 
                 connectedWifiDetails.put("hidden_SSID","${wifiInfo.hiddenSSID}")
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -382,15 +426,25 @@ class MainActivity : AppCompatActivity() {
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     connectedWifiDetails.put("tx_link_speed", wifiInfo.txLinkSpeedMbps.toInt())
-                    connectedWifiDetails.put("rx_link_speed", wifiInfo.rxLinkSpeedMbps.toInt())
+                    signalDetail.put("rx_link_speed", wifiInfo.rxLinkSpeedMbps.toInt())
                 }
                 connectedWifiDetails.put("netID", "${wifiInfo.networkId}")
-                connectedWifiDetails.put("isConnected", "true")
+                signalDetail.put("isConnected", "true")
+
+                connectedWifiDetails.put("signal", signalDetail)
+
+
+                //later added to synchronize connected and scanned results
+//                connectedWifiDetails.put("capabilities", "")
+//                connectedWifiDetails.put("channel_width", "")
+//                connectedWifiDetails.put("centerFreq0", "")
+//                connectedWifiDetails.put("centerFreq1", "")
+//                connectedWifiDetails.put("mcResponder80211", "")
 
 
             }
         }
-        return connectedWifiDetails.toString()
+        return connectedWifiDetails
     }
 
     private fun checkBluetoothDeviceType(int: Int): String {
