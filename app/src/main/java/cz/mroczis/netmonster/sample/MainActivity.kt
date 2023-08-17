@@ -345,7 +345,7 @@ class MainActivity : AppCompatActivity() {
                 val rx_link_speed = signalObject.getInt("rx_link_speed")
                 val netID= connectedWifi.getString("netID")
                 val security_type = connectedWifi.getString("security_type")
-                val isconnected="true"
+
 
                 tempObject.put("Link_speed",Link_speed)
                 tempObject.put("hidden_SSID",hidden_SSID)
@@ -356,7 +356,7 @@ class MainActivity : AppCompatActivity() {
                 signalDetail.put("rx_link_speed",rx_link_speed)
                 signalDetail.put("RSSI",RSSI)
                 tempObject.put("netID",netID)
-                signalDetail.put("isconnected", isConnected)
+                signalDetail.put("isconnected", "true")
                 tempObject.put("security_type",security_type)
 
 
