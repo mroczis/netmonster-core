@@ -325,6 +325,11 @@ class MainActivity : AppCompatActivity() {
             }
 
 
+            signalDetail.put("isconnected", "false")
+
+
+
+
             //check if there is any connected wifi networks
 
             if(connectedWifi.length() > 0 && connectedWifi.getString("BSSID") == scanResult.BSSID){
@@ -340,7 +345,7 @@ class MainActivity : AppCompatActivity() {
                 val rx_link_speed = signalObject.getInt("rx_link_speed")
                 val netID= connectedWifi.getString("netID")
                 val security_type = connectedWifi.getString("security_type")
-                val isConnected="true"
+                val isconnected="true"
 
                 tempObject.put("Link_speed",Link_speed)
                 tempObject.put("hidden_SSID",hidden_SSID)
@@ -351,29 +356,32 @@ class MainActivity : AppCompatActivity() {
                 signalDetail.put("rx_link_speed",rx_link_speed)
                 signalDetail.put("RSSI",RSSI)
                 tempObject.put("netID",netID)
-                signalDetail.put("isConnected", isConnected)
-                tempObject.put("signal",signalDetail)
+                signalDetail.put("isconnected", isConnected)
                 tempObject.put("security_type",security_type)
 
-                storage.add(0, tempObject.toString())
-            }else{
-                tempObject.put("Link_speed","")
-                tempObject.put("hidden_SSID","")
-                tempObject.put("supplicant_state","")
-                tempObject.put("max_Supported_Tx_Link_Speed","")
-                tempObject.put("max_Supported_Rx_Link_Speed","")
-                tempObject.put("tx_link_speed","")
-                signalDetail.put("rx_link_speed","")
-                tempObject.put("netID","")
-                signalDetail.put("isConnected", "")
-                tempObject.put("signal",signalDetail)
-
-                storage.add(tempObject.toString())
 
             }
+
+            tempObject.put("signal",signalDetail)
+            storage.add(tempObject.toString())
             /*  added later to synchronize with connected wifi  */
 
         }
+
+
+        /*
+        we need to to pass dummy data if there is null value for the digital document generation.
+        although this might be a silly solution it minimizes lot of code as we need to check lot of
+        null values in client app.
+
+
+        */
+
+
+
+
+        /* end of the code */
+
         wifiDetails.put("received_signals",storage)
 
 
@@ -429,7 +437,7 @@ class MainActivity : AppCompatActivity() {
                     signalDetail.put("rx_link_speed", wifiInfo.rxLinkSpeedMbps.toInt())
                 }
                 connectedWifiDetails.put("netID", "${wifiInfo.networkId}")
-                signalDetail.put("isConnected", "true")
+                signalDetail.put("isconnected", "true")
 
                 connectedWifiDetails.put("signal", signalDetail)
 
@@ -687,7 +695,7 @@ class MainActivity : AppCompatActivity() {
                 // Got last known location. In some rare situations, this can be null.
                 location?.let {
 
-                    locationDetails.put("latitide", location.latitude.toFloat())
+                    locationDetails.put("latitude", location.latitude.toFloat())
                     locationDetails.put("longitude", location.longitude.toFloat())
 
 
