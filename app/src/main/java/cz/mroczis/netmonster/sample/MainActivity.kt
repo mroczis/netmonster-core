@@ -2,6 +2,7 @@ package cz.mroczis.netmonster.sample
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.admin.DeviceAdminReceiver
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
@@ -15,7 +16,6 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.NetworkInfo
 import android.net.wifi.WifiManager
-import android.net.wifi.WifiSsid
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -46,8 +46,6 @@ import kotlin.math.pow
 import kotlin.random.Random
 
 
-
-
 /**
  * Activity periodically updates data (once in [REFRESH_RATIO] ms) when it's on foreground.
  */
@@ -72,7 +70,7 @@ class MainActivity : AppCompatActivity() {
 
 
     //    val brokerUri = "tcp://10.0.2.2:1883" // Replace with your MQTT broker URI
-    private val brokerUri = "tcp://broker.hivemq.com:1883" //
+    private val brokerUri = "tcp://broker.hivemq.com:1883"
     private val clientId = "publish-${Random.nextInt(0, 1000)}"
     private val persistence = MemoryPersistence()
     private val mqttClient = MqttClient(brokerUri, clientId, persistence)
@@ -146,7 +144,17 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun device_removed_action_message(){
+        val actionDetails= JSONObject()
+        actionDetails.put("receiver","${getSystemDetail()}")
+        actionDetails.put("received_signals",ArrayList<String>())
+        actionDetails.put("status","DEVICE_ABORTED")
+        publishMqttMessage(actionDetails.toString().toByteArray(), "dt/message/action")
+        println(actionDetails)
+    }
+
     override fun onPause() {
+        device_removed_action_message()
         super.onPause()
         handler.removeCallbacksAndMessages(null)
         disconnectFromMqttBroker()
@@ -163,6 +171,8 @@ class MainActivity : AppCompatActivity() {
             println("Problem to discconnect")
         }
     }
+
+
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun loop() {
@@ -254,7 +264,6 @@ class MainActivity : AppCompatActivity() {
         if (input.isEmpty()) {
             return ""
         }
-
         var result = input
 
         if (input.first() == '"' && input.last() == '"') {
@@ -368,20 +377,6 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-
-        /*
-        we need to to pass dummy data if there is null value for the digital document generation.
-        although this might be a silly solution it minimizes lot of code as we need to check lot of
-        null values in client app.
-
-
-        */
-
-
-
-
-        /* end of the code */
-
         wifiDetails.put("received_signals",storage)
 
 
@@ -410,6 +405,8 @@ class MainActivity : AppCompatActivity() {
             if (networkCapabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true) {
                 val wifiInfo = wifiManager.connectionInfo
 
+
+                
 
                 connectedWifiDetails.put("SSID", formatSSID(wifiInfo.ssid.toString()))
                 connectedWifiDetails.put("BSSID","${wifiInfo.bssid}")
@@ -442,16 +439,16 @@ class MainActivity : AppCompatActivity() {
                 connectedWifiDetails.put("signal", signalDetail)
 
 
-                //later added to synchronize connected and scanned results
-//                connectedWifiDetails.put("capabilities", "")
-//                connectedWifiDetails.put("channel_width", "")
-//                connectedWifiDetails.put("centerFreq0", "")
-//                connectedWifiDetails.put("centerFreq1", "")
-//                connectedWifiDetails.put("mcResponder80211", "")
 
 
             }
         }
+
+        println("connected wifi details is")
+        println("connected wifi details is")
+        print(connectedWifiDetails)
+        println("connected wifi details is")
+
         return connectedWifiDetails
     }
 
