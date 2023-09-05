@@ -10,6 +10,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ModuleInfo
 import android.content.pm.PackageManager
 import android.location.Location
 import android.net.ConnectivityManager
@@ -26,6 +27,9 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.os.postDelayed
+import com.chaquo.python.PyObject
+import com.chaquo.python.Python
+import com.chaquo.python.android.AndroidPlatform
 import com.google.android.gms.location.*
 import com.google.gson.Gson
 import cz.mroczis.netmonster.core.factory.NetMonsterFactory
@@ -44,7 +48,12 @@ import kotlin.math.abs
 import kotlin.math.log10
 import kotlin.math.pow
 import kotlin.random.Random
-
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 /**
  * Activity periodically updates data (once in [REFRESH_RATIO] ms) when it's on foreground.
@@ -82,6 +91,10 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if( !Python.isStarted() ) {
+            Python.start(AndroidPlatform(this))
+        }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
 
@@ -179,6 +192,8 @@ class MainActivity : AppCompatActivity() {
         requestLocationUpdates()
         updateCellularData()
         updateWifiData()
+
+
         handler.postDelayed(REFRESH_RATIO) { loop() }
     }
 
@@ -245,6 +260,13 @@ class MainActivity : AppCompatActivity() {
 
             publishMqttMessage(cellDetails.toString().toByteArray(), "dt/message/cell")
 
+
+
+
+            GlobalScope.launch(Dispatchers.IO) {
+                val pythonModule = Python.getInstance().getModule("distributor/main")
+                pythonModule.callAttr("f_for_cell", cellDetails.toString()).toString()
+            }
 
 
         }

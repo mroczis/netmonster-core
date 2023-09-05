@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'com.chaquo.python'
+
 }
 
 android {
@@ -15,6 +17,24 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        python {
+            version "3.11"
+            pip{
+                install "pusher==3.0.0"
+                install "-r", "src/main/python/distributor/requirements.txt"
+            }
+        }
+
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
+
+        sourceSets{
+            main{
+                python.srcDir "src/main/python"
+            }
+        }
     }
 
     buildTypes {
@@ -38,6 +58,8 @@ android {
 
     namespace 'cz.mroczis.netmonster.sample'
 }
+
+
 
 dependencies {
     implementation project(":library")
