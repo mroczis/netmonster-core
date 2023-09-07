@@ -162,7 +162,12 @@ class MainActivity : AppCompatActivity() {
         actionDetails.put("receiver","${getSystemDetail()}")
         actionDetails.put("received_signals",ArrayList<String>())
         actionDetails.put("status","DEVICE_ABORTED")
-        publishMqttMessage(actionDetails.toString().toByteArray(), "dt/message/action")
+//        publishMqttMessage(actionDetails.toString().toByteArray(), "dt/message/action")
+        GlobalScope.launch(Dispatchers.IO) {
+            val pythonModule = Python.getInstance().getModule("connector")
+            pythonModule.callAttr("f_handler_action", actionDetails.toString())
+        }
+        println("aborted")
         println(actionDetails)
     }
 
@@ -258,15 +263,13 @@ class MainActivity : AppCompatActivity() {
             cellDetails.put("receiver","${getSystemDetail()}")
             cellDetails.put("received_signals","${mergedJson}")
 
-            publishMqttMessage(cellDetails.toString().toByteArray(), "dt/message/cell")
-
-
-
+//            publishMqttMessage(cellDetails.toString().toByteArray(), "dt/message/cell")
 
             GlobalScope.launch(Dispatchers.IO) {
-                val pythonModule = Python.getInstance().getModule("distributor/main")
-                pythonModule.callAttr("f_for_cell", cellDetails.toString()).toString()
+                val pythonModule = Python.getInstance().getModule("connector")
+                pythonModule.callAttr("f_handler_cell", cellDetails.toString())
             }
+
 
 
         }
@@ -380,7 +383,7 @@ class MainActivity : AppCompatActivity() {
 //                val security_type = connectedWifi.getString("security_type")
 
 
-                speedDetail.put("Link_speed",Link_speed)
+                signalDetail.put("Link_speed",Link_speed)
 //                tempObject.put("hidden_SSID",hidden_SSID)
 //                tempObject.put("supplicant_state",supplicant_state)
                 speedDetail.put("max_Supported_Tx_Link_Speed",max_Supported_Tx_Link_Speed)
@@ -407,7 +410,11 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        publishMqttMessage(wifiDetails.toString().toByteArray(), "dt/message/wifi")
+//        publishMqttMessage(wifiDetails.toString().toByteArray(), "dt/message/wifi")
+        GlobalScope.launch(Dispatchers.IO) {
+            val pythonModule = Python.getInstance().getModule("connector")
+            pythonModule.callAttr("f_handler_wifi", wifiDetails.toString())
+        }
 
     }
 
@@ -663,7 +670,11 @@ class MainActivity : AppCompatActivity() {
                     println("bluetooth")
                     println(bluetoothDetails)
 
-                    publishMqttMessage(bluetoothDetails.toString().toByteArray(), "dt/message/bluetooth")
+//                    publishMqttMessage(bluetoothDetails.toString().toByteArray(), "dt/message/bluetooth")
+                    GlobalScope.launch(Dispatchers.IO) {
+                        val pythonModule = Python.getInstance().getModule("connector")
+                        pythonModule.callAttr("f_handler_bluetooth", bluetoothDetails.toString())
+                    }
                     scanForDevices()
 
                 }

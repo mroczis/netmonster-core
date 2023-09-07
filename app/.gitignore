@@ -1,1 +1,4 @@
 /build
+/src/main/python/client/config/auth.py
+**/auth.py
+.env
