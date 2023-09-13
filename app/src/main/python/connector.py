@@ -21,7 +21,7 @@ def f_handler_cell(data:str)->None:
 def f_handler_action(data:str)->None:
     cleaned=get_cleaned_action_data(data)
     f_update_twin_instances(cleaned, None, None, None)
-    print("Aboreted")
+    print("Aborted")
     return
 
 
