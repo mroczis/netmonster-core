@@ -15,7 +15,7 @@ def f_handler_wifi(data:str)->None:
 def f_handler_cell(data:str)->None:
     cleaned=get_cleaned_cellular_data(data)
     f_update_twin_instances(cleaned, 'globalId', "dtmi:network:cell;1", 'cell')
-    return 
+    return
 
 
 def f_handler_action(data:str)->None:

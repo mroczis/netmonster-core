@@ -21,7 +21,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -31,14 +30,10 @@ import com.chaquo.python.android.AndroidPlatform
 import com.google.android.gms.location.*
 import com.google.gson.Gson
 import cz.mroczis.netmonster.core.factory.NetMonsterFactory
-import cz.mroczis.netmonster.core.feature.merge.CellSource
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.sample.MainActivity.Companion.REFRESH_RATIO
-import cz.mroczis.netmonster.sample.databinding.ActivityMainBinding
 import org.eclipse.paho.client.mqttv3.MqttClient
-//import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttException
-//import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import org.json.JSONObject
 import java.lang.reflect.Method
@@ -51,6 +46,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttMessage
+import org.json.JSONArray
+
 
 /**
  * Activity periodically updates data (once in [REFRESH_RATIO] ms) when it's on foreground.
@@ -63,8 +60,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
 
-
-
     companion object {
         private const val REFRESH_RATIO = 5_000L
     }
@@ -72,8 +67,8 @@ class MainActivity : AppCompatActivity() {
 
 
     private val handler = Handler(Looper.getMainLooper())
-    private val adapter = MainAdapter()
-    private lateinit var binding: ActivityMainBinding
+//    private val adapter = MainAdapter()
+//    private lateinit var binding: ActivityMainBinding
     private lateinit var wifiManager: WifiManager
 
 
@@ -87,19 +82,19 @@ class MainActivity : AppCompatActivity() {
 
 
 
-
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
 
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
+//        binding = ActivityMainBinding.inflate(layoutInflater)
 
-        with(binding) {
-            setContentView(root)
-            recycler.adapter = adapter
-        }
+//        with(binding) {
+//            setContentView(root)
+//            recycler.adapter = adapter
+//        }
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         scanForDevices()
@@ -115,9 +110,6 @@ class MainActivity : AppCompatActivity() {
             val mqttOptions = MqttConnectOptions()
             mqttOptions.isCleanSession = true
             mqttClient.connect(mqttOptions)
-            println("connected")
-            println("connected")
-            println("connected")
             println("connected")
         } catch (e: MqttException) {
             e.printStackTrace()
@@ -172,9 +164,9 @@ class MainActivity : AppCompatActivity() {
         actionDetails.put("receiver","${getSystemDetail()}")
         actionDetails.put("received_signals",ArrayList<String>())
         actionDetails.put("status","DEVICE_ABORTED")
-//        publishMqttMessage(actionDetails.toString().toByteArray(), "dt/message/action")
+        publishMqttMessage(actionDetails.toString().toByteArray(), "dt/message/action")
 
-        run_python_script( "f_handler_action", actionDetails.toString())
+//        run_python_script( "f_handler_action", actionDetails.toString())
         println("aborted")
 
     }
@@ -184,8 +176,6 @@ class MainActivity : AppCompatActivity() {
         handler.removeCallbacksAndMessages(null)
         disconnectFromMqttBroker()
         device_removed_action_message()
-
-
     }
 
     private fun disconnectFromMqttBroker() {
@@ -199,81 +189,56 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun loop() {
-
         requestLocationUpdates()
         updateCellularData()
         updateWifiData()
-
         handler.postDelayed(REFRESH_RATIO) { loop() }
     }
 
+
     @SuppressLint("HardwareIds")
     private fun getSystemDetail(): String {
-        val deviceDetail= JSONObject()
-
-        val manager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        val info = manager.connectionInfo
-
-
-        deviceDetail.put("Model","${Build.MODEL}")
-        deviceDetail.put("BuildID","${Build.ID}")
-        deviceDetail.put("receiverID","${
-            Settings.Secure.getString(
-                contentResolver,
-                Settings.Secure.ANDROID_ID
-            )
-        }")
-        deviceDetail.put("Manufacture","${Build.MANUFACTURER}")
-        deviceDetail.put("Brand","${Build.BRAND}")
-
-        deviceDetail.put("MAC","${info.macAddress.toUpperCase()}")
-
-
-        val sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE)
-        val locationData = sharedPreferences.getString("locationData", "")
-        deviceDetail.put("locationData", "${locationData}")
-
-
-
-        return deviceDetail.toString()
+        val result = JSONObject().apply {
+            put("Model", Build.MODEL)
+            put("BuildID", Build.ID)
+            put("receiverID", Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID))
+            put("Manufacture", Build.MANUFACTURER)
+            put("Brand", Build.BRAND)
+            val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+            put("MAC", wifiManager?.connectionInfo?.macAddress?.toUpperCase() ?: "N/A")
+            val sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE)
+            val locationData = sharedPreferences.getString("locationData", "")
+            put("locationData", locationData)
+        }
+        return result.toString()
     }
-
 
 
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     @SuppressLint("MissingPermission")
     private fun updateCellularData() {
-
         NetMonsterFactory.get(this).apply {
-            val subset : List<ICell> = getCells(
-                // subset of available sources
-                CellSource.ALL_CELL_INFO,
+            val subset: List<ICell> = getCells()
 
-                CellSource.CELL_LOCATION,
-
-                )
-
-            adapter.data = subset
-            val separated = " \n${subset.joinToString(separator = "\n")}"
-            Log.d("NTM-RES", separated)
-
-            //this is testing
             val gson = Gson()
             val mergedJson = gson.toJson(subset)
-            val cellDetails = JSONObject()
-            cellDetails.put("receiver","${getSystemDetail()}")
-            cellDetails.put("received_signals","${mergedJson}")
 
-//            publishMqttMessage(cellDetails.toString().toByteArray(), "dt/message/cell")
 
-            run_python_script("f_handler_cell",cellDetails.toString())
+            val cellDetails = JSONObject().apply {
+                put("receiver", getSystemDetail())
+                put("received_signals", mergedJson)
+            }
+
+
+            publishMqttMessage(cellDetails.toString().toByteArray(), "dt/message/cell")
+
+//            run_python_script("f_handler_cell",cellDetails.toString())
+//            adapter.data = subset
 
         }
-
     }
 
 
@@ -303,21 +268,17 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     @SuppressLint("MissingPermission")
-    private fun updateWifiData(){
-
+    private fun updateWifiData() {
         wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
 
-        if( wifiManager.isWifiEnabled == true) {
-
+//        if (wifiManager.isWifiEnabled) {
             val wifiInfo = wifiManager.scanResults
-
             val connectedWifi = getConnectedWifiSSID(context)
 
-
             val wifiDetails = JSONObject()
-            val storage = ArrayList<String>()
             wifiDetails.put("receiver", getSystemDetail().toString())
 
+            val storage = JSONArray()
 
             for (scanResult in wifiInfo) {
                 val tempObject = JSONObject()
@@ -325,50 +286,44 @@ class MainActivity : AppCompatActivity() {
                 val speedDetail = JSONObject()
                 val frequencyDetail = JSONObject()
 
-
-
-
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     tempObject.put("SSID", formatSSID(scanResult.wifiSsid.toString()))
                 }
 
-                tempObject.put("BSSID", "${scanResult.BSSID}")
+                tempObject.put("BSSID", scanResult.BSSID)
+                tempObject.put("capabilities", scanResult.capabilities)
 
-
-                tempObject.put("capabilities", "${scanResult.capabilities}")
                 signalDetail.put("RSSI", scanResult.level.toInt())
                 frequencyDetail.put("Frequency", scanResult.frequency.toInt())
-
 
                 val distance = calculateDistance(scanResult.level, scanResult.frequency)
                 signalDetail.put("Distance", distance.toFloat())
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     speedDetail.put("channel_width", scanResult.channelWidth)
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     frequencyDetail.put("centerFreq0", scanResult.centerFreq0.toInt())
-
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     frequencyDetail.put("centerFreq1", scanResult.centerFreq1.toInt())
                 }
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     tempObject.put("wifi_standard", scanResult.wifiStandard.toInt())
                 }
 
-
                 signalDetail.put("isconnected", "false")
 
-
-                //check if there is any connected wifi networks
-
+                // Check if there is any connected WiFi network
                 if (connectedWifi != null && connectedWifi.bssid == scanResult.BSSID) {
-
                     signalDetail.put("Link_speed", connectedWifi.linkSpeed)
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        speedDetail.put("max_Supported_Tx_Link_Speed", connectedWifi.maxSupportedTxLinkSpeedMbps)
-                        speedDetail.put("max_Supported_Rx_Link_Speed", connectedWifi.maxSupportedRxLinkSpeedMbps)
+                        speedDetail.put(
+                            "max_Supported_Tx_Link_Speed",
+                            connectedWifi.maxSupportedTxLinkSpeedMbps
+                        )
+                        speedDetail.put(
+                            "max_Supported_Rx_Link_Speed",
+                            connectedWifi.maxSupportedRxLinkSpeedMbps
+                        )
                     }
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -378,29 +333,24 @@ class MainActivity : AppCompatActivity() {
 
                     signalDetail.put("RSSI", connectedWifi.rssi)
                     signalDetail.put("isconnected", "true")
-
                 }
 
                 tempObject.put("signal", signalDetail)
                 tempObject.put("speed", speedDetail)
                 tempObject.put("frequency", frequencyDetail)
-                storage.add(tempObject.toString())
-                /*  added later to synchronize with connected wifi  */
-
+                storage.put(tempObject)
             }
+
             wifiDetails.put("received_signals", storage)
 
-//            publishMqttMessage(wifiDetails.toString().toByteArray(), "dt/message/wifi")
-
-            run_python_script("f_handler_wifi", wifiDetails.toString())
-
-        }
-
-
+             publishMqttMessage(wifiDetails.toString().toByteArray(), "dt/message/wifi")
+//            run_python_script("f_handler_wifi", wifiDetails.toString())
+//        }
     }
 
 
-//    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+
+    //    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun getConnectedWifiSSID(context: Context): WifiInfo? {
 
         val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -578,6 +528,7 @@ class MainActivity : AppCompatActivity() {
                             val rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
                             val connection = isConnected(device)
 
+
                             if(deviceName != null){
                                 tempDetails.put("Name", "${deviceName}")
                                 tempDetails.put("MAC", "${deviceAddress}")
@@ -609,9 +560,9 @@ class MainActivity : AppCompatActivity() {
                     bluetoothDetails.put("receiver","${getSystemDetail()}")
 
 
-//                    publishMqttMessage(bluetoothDetails.toString().toByteArray(), "dt/message/bluetooth")
+                    publishMqttMessage(bluetoothDetails.toString().toByteArray(), "dt/message/bluetooth")
 
-                    run_python_script("f_handler_bluetooth",  bluetoothDetails.toString())
+//                    run_python_script("f_handler_bluetooth",  bluetoothDetails.toString())
 
                     scanForDevices()
 
@@ -661,26 +612,19 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     private fun requestLocationUpdates() {
-        val locationDetails = JSONObject()
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
-                // Got last known location. In some rare situations, this can be null.
                 location?.let {
-
-                    locationDetails.put("latitude", location.latitude.toFloat())
-                    locationDetails.put("longitude", location.longitude.toFloat())
-
-
-
+                    val locationDetails = JSONObject().apply {
+                        put("latitude", location.latitude.toFloat())
+                        put("longitude", location.longitude.toFloat())
+                    }
                     val sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE)
-                    val editor = sharedPreferences.edit()
-                    editor.putString("locationData", locationDetails.toString())
-                    editor.apply()
-
+                    sharedPreferences.edit().putString("locationData", locationDetails.toString()).apply()
                 }
             }
-
     }
+
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
