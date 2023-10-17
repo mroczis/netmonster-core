@@ -1,5 +1,4 @@
 package cz.mroczis.netmonster.sample
-
 import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
@@ -25,13 +24,14 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.os.postDelayed
-import com.chaquo.python.Python
-import com.chaquo.python.android.AndroidPlatform
+//import com.chaquo.python.Python
+//import com.chaquo.python.android.AndroidPlatform
 import com.google.android.gms.location.*
 import com.google.gson.Gson
 import cz.mroczis.netmonster.core.factory.NetMonsterFactory
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.sample.MainActivity.Companion.REFRESH_RATIO
+import cz.mroczis.netmonster.sample.databinding.ActivityMainBinding
 import org.eclipse.paho.client.mqttv3.MqttClient
 import org.eclipse.paho.client.mqttv3.MqttException
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
@@ -47,7 +47,7 @@ import kotlinx.coroutines.launch
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.json.JSONArray
-
+import java.time.LocalDateTime
 
 /**
  * Activity periodically updates data (once in [REFRESH_RATIO] ms) when it's on foreground.
@@ -67,8 +67,8 @@ class MainActivity : AppCompatActivity() {
 
 
     private val handler = Handler(Looper.getMainLooper())
-//    private val adapter = MainAdapter()
-//    private lateinit var binding: ActivityMainBinding
+    private val adapter = MainAdapter()
+    private lateinit var binding: ActivityMainBinding
     private lateinit var wifiManager: WifiManager
 
 
@@ -81,6 +81,7 @@ class MainActivity : AppCompatActivity() {
     val LOCATION_PERMISSION_REQUEST_CODE = 1001
 
 
+    private val operation = "local"
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,12 +89,12 @@ class MainActivity : AppCompatActivity() {
 
 
 
-//        binding = ActivityMainBinding.inflate(layoutInflater)
+        binding = ActivityMainBinding.inflate(layoutInflater)
 
-//        with(binding) {
-//            setContentView(root)
-//            recycler.adapter = adapter
-//        }
+        with(binding) {
+            setContentView(root)
+            recycler.adapter = adapter
+        }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -145,18 +146,18 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun run_python_script( pyfunc: String, data: String){
-
-        if( !Python.isStarted() ) {
-            Python.start(AndroidPlatform(this))
-        }
-
-        GlobalScope.launch(Dispatchers.IO) {
-            val pythonModule = Python.getInstance().getModule("connector")
-            pythonModule.callAttr(pyfunc, data)
-        }
-
-    }
+//    private fun run_python_script( pyfunc: String, data: String){
+//
+//        if( !Python.isStarted() ) {
+//            Python.start(AndroidPlatform(this))
+//        }
+//
+//        GlobalScope.launch(Dispatchers.IO) {
+//            val pythonModule = Python.getInstance().getModule("connector")
+//            pythonModule.callAttr(pyfunc, data)
+//        }
+//
+//    }
 
     private fun device_removed_action_message(){
 
@@ -165,8 +166,6 @@ class MainActivity : AppCompatActivity() {
         actionDetails.put("received_signals",ArrayList<String>())
         actionDetails.put("status","DEVICE_ABORTED")
         publishMqttMessage(actionDetails.toString().toByteArray(), "dt/message/action")
-
-//        run_python_script( "f_handler_action", actionDetails.toString())
         println("aborted")
 
     }
@@ -174,8 +173,9 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         handler.removeCallbacksAndMessages(null)
-        disconnectFromMqttBroker()
         device_removed_action_message()
+        disconnectFromMqttBroker()
+
     }
 
     private fun disconnectFromMqttBroker() {
@@ -220,6 +220,15 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     @SuppressLint("MissingPermission")
     private fun updateCellularData() {
+
+
+        val current = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            LocalDateTime.now()
+        } else {
+            TODO("VERSION.SDK_INT < O")
+        }
+
+
         NetMonsterFactory.get(this).apply {
             val subset: List<ICell> = getCells()
 
@@ -230,13 +239,17 @@ class MainActivity : AppCompatActivity() {
             val cellDetails = JSONObject().apply {
                 put("receiver", getSystemDetail())
                 put("received_signals", mergedJson)
+                put("ingestor", current)
             }
+
+
+//            run_python_script("f_handler_cell",cellDetails.toString())
 
 
             publishMqttMessage(cellDetails.toString().toByteArray(), "dt/message/cell")
 
-//            run_python_script("f_handler_cell",cellDetails.toString())
-//            adapter.data = subset
+
+            adapter.data = subset
 
         }
     }
@@ -271,7 +284,6 @@ class MainActivity : AppCompatActivity() {
     private fun updateWifiData() {
         wifiManager = applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
 
-//        if (wifiManager.isWifiEnabled) {
             val wifiInfo = wifiManager.scanResults
             val connectedWifi = getConnectedWifiSSID(context)
 
@@ -341,11 +353,21 @@ class MainActivity : AppCompatActivity() {
                 storage.put(tempObject)
             }
 
-            wifiDetails.put("received_signals", storage)
 
-             publishMqttMessage(wifiDetails.toString().toByteArray(), "dt/message/wifi")
-//            run_python_script("f_handler_wifi", wifiDetails.toString())
-//        }
+            val current = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                LocalDateTime.now()
+            } else {
+                TODO("VERSION.SDK_INT < O")
+            }
+
+            wifiDetails.put("received_signals", storage)
+            wifiDetails.put("ingestor", current)
+
+//        run_python_script("f_handler_wifi", wifiDetails.toString())
+
+        publishMqttMessage(wifiDetails.toString().toByteArray(), "dt/message/wifi")
+
+
     }
 
 
@@ -354,6 +376,7 @@ class MainActivity : AppCompatActivity() {
     fun getConnectedWifiSSID(context: Context): WifiInfo? {
 
         val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkInfo: NetworkInfo? = connectivityManager.activeNetworkInfo
         var data: WifiInfo? = null
@@ -559,10 +582,17 @@ class MainActivity : AppCompatActivity() {
                     bluetoothDetails.put("received_signals", storage.distinct().toString())
                     bluetoothDetails.put("receiver","${getSystemDetail()}")
 
+                    val current = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        LocalDateTime.now()
+                    } else {
+                        TODO("VERSION.SDK_INT < O")
+                    }
+                    bluetoothDetails.put("ingestor", current)
 
+
+//                   run_python_script("f_handler_bluetooth",  bluetoothDetails.toString())
                     publishMqttMessage(bluetoothDetails.toString().toByteArray(), "dt/message/bluetooth")
 
-//                    run_python_script("f_handler_bluetooth",  bluetoothDetails.toString())
 
                     scanForDevices()
 
@@ -644,6 +674,7 @@ class MainActivity : AppCompatActivity() {
 
 
 }
+
 
 
 
