@@ -11,6 +11,7 @@ import cz.mroczis.netmonster.core.db.model.NetworkType
 import cz.mroczis.netmonster.core.model.cell.CellLte
 import cz.mroczis.netmonster.core.model.cell.CellNr
 import cz.mroczis.netmonster.core.model.cell.ICell
+import cz.mroczis.netmonster.core.model.connection.NoneConnection
 import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 import cz.mroczis.netmonster.core.model.connection.SecondaryConnection
 import cz.mroczis.netmonster.core.model.nr.NrNsaState
@@ -97,9 +98,10 @@ class NrNsaStateParser {
     private fun parse(cells: List<ICell>) =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val servingLte = cells.any { it is CellLte && it.connectionStatus is PrimaryConnection }
-            val secondaryNr = cells.any { it is CellNr && it.connectionStatus is SecondaryConnection }
+            val secondaryNr = cells.count { it is CellNr && it.connectionStatus is SecondaryConnection }
+            val neighbouringNr = cells.count { it is CellNr && it.connectionStatus is NoneConnection }
 
-            servingLte && secondaryNr
+            servingLte && (secondaryNr + neighbouringNr > 0)
         } else {
             false
         }
