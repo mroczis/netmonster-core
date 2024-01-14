@@ -52,10 +52,19 @@ data class SignalNr(
      * Unit: None
      */
     @IntRange(from = SINR_MIN, to = SINR_MAX)
-    val ssSinr: Int?
+    val ssSinr: Int?,
+
+    /**
+     * Timing advance is normalized value that can tell you how far you are from signal source.
+     * The bigger the value the farther you are.
+     *
+     * Unit: microseconds
+     */
+    @IntRange(from = TA_MIN, to = TA_MAX)
+    val timingAdvance: Int?,
 ) : ISignal {
 
-    internal constructor() : this(null, null, null, null, null, null)
+    internal constructor() : this(null, null, null, null, null, null, null)
 
     override val dbm: Int?
         get() = ssRsrp
@@ -100,10 +109,14 @@ data class SignalNr(
         const val SINR_MAX = 23L
         const val SINR_MIN = -23L
 
+        const val TA_MIN = 0L
+        const val TA_MAX = 1282L
+
         internal val RSRP_RANGE = RSRP_MIN..RSRP_MAX
         internal val RSRQ_RANGE = RSRQ_MIN..RSRQ_MAX
         internal val SINR_RANGE = SINR_MIN..SINR_MAX
+        internal val TA_RANGE = TA_MIN..TA_MAX
 
-        internal val EMPTY = SignalNr(null, null, null, null, null, null)
+        internal val EMPTY = SignalNr(null, null, null, null, null, null, null)
     }
 }

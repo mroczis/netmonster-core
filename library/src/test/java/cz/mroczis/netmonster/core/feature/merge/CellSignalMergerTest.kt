@@ -29,7 +29,8 @@ class CellSignalMergerTest : SdkTest(Build.VERSION_CODES.Q) {
                     csiSinr = null,
                     ssRsrp = null,
                     ssRsrq = null,
-                    ssSinr = 18
+                    ssSinr = 18,
+                    timingAdvance = null,
                 ),
                 timestamp = null,
             )
@@ -50,7 +51,8 @@ class CellSignalMergerTest : SdkTest(Build.VERSION_CODES.Q) {
                     csiSinr = null,
                     ssRsrp = -101,
                     ssRsrq = -9,
-                    ssSinr = 19
+                    ssSinr = 19,
+                    timingAdvance = null,
                 ),
                 timestamp = null,
             )

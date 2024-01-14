@@ -53,7 +53,7 @@ internal fun CellIdentityNr.mapCell(
         } else {
             connection
         },
-        signal = signal ?: SignalNr (),
+        signal = signal ?: SignalNr(),
         band = band,
         subscriptionId = subId,
         timestamp = timestamp
@@ -69,6 +69,9 @@ internal fun CellSignalStrengthNr.mapSignal(): SignalNr {
     val csiRsrp = csiRsrp.inRangeOrNull(SignalNr.RSRP_RANGE) ?: (csiRsrp * -1).inRangeOrNull(SignalNr.RSRP_RANGE)
     val csiRsrq = csiRsrq.inRangeOrNull(SignalNr.RSRQ_RANGE) ?: (csiRsrq * -1).inRangeOrNull(SignalNr.RSRQ_RANGE)
     val csiSinr = csiSinr.inRangeOrNull(SignalNr.SINR_RANGE)
+    val timingAdvance = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        timingAdvanceMicros.inRangeOrNull(SignalNr.TA_RANGE)
+    } else null
 
     return SignalNr(
         ssRsrp = ssRsrp,
@@ -76,6 +79,7 @@ internal fun CellSignalStrengthNr.mapSignal(): SignalNr {
         ssSinr = ssSinr,
         csiRsrp = csiRsrp,
         csiRsrq = csiRsrq,
-        csiSinr = csiSinr
+        csiSinr = csiSinr,
+        timingAdvance = timingAdvance,
     )
 }
