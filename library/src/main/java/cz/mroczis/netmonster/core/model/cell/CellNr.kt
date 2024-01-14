@@ -43,6 +43,36 @@ data class CellNr(
     override val timestamp: Milliseconds?,
 ) : ICell {
 
+    /**
+     * NCI can be split into two identifiers - gNodeB ID and cell local id. Depending of the network configuration
+     * length of gNB can vary. This method will extract gNB from NCI using provided [gnbBitLength] which must
+     * be in range from [GNB_LENGTH_MIN] to [GNB_LENGTH_MAX]. Length is currently not present in Android APIs and you
+     * need to obtain it directly from the carrier or other sources.
+     *
+     * @see <a href ="https://issuetracker.google.com/issues/319966463">AOSP feature request</a>
+     * @return gNodeB id (22 to 32 bits)
+     */
+    fun gnbId(gnbBitLength: Int) = nci?.let { nci ->
+        if (gnbBitLength !in GNB_LENGTH_RANGE) return@let null
+        val l = 36 - gnbBitLength
+        nci shr l
+    }
+
+    /**
+     * NCI can be split into two identifiers - gNodeB ID and cell local id. Depending of the network configuration
+     * length of gNB can vary. This method will extract cell local id from NCI using provided [gnbBitLength] which must
+     * be in range from [GNB_LENGTH_MIN] to [GNB_LENGTH_MAX]. Length is currently not present in Android APIs and you
+     * need to obtain it directly from the carrier or other sources.
+     *
+     * @see <a href ="https://issuetracker.google.com/issues/319966463">AOSP feature request</a>
+     * @return cell local id id (4 to 14 bits)
+     */
+    fun clId(gnbBitLength: Int) = nci?.let { nci ->
+        if (gnbBitLength !in GNB_LENGTH_RANGE) return@let null
+        val l = 36 - gnbBitLength
+        nci and ((1 shl l) - 1).toLong()
+    }
+
     override fun <T> let(processor: ICellProcessor<T>): T = processor.processNr(this)
 
     companion object {
@@ -66,9 +96,13 @@ data class CellNr(
         const val PCI_MIN = 0L
         const val PCI_MAX = 1007L
 
+        const val GNB_LENGTH_MIN = 22
+        const val GNB_LENGTH_MAX = 32
+
         internal val CID_RANGE = CID_MIN..CID_MAX
         internal val TAC_RANGE = TAC_MIN..TAC_MAX
         internal val PCI_RANGE = PCI_MIN..PCI_MAX
+        internal val GNB_LENGTH_RANGE = GNB_LENGTH_MIN..GNB_LENGTH_MAX
     }
 
 }
