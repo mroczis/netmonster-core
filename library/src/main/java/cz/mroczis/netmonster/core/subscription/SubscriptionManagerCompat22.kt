@@ -11,6 +11,7 @@ import cz.mroczis.netmonster.core.factory.NetMonsterFactory
 import cz.mroczis.netmonster.core.model.Network
 import cz.mroczis.netmonster.core.model.SubscribedNetwork
 import cz.mroczis.netmonster.core.subscription.mapper.mapNetwork
+import cz.mroczis.netmonster.core.util.registrationState
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP_MR1)
 internal open class SubscriptionManagerCompat22(
@@ -35,7 +36,7 @@ internal open class SubscriptionManagerCompat22(
                 // Phones report deactivated SIMs in list of active subscriptions
                 // Explicit check if SIM is ready is required in order to not show obsolete data
                 val telephony = NetMonsterFactory.getTelephony(context, id)
-                val simServiceState = telephony.getServiceState()?.state ?: ServiceState.STATE_POWER_OFF
+                val simServiceState = telephony.getServiceState()?.registrationState ?: ServiceState.STATE_POWER_OFF
                 if (simServiceState != ServiceState.STATE_POWER_OFF && simServiceState != ServiceState.STATE_OUT_OF_SERVICE) {
                     SubscribedNetwork(it.simSlotIndex, it.subscriptionId, it.mapNetwork())
                 } else {
