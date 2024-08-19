@@ -141,8 +141,10 @@ class MocnNetworkPostprocessor(
                 } else {
                     null
                 }
-            } else {
+            } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
                 networkOperator
+            } else {
+                null
             }
 
     }
