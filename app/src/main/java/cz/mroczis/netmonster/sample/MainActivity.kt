@@ -8,9 +8,14 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.os.postDelayed
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import cz.mroczis.netmonster.core.factory.NetMonsterFactory
 import cz.mroczis.netmonster.sample.databinding.ActivityMainBinding
 
@@ -35,6 +40,18 @@ class MainActivity : AppCompatActivity() {
         with(binding) {
             setContentView(root)
             recycler.adapter = adapter
+
+            ViewCompat.setOnApplyWindowInsetsListener(root) { v, windowInsets ->
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = insets.top
+                    leftMargin = insets.left
+                    rightMargin = insets.right
+                }
+
+                recycler.updatePadding(bottom = insets.bottom)
+                WindowInsetsCompat.CONSUMED
+            }
         }
     }
 
