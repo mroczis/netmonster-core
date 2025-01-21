@@ -54,7 +54,7 @@ class NrNsaStateParser {
         // Android standard way to detect connection
         val nrState = getStringField(serviceState, "nrState")
             /* Should be upper case by default; just in case, manufacturers tend to surprise all the time */
-            .map { it.toUpperCase(Locale.getDefault()) }
+            .map { it.uppercase(Locale.getDefault()) }
 
         val nsaStateConnected = getIntField(serviceState, "nsaState").contains(5) // Huawei Android P
         val nsaStateAvailable = getIntField(serviceState, "nsaState").any { it in 2..4 } // Huawei Android P
