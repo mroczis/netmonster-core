@@ -6,9 +6,9 @@ plugins {
 android {
     defaultConfig {
         applicationId "cz.mroczis.netmonster.sample"
-        minSdkVersion 19
-        targetSdkVersion 35
-        compileSdk 35
+        minSdkVersion 21
+        targetSdkVersion 36
+        compileSdk 36
         versionCode 1
         versionName "1.0"
 
@@ -40,7 +40,7 @@ android {
 dependencies {
     implementation project(":library")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.13.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.core:core-ktx:1.16.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'com.google.android.material:material:1.12.0'
 }
