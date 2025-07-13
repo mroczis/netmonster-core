@@ -77,20 +77,19 @@ internal class CellSignalMerger {
         pci = pci ?: other.pci,
         band = band ?: other.band,
         signal = signal.copy(
-            csiRsrp = signal.csiRsrp minOr other.signal.csiRsrp,
-            csiRsrq = signal.csiRsrq minOr other.signal.csiRsrq,
-            csiSinr = signal.csiSinr minOr other.signal.csiSinr,
-            ssRsrp = signal.ssRsrp minOr other.signal.ssRsrp,
-            ssRsrq = signal.ssRsrq minOr other.signal.ssRsrq,
-            ssSinr = signal.ssSinr minOr other.signal.ssSinr
+            csiRsrp = setOfNotNull(signal.csiRsrp, other.signal.csiRsrp).pickMin(),
+            csiRsrq = setOfNotNull(signal.csiRsrq, other.signal.csiRsrq).pickMin(),
+            csiSinr = setOfNotNull(signal.csiSinr, other.signal.csiSinr).pickMin(preferablyIgnorable = setOf(0)),
+            ssRsrp = setOfNotNull(signal.ssRsrp, other.signal.ssRsrp).pickMin(),
+            ssRsrq = setOfNotNull(signal.ssRsrq, other.signal.ssRsrq).pickMin(),
+            ssSinr = setOfNotNull(signal.ssSinr, other.signal.ssSinr).pickMin(preferablyIgnorable = setOf(0)),
         )
     )
 
     /**
-     * Takes first not not null or min out of two
+     * Takes minimum of provided values ignoring [preferablyIgnorable] if there's any other value.
      */
-    private infix fun Int?.minOr(other: Int?) =
-        if (this != null && other != null) {
-            kotlin.math.min(this, other)
-        } else this ?: other
+    private fun Set<Int>.pickMin( preferablyIgnorable: Set<Int> = emptySet()) =
+        (this - preferablyIgnorable).minOrNull() ?: this.minOrNull()
+
 }
