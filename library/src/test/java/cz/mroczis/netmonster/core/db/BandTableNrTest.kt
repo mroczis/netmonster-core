@@ -39,6 +39,30 @@ class BandTableNrTest : FreeSpec() {
             BandTableNr.get(632_000) shouldBe null
         }
 
+        "Band 77,78 overlap in Europe -> n78" {
+            BandTableNr.get(653_144, mcc = "200").applyNonNull {
+                name shouldBe "3500"
+                number shouldBe 78
+            }
+
+            BandTableNr.get(632_000, mcc = "200").applyNonNull {
+                name shouldBe "3500"
+                number shouldBe 78
+            }
+        }
+
+        "Band 77,78 overlap in North America -> n77" {
+            BandTableNr.get(653_144, mcc = "310").applyNonNull {
+                name shouldBe "3700"
+                number shouldBe 77
+            }
+
+            BandTableNr.get(632_000, mcc = "310").applyNonNull {
+                name shouldBe "3700"
+                number shouldBe 77
+            }
+        }
+
         // Bands that overlap but have common name
         "Band 50,51,75,76 overlap" {
             BandTableNr.get(289_400).applyNonNull {

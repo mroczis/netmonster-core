@@ -13,7 +13,15 @@ data class BandNr(
      */
     val downlinkFrequency: Int,
     override val number: Int?,
-    override val name: String?
+    override val name: String?,
+    /**
+     * The most common Subcarrier Spacing (SCS) for this band. This is *not* a value reported
+     * by the device, but rather a hardcoded value based on the band number. It can be null
+     * if the band is not recognized or if SCS is not uniquely defined for it.
+     *
+     * Unit: kHz
+     */
+    val expectedScs: Int?
 ) : IBand {
     override val channelNumber: Int = downlinkArfcn
 

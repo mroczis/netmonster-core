@@ -34,9 +34,9 @@ internal fun CellIdentityNr.mapCell(
     val arfcn = nrarfcn.inRangeOrNull(BandNr.DOWNLINK_EARFCN_RANGE)
     val band = arfcn?.let {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            BandTableNr.map(it, bands)
+            BandTableNr.map(arfcn = it, bandHints = bands, mcc = network?.mcc)
         } else {
-            BandTableNr.map(it)
+            BandTableNr.map(arfcn = it, bandHints = intArrayOf(), mcc = network?.mcc)
         }
     }
 

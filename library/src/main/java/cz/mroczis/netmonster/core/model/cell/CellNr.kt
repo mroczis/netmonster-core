@@ -73,6 +73,31 @@ data class CellNr(
         nci and ((1 shl l) - 1).toLong()
     }
 
+    /**
+     * Calculates approximate distance to [cz.mroczis.netmonster.core.model.cell.CellNr]
+     * which is assigned to this object.
+     *
+     * To get correct distance a Subcarrier Spacing (SCS) is required. This param
+     * depends on network configuration and may change per cell but is usually bound to ARFCN.
+     *
+     * NetMonster Core's [BandNr] provides most-likely value for SCS based on band but note
+     * that this guess might be incorrect in some cases. Always check with your carrier.
+     *
+     * If you are willing to use Netmonster's guess then pass [scs] value from [band] assigned
+     * to this class instance
+     *
+     * @see [BandNr.expectedScs].
+     * @return distance in meters or null if timingAdvance or [scs] is null
+     */
+    fun getDistanceToCell(scs: Int?): Double? =
+        signal.timingAdvance?.let { ta ->
+            if (scs != null) {
+                (2343.75 / scs) * ta
+            } else {
+                null
+            }
+        }
+
     override fun <T> let(processor: ICellProcessor<T>): T = processor.processNr(this)
 
     companion object {
@@ -103,6 +128,7 @@ data class CellNr(
         internal val TAC_RANGE = TAC_MIN..TAC_MAX
         internal val PCI_RANGE = PCI_MIN..PCI_MAX
         internal val GNB_LENGTH_RANGE = GNB_LENGTH_MIN..GNB_LENGTH_MAX
+
     }
 
 }
