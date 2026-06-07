@@ -1,0 +1,32 @@
+[versions]
+android-compileSdk = "37"
+android-targetSdk = "37"
+android-minSdk = "14"
+android-appMinSdk = "23"
+
+agp = "9.2.1"
+annotation = "1.10.0"
+constraintlayout = "2.2.1"
+coreKtx = "1.19.0"
+espressoCore = "3.7.0"
+junit = "4.13.2"
+kotlintestRunnerJunit5 = "3.4.2"
+material = "1.14.0"
+mockk = "1.14.11"
+runner = "1.7.0"
+
+[libraries]
+androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
+androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
+kotlintest-runner-junit5 = { module = "io.kotlintest:kotlintest-runner-junit5", version.ref = "kotlintestRunnerJunit5" }
+junit = { module = "junit:junit", version.ref = "junit" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+
+
+[plugins]
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
