@@ -155,7 +155,10 @@ data class SignalLte(
         const val SNR_MAX = 30.0
         const val SNR_MIN = -19.9
 
-        const val TIMING_ADVANCE_MAX = 1282L
+        /**
+         * 1282 per spec, Mediatek devices use it as N/A value
+         */
+        const val TIMING_ADVANCE_MAX = 1281L
         const val TIMING_ADVANCE_MIN = 0L
 
 
