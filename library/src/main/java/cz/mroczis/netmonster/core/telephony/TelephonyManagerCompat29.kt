@@ -32,6 +32,8 @@ internal open class TelephonyManagerCompat29(
         onSuccess: CellCallbackSuccess,
         onError: CellCallbackError?
     ) {
+        val fallback = { super.getAllCellInfo(onSuccess, onError) }
+
         try {
             telephony.requestCellInfoUpdate(DirectExecutor(), CellInfoCallbackMapper(
                 success = { cells -> onSuccess.invoke(cellInfoMapper.map(cells)) },
@@ -39,12 +41,17 @@ internal open class TelephonyManagerCompat29(
                     if (onError != null) {
                         onError.invoke(errorCode)
                     } else {
-                        onSuccess.invoke(cellInfoMapper.map(telephony.allCellInfo))
+                        fallback.invoke()
                     }
                 }
             ))
-        } catch (e: IllegalStateException) {
-            onError?.invoke(CellError.UNKNOWN)
+        } catch (_: Throwable) {
+            // Xiaomi devices tend to throw exceptions when getting all cell info
+            if (onError != null) {
+                onError.invoke(CellError.UNKNOWN)
+            } else {
+                fallback.invoke()
+            }
         }
     }
 

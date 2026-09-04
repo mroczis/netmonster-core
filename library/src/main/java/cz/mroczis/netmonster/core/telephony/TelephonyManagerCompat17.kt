@@ -35,7 +35,14 @@ internal open class TelephonyManagerCompat17(
         onSuccess: CellCallbackSuccess,
         onError: CellCallbackError?
     ) {
-        onSuccess.invoke(cellInfoMapper.map(telephony.allCellInfo))
+        val cells = try {
+            telephony.allCellInfo
+        } catch (_: Throwable) {
+            // Xiaomi devices tend to throw exceptions when getting all cell info
+            null
+        }
+
+        onSuccess.invoke(cellInfoMapper.map(cells))
     }
 
 
