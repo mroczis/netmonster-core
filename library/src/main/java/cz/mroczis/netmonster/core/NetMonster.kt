@@ -49,6 +49,7 @@ internal class NetMonster(
             serviceStateGetter = { subId -> getTelephony(subId).getServiceState() },
         ), // fix PLMNs
         InvalidCellsPostprocessor(), // get rid of false-positive cells
+        NrIdentityFromLtePostprocessor(), // NR NSA cells with identity copied from LTE
         PrimaryCellPostprocessor(), // mark 1st cell as Primary if required
         SubDuplicitiesPostprocessor(subscription) { subId ->
             getTelephony(subId).getNetworkOperator()
