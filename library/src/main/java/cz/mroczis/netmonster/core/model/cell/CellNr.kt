@@ -92,7 +92,7 @@ data class CellNr(
     fun getDistanceToCell(scs: Int?): Double? =
         signal.timingAdvance?.let { ta ->
             if (scs != null) {
-                (2343.75 / scs) * ta
+                (1171.875 / scs) * ta
             } else {
                 null
             }

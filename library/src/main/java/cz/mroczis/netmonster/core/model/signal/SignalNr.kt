@@ -55,10 +55,8 @@ data class SignalNr(
     val ssSinr: Int?,
 
     /**
-     * Timing advance is normalized value that can tell you how far you are from signal source.
-     * The bigger the value the farther you are.
-     *
-     * Unit: microseconds
+     * Get the timing advance value for a one way trip from cell to device for NR.
+     * Note: This value represents the raw 3GPP TS 38.213 Section 4.2 Timing Advance command index (T_A), not physical microseconds.
      */
     @IntRange(from = TA_MIN, to = TA_MAX)
     val timingAdvance: Int?,
@@ -110,7 +108,7 @@ data class SignalNr(
         const val SINR_MIN = -23L
 
         const val TA_MIN = 0L
-        const val TA_MAX = 1282L
+        const val TA_MAX = 3846L
 
         internal val RSRP_RANGE = RSRP_MIN..RSRP_MAX
         internal val RSRQ_RANGE = RSRQ_MIN..RSRQ_MAX
