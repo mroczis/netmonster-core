@@ -85,5 +85,48 @@ class BandTableNrTest : FreeSpec() {
                 number shouldBe 75
             }
         }
+
+        "Band 7,38,41 overlap in USA -> n41, in Europe -> n7" {
+            BandTableNr.get(529_000, mcc = "310").applyNonNull {
+                number shouldBe 41
+                scs shouldBe 30
+            }
+
+            BandTableNr.get(529_000, mcc = "230").applyNonNull {
+                number shouldBe 7
+                scs shouldBe 15
+            }
+        }
+
+        "Band 77,78 overlap without MCC still knows SCS" {
+            BandTableNr.map(632_000).apply {
+                number shouldBe null
+                expectedScs shouldBe 30
+            }
+        }
+
+        "FR2 ranges and frequency" {
+            BandTableNr.get(2_020_000, mcc = "230").applyNonNull {
+                name shouldBe "26G"
+                number shouldBe 258
+            }
+
+            BandTableNr.get(2_079_167, mcc = "310").applyNonNull {
+                name shouldBe "28G"
+            }
+
+            BandTableNr.map(2_016_667).apply {
+                downlinkFrequency shouldBe 24_250_080 // kHz
+                expectedScs shouldBe 120
+            }
+
+            BandTableNr.get(2_000_000) shouldBe null
+        }
+
+        "Band 28 in India" {
+            BandTableNr.get(152_600, mcc = "405").applyNonNull {
+                number shouldBe 28
+            }
+        }
     }
 }

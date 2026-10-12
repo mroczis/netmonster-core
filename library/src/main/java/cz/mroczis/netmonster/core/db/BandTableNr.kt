@@ -1,13 +1,10 @@
 package cz.mroczis.netmonster.core.db
 
-import android.R
 import cz.mroczis.netmonster.core.db.model.BandEntity
-import cz.mroczis.netmonster.core.db.model.IBandEntity
 import cz.mroczis.netmonster.core.model.band.BandNr
 
 /**
  * In NR world loads of ARFCNs are overlapping.
- * This class holds all known bands for release 16.0.0 that have downlink defined.
  *
  * [3GPP 38.101-1 specification for NR](https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=3283)
  */
@@ -57,9 +54,12 @@ object BandTableNr {
         BandEntity(693_334..733_333, "4500", 79, 30),
         BandEntity(743_334..795_000, "5200", 46, 30),
         BandEntity(790_334..795_000, "5900", 47, 30),
-        BandEntity(2_000_000..2_100_000, "28G", 257, 120),
-        BandEntity(2_050_000..2_100_000, "28G", 261, 120),
-        BandEntity(2_225_000..2_300_000, "39G", 260, 120),
+        BandEntity(828_334..875_000, "6400", 104, 30),
+        BandEntity(2_016_667..2_070_832, "26G", 258, 120),
+        BandEntity(2_054_166..2_104_165, "28G", 257, 120),
+        BandEntity(2_070_833..2_084_999, "28G", 261, 120),
+        BandEntity(2_229_166..2_279_165, "39G", 260, 120),
+        BandEntity(2_270_833..2_337_499, "41G", 259, 120),
     )
 
     /**
@@ -71,9 +71,15 @@ object BandTableNr {
             .filter { bandHints.isEmpty() || (it.number != null && bandHints.contains(it.number)) }
 
     /**
-     * Prioritize n78/n28/n20/n1/n3/n7/n8, Disqualify n71/n25/n66/n260/n261
+     * Prioritize n78/n28/n20/n1/n3/n7/n8/n258, Disqualify n71/n25/n66/n41/n77/n257/n260/n261
      */
-    private val PRIORITY_EUROPE = listOf(1, 3, 7, 8, 20, 28, 78)
+    private val PRIORITY_EUROPE = listOf(1, 3, 7, 8, 20, 28, 78, 258)
+
+    /**
+     * USA: n41 is T-Mobile's main 5G band, n5 is used by AT&T / Verizon (DSS), n77 is C-band.
+     * Disqualify n78/n7/n38/n26/n18/n1/n3/n8/n28
+     */
+    private val PRIORITY_USA = listOf(5, 25, 41, 66, 71, 77)
 
     /**
      * Prioritize n77/n71/n66/n25, Disqualify n78/n1/n3/n8/n28
@@ -81,9 +87,25 @@ object BandTableNr {
     private val PRIORITY_NORTH_AMERICA = listOf(25, 66, 71, 77)
 
     /**
-     * Prioritize n77/n78/n79/n41/n1/n3
+     * Prioritize n78/n79/n41/n28/n1/n3/n258 (China Mobile n41, China Broadnet n28, Jio n28 + n258)
      */
-    private val PRIORITY_ASIA = listOf(1, 3, 41, 78, 79)
+    private val PRIORITY_ASIA = listOf(1, 3, 28, 41, 78, 79, 258)
+
+    /**
+     * Oceania + south-east Asia: n78/n28/n1/n3/n258 (Australia).
+     * n7 vs n41 is left unresolved, Australia uses n7 while Thailand or Philippines n41.
+     */
+    private val PRIORITY_OCEANIA = listOf(1, 3, 28, 78, 258)
+
+    /**
+     * Prioritize n78/n28/n1/n3 (South Africa)
+     */
+    private val PRIORITY_AFRICA = listOf(1, 3, 28, 78)
+
+    /**
+     * Prioritize n78 (3.5 GHz in Brazil, Chile, ...)
+     */
+    private val PRIORITY_SOUTH_AMERICA = listOf(78)
 
     internal fun get(
         arfcn: Int,
@@ -98,10 +120,14 @@ object BandTableNr {
         // Give priority by MCC -> continent(s)
         if (mcc != null) {
             val priorityBands = when {
-                mcc.startsWith("mcc") || mcc.startsWith("31") || mcc.startsWith("33") -> PRIORITY_NORTH_AMERICA
+                mcc.startsWith("31") || mcc == "330" || mcc == "332" -> PRIORITY_USA // + Puerto Rico, US Virgin Islands
+                mcc.startsWith("30") || mcc.startsWith("33") -> PRIORITY_NORTH_AMERICA // Canada, Mexico, ...
                 mcc.startsWith("2") -> PRIORITY_EUROPE
                 mcc.startsWith("4") && mcc != "440" && mcc != "441" -> PRIORITY_ASIA
                 mcc == "440" || mcc == "441" -> PRIORITY_ASIA + 77 // Japan uses n78 and n77
+                mcc.startsWith("5") -> PRIORITY_OCEANIA
+                mcc.startsWith("6") -> PRIORITY_AFRICA
+                mcc.startsWith("7") -> PRIORITY_SOUTH_AMERICA
                 else -> emptyList()
             }
 
@@ -162,14 +188,16 @@ object BandTableNr {
     /**
      * Calculates frequency from arfcn.
      *
-     * Taken from 3GPP 38.101-1 / 5.4.2.1 NR-ARFCN and channel raster
+     * Taken from 3GPP 38.101-1 / 38.101-2 / 5.4.2.1 NR-ARFCN and channel raster
      * @return downlink in kHz
      */
     private fun getFrequency(arfcn: Int): Int {
         return if (arfcn <= 600_000) {
             5 * arfcn
-        } else {
+        } else if (arfcn <= 2_016_666) {
             3_000_000 + 15 * (arfcn - 600_000)
+        } else {
+            24_250_080 + 60 * (arfcn - 2_016_667)
         }
     }
 
@@ -189,14 +217,18 @@ object BandTableNr {
         arfcn: Int,
         bandHints: IntArray = intArrayOf(),
         mcc: String? = null,
-    ): BandNr = get(arfcn, bandHints, mcc).toBandNr(arfcn = arfcn)
+    ): BandNr = get(arfcn, bandHints, mcc).toBandNr(
+        arfcn = arfcn,
+        // Band itself is ambiguous, but SCS (for TA distance) can still be known when all candidates agree
+        fallbackScs = getAll(arfcn = arfcn, bandHints = bandHints).mapTo(mutableSetOf()) { it.scs }.singleOrNull(),
+    )
 
-    private fun BandEntity?.toBandNr(arfcn: Int) = BandNr(
+    private fun BandEntity?.toBandNr(arfcn: Int, fallbackScs: Int? = null) = BandNr(
         downlinkArfcn = arfcn,
         downlinkFrequency = getFrequency(arfcn),
         number = this?.number,
         name = this?.name,
-        expectedScs = this?.scs,
+        expectedScs = this?.scs ?: fallbackScs,
     )
 
 }
