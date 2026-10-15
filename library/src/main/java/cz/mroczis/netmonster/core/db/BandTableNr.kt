@@ -107,30 +107,49 @@ object BandTableNr {
      */
     private val PRIORITY_SOUTH_AMERICA = listOf(78)
 
+    /**
+     * Bands preferred in region of [mcc] -> continent(s)
+     */
+    private fun getPriorityBands(mcc: String?): List<Int> = when {
+        mcc == null -> emptyList()
+        mcc.startsWith("31") || mcc == "330" || mcc == "332" -> PRIORITY_USA // + Puerto Rico, US Virgin Islands
+        mcc.startsWith("30") || mcc.startsWith("33") -> PRIORITY_NORTH_AMERICA // Canada, Mexico, ...
+        mcc.startsWith("2") -> PRIORITY_EUROPE
+        mcc.startsWith("4") && mcc != "440" && mcc != "441" -> PRIORITY_ASIA
+        mcc == "440" || mcc == "441" -> PRIORITY_ASIA + 77 // Japan uses n78 and n77
+        mcc.startsWith("5") -> PRIORITY_OCEANIA
+        mcc.startsWith("6") -> PRIORITY_AFRICA
+        mcc.startsWith("7") -> PRIORITY_SOUTH_AMERICA
+        else -> emptyList()
+    }
+
+    /**
+     * Bands that fit [arfcn] and [bandHints]. Hints are ignored when they contradict the region of [mcc] -
+     * a band preferred there fits [arfcn] but hints point only to bands that are not preferred (or to none at all).
+     */
+    private fun getCandidates(arfcn: Int, bandHints: IntArray, priorityBands: List<Int>): List<BandEntity> {
+        val hinted = getAll(arfcn = arfcn, bandHints = bandHints)
+        if (bandHints.isEmpty() || priorityBands.isEmpty() || hinted.any { it.number in priorityBands }) {
+            return hinted
+        }
+
+        val all = getAll(arfcn = arfcn)
+        return if (all.any { it.number in priorityBands }) all else hinted
+    }
+
     internal fun get(
         arfcn: Int,
         bandHints: IntArray = intArrayOf(),
         mcc: String? = null,
     ): BandEntity? {
-        val candidates = getAll(arfcn = arfcn, bandHints = bandHints)
+        val priorityBands = getPriorityBands(mcc)
+        val candidates = getCandidates(arfcn = arfcn, bandHints = bandHints, priorityBands = priorityBands)
 
         if (candidates.isEmpty()) return null
         if (candidates.size == 1) return candidates[0]
 
         // Give priority by MCC -> continent(s)
-        if (mcc != null) {
-            val priorityBands = when {
-                mcc.startsWith("31") || mcc == "330" || mcc == "332" -> PRIORITY_USA // + Puerto Rico, US Virgin Islands
-                mcc.startsWith("30") || mcc.startsWith("33") -> PRIORITY_NORTH_AMERICA // Canada, Mexico, ...
-                mcc.startsWith("2") -> PRIORITY_EUROPE
-                mcc.startsWith("4") && mcc != "440" && mcc != "441" -> PRIORITY_ASIA
-                mcc == "440" || mcc == "441" -> PRIORITY_ASIA + 77 // Japan uses n78 and n77
-                mcc.startsWith("5") -> PRIORITY_OCEANIA
-                mcc.startsWith("6") -> PRIORITY_AFRICA
-                mcc.startsWith("7") -> PRIORITY_SOUTH_AMERICA
-                else -> emptyList()
-            }
-
+        if (priorityBands.isNotEmpty()) {
             val continentCandidates = candidates.filter { it.number in priorityBands }
 
             // Filtered bands do not overlap (except Japan), no further processing implemented for now
@@ -220,7 +239,8 @@ object BandTableNr {
     ): BandNr = get(arfcn, bandHints, mcc).toBandNr(
         arfcn = arfcn,
         // Band itself is ambiguous, but SCS (for TA distance) can still be known when all candidates agree
-        fallbackScs = getAll(arfcn = arfcn, bandHints = bandHints).mapTo(mutableSetOf()) { it.scs }.singleOrNull(),
+        fallbackScs = getCandidates(arfcn = arfcn, bandHints = bandHints, priorityBands = getPriorityBands(mcc))
+            .mapTo(mutableSetOf()) { it.scs }.singleOrNull(),
     )
 
     private fun BandEntity?.toBandNr(arfcn: Int, fallbackScs: Int? = null) = BandNr(

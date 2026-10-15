@@ -123,6 +123,38 @@ class BandTableNrTest : FreeSpec() {
             BandTableNr.get(2_000_000) shouldBe null
         }
 
+        "Hint contradicting region is ignored" {
+            // Europe prefers n78, modem hints n77 only
+            BandTableNr.get(644_640, intArrayOf(77), mcc = "230").applyNonNull {
+                name shouldBe "3500"
+                number shouldBe 78
+            }
+
+            // USA prefers n41, modem hints n7 only
+            BandTableNr.get(529_000, intArrayOf(7), mcc = "310").applyNonNull {
+                number shouldBe 41
+            }
+        }
+
+        "Hint matching region is kept" {
+            // Japan prefers both n77 and n78, hint decides
+            BandTableNr.get(632_000, intArrayOf(77), mcc = "440").applyNonNull {
+                number shouldBe 77
+            }
+
+            // Hint among preferred bands in Europe
+            BandTableNr.get(159_200, intArrayOf(20), mcc = "230").applyNonNull {
+                number shouldBe 20
+            }
+        }
+
+        "Hint is kept when region prefers no fitting band" {
+            // n50/n75 are not preferred anywhere in Europe
+            BandTableNr.get(289_962, intArrayOf(75), mcc = "230").applyNonNull {
+                number shouldBe 75
+            }
+        }
+
         "Band 28 in India" {
             BandTableNr.get(152_600, mcc = "405").applyNonNull {
                 number shouldBe 28

@@ -54,6 +54,7 @@ internal class NetMonster(
         SubDuplicitiesPostprocessor(subscription) { subId ->
             getTelephony(subId).getNetworkOperator()
         }, // filter out duplicities, only Dual SIMs
+        NrBandPostprocessor(), // NR band of neighbours by MCC of serving cells, before they get PLMN
         PlmnPostprocessor(), // guess PLMNs when channels match
         CdmaPlmnPostprocessor(), // guess PLMN for CDMA cells
         SignalStrengthPostprocessor { subId ->
