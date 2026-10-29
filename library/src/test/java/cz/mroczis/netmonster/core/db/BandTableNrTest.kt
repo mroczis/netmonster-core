@@ -98,6 +98,30 @@ class BandTableNrTest : FreeSpec() {
             }
         }
 
+        "Band 7,41 overlap in Thailand -> n41, even when modem hints n7" {
+            // TrueMove H, 2649.75 MHz
+            BandTableNr.get(529_950, mcc = "520").applyNonNull {
+                number shouldBe 41
+                scs shouldBe 30
+            }
+
+            BandTableNr.get(529_950, intArrayOf(7), mcc = "520").applyNonNull {
+                number shouldBe 41
+            }
+
+        }
+
+        "Band 7,41 overlap in Australia -> n7, even when modem hints n41" {
+            BandTableNr.get(529_950, mcc = "505").applyNonNull {
+                number shouldBe 7
+                scs shouldBe 15
+            }
+
+            BandTableNr.get(529_950, intArrayOf(41), mcc = "505").applyNonNull {
+                number shouldBe 7
+            }
+        }
+
         "Band 77,78 overlap without MCC still knows SCS" {
             BandTableNr.map(632_000).apply {
                 number shouldBe null

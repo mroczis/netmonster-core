@@ -93,7 +93,7 @@ object BandTableNr {
 
     /**
      * Oceania + south-east Asia: n78/n28/n1/n3/n258 (Australia).
-     * n7 vs n41 is left unresolved, Australia uses n7 while Thailand or Philippines n41.
+     * n7 vs n41 is left unresolved here, it's decided per country in [getPriorityBands].
      */
     private val PRIORITY_OCEANIA = listOf(1, 3, 28, 78, 258)
 
@@ -117,6 +117,8 @@ object BandTableNr {
         mcc.startsWith("2") -> PRIORITY_EUROPE
         mcc.startsWith("4") && mcc != "440" && mcc != "441" -> PRIORITY_ASIA
         mcc == "440" || mcc == "441" -> PRIORITY_ASIA + 77 // Japan uses n78 and n77
+        mcc == "505" -> PRIORITY_OCEANIA + 7 // Australia, 2600 MHz is FDD only, 2.5 GHz TDD is not assigned there
+        mcc == "515" || mcc == "520" -> PRIORITY_OCEANIA + 41 // Philippines, Thailand use n41
         mcc.startsWith("5") -> PRIORITY_OCEANIA
         mcc.startsWith("6") -> PRIORITY_AFRICA
         mcc.startsWith("7") -> PRIORITY_SOUTH_AMERICA
