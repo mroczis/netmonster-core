@@ -63,6 +63,21 @@ object BandTableNr {
     )
 
     /**
+     * Numbers of all bands this table knows, sorted
+     */
+    val numbers: List<Int> by lazy { bands.mapNotNull { it.number }.distinct().sorted() }
+
+    /**
+     * Name of band [number] (3500, 26G, ...), null when it's unknown
+     */
+    fun nameOf(number: Int): String? = bands.firstOrNull { it.number == number }?.name
+
+    /**
+     * Downlink NR-ARFCN ranges of band [number], empty when it's unknown
+     */
+    fun channelsOf(number: Int): List<IntRange> = bands.filter { it.number == number }.map { it.channelRange }
+
+    /**
      * Lists all bands that do fit [arfcn] and are among [bandHints] (if not empty)
      */
     internal fun getAll(arfcn: Int, bandHints: IntArray = intArrayOf()) : List<BandEntity> =

@@ -115,6 +115,21 @@ object BandTableLte {
     internal fun getByNumber(number: Int): IBandEntity? =
         bands.firstOrNull { it.number == number }
 
+    /**
+     * Numbers of all bands this table knows, sorted
+     */
+    val numbers: List<Int> by lazy { bands.mapNotNull { it.number }.distinct().sorted() }
+
+    /**
+     * Name of band [number] (1800, AWS, ...), null when it's unknown
+     */
+    fun nameOf(number: Int): String? = getByNumber(number)?.name
+
+    /**
+     * Downlink EARFCN ranges of band [number], empty when it's unknown
+     */
+    fun channelsOf(number: Int): List<IntRange> = bands.filter { it.number == number }.map { it.channelRange }
+
 
     /**
      * Attempts to find current band information depending on [earfcn].
