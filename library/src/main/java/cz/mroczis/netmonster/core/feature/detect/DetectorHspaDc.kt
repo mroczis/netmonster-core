@@ -28,7 +28,8 @@ class DetectorHspaDc : INetworkDetector {
     )
     @SinceSdk(Build.VERSION_CODES.N)
     override fun detect(netmonster: INetMonster, telephony: ITelephonyManagerCompat): NetworkType? =
-        detect(netmonster.getCells(CellSource.ALL_CELL_INFO))
+        // Cells of all SIMs come back, the other SIM's serving cell must not count
+        detect((netmonster.getCells(CellSource.ALL_CELL_INFO)).filter { it.subscriptionId == telephony.getSubscriberId() })
 
 
     @VisibleForTesting
