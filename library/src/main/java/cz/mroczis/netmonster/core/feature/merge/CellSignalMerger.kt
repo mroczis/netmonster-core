@@ -43,7 +43,7 @@ internal class CellSignalMerger {
                 if (sourceCell != null) {
                     val mergedCell = sourceCell mergeWith signalApi[0]
                     newApi.toMutableList().apply {
-                        remove(nrCells[0])
+                        remove(sourceCell)
                         add(mergedCell)
                     }
                 } else {
