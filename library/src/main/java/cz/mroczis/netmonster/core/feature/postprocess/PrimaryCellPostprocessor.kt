@@ -4,30 +4,39 @@ import cz.mroczis.netmonster.core.model.cell.*
 import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 
 /**
- * Attempts to find one primary cell if none of cells is marked as primary.
+ * Attempts to find one primary cell of a subscription if none of its cells is marked as primary.
  * Marks first cell that matches pre-conditions to be primarily serving.
+ *
+ * Happens in emergency calls only mode and out of service - the modem is camped on a cell, it reads its identity,
+ * but reports it as a neighbour. Each subscription is checked on its own, one SIM can be in service while the other isn't.
  *
  * 100 % reliable for WCDMA, LTE, TD-SCDMA, NR
  */
 class PrimaryCellPostprocessor : ICellPostprocessor {
 
-    override fun postprocess(list: List<ICell>): List<ICell> =
-        if (list.firstOrNull { it.connectionStatus is PrimaryConnection } != null) {
-            list
-        } else {
-            // No Primary connection found -> in this case phone might be in emergency calls
-            // mode only. Which means that Android is connected to some cell as primary
-            // but it does not admit the fact.
-            // In case of NR, LTE and WCDMA networks it's easy to find the cell - CID is filled
-            // only for serving cells. In case of GSM we grab 1st cell.
+    override fun postprocess(list: List<ICell>): List<ICell> {
+        // No Primary connection found -> in this case phone might be in emergency calls
+        // mode only or out of service. Which means that Android is connected (camped) to some cell
+        // as primary but it does not admit the fact.
+        // In case of NR, LTE and WCDMA networks it's easy to find the cell - CID is filled
+        // only for serving cells. In case of GSM we grab 1st cell.
+        val primaries = list.groupBy { it.subscriptionId }
+            .filterValues { cells -> cells.none { it.connectionStatus is PrimaryConnection } }
+            .mapNotNull { (_, cells) -> cells.firstOrNull { it.let(PrimaryConnectionDetector()) } }
 
-            list.firstOrNull { it.let(PrimaryConnectionDetector()) }?.let { primaryCell ->
-                list.toMutableList().apply {
-                    remove(primaryCell)
-                    add(0, primaryCell.let(SwitchToPrimaryConnection()))
-                }
-            } ?: list
+        if (primaries.isEmpty()) {
+            return list
         }
+
+        return list.toMutableList().apply {
+            primaries.forEach { primaryCell ->
+                remove(primaryCell)
+                // First among cells of its subscription
+                val index = indexOfFirst { it.subscriptionId == primaryCell.subscriptionId }.takeIf { it >= 0 } ?: size
+                add(index, primaryCell.let(SwitchToPrimaryConnection()))
+            }
+        }
+    }
 
     /**
      * Switches connection status of given cell to [PrimaryConnection]

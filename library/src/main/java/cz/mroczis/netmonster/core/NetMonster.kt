@@ -3,6 +3,7 @@ package cz.mroczis.netmonster.core
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.SystemClock
 import androidx.annotation.RequiresPermission
 import androidx.annotation.WorkerThread
 import cz.mroczis.netmonster.core.db.NetworkTypeTable
@@ -18,6 +19,7 @@ import cz.mroczis.netmonster.core.feature.merge.CellSignalMerger
 import cz.mroczis.netmonster.core.feature.merge.CellSource
 import cz.mroczis.netmonster.core.feature.postprocess.*
 import cz.mroczis.netmonster.core.model.NetMonsterConfig
+import cz.mroczis.netmonster.core.model.SubscribedNetwork.RegistrationState
 import cz.mroczis.netmonster.core.model.cell.ICell
 import cz.mroczis.netmonster.core.model.config.PhysicalChannelConfig
 import cz.mroczis.netmonster.core.subscription.ISubscriptionManagerCompat
@@ -98,42 +100,50 @@ internal class NetMonster(
         allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE]
     )
     override fun getCells(vararg sources: CellSource): List<ICell> {
-        val subscriptions = subscription.getActiveSubscriptionIds()
+        val active = subscription.getActiveSubscriptions()
+        val subscriptions = active.map { it.subscriptionId }
+        // Out of service the modem might still report the last cells it had - only fresh measurements are trusted,
+        // the sources without a timestamp (and the signal of the last serving cell) are not read at all
+        val outOfService = active.filter { it.registrationState == RegistrationState.OUT_OF_SERVICE }.map { it.subscriptionId }.toSet()
+        val inService = subscriptions.filterNot { it in outOfService }
+
         val oldApi = mutableListOf<ICell>().apply {
             if (CellSource.CELL_LOCATION in sources) {
-                val serving = subscriptions.map { subId ->
+                val serving = inService.flatMap { subId ->
                     getTelephony(subId).getCellLocation()
-                }.flatten().toSet()
+                }.toSet()
 
                 addAll(serving)
             }
 
             if (CellSource.NEIGHBOURING_CELLS in sources) {
-                val neighbouring = subscriptions.map { subId ->
+                val neighbouring = inService.flatMap { subId ->
                     getTelephony(subId).getNeighboringCellInfo()
-                }.flatten().toSet()
+                }.toSet()
 
                 addAll(neighbouring)
             }
         }
 
         val newApi = if (CellSource.ALL_CELL_INFO in sources) {
-            var allCells = subscriptions.map { subId ->
-                getTelephony(subId).getAllCellInfo()
-            }.flatten().toSet().toList()
+            var allCells = subscriptions.flatMap { subId ->
+                getTelephony(subId).getAllCellInfo().let { cells ->
+                    if (subId in outOfService) cells.filter { it.isFresh() } else cells
+                }
+            }.toSet().toList()
 
             postprocessors.forEach { allCells = it.postprocess(allCells) }
             allCells
         } else emptyList()
 
         val signalApi = if (CellSource.SIGNAL_STRENGTH in sources) {
-            subscriptions.mapNotNull { subId ->
+            inService.mapNotNull { subId ->
                 getTelephony(subId).getSignalStrength()?.toCells(subId)
             }.flatten().toSet().toList()
         } else emptyList()
 
         val networkRegistrationApi = if (CellSource.NETWORK_REGISTRATION_INFO in sources) {
-            subscriptions.mapNotNull { subId ->
+            inService.mapNotNull { subId ->
                 getTelephony(subId).getServiceState()?.toCells(subId)
             }.flatten().toSet().toList()
 
@@ -168,8 +178,22 @@ internal class NetMonster(
             physicalChannelSource.get(it, subId)
         } ?: emptyList()
 
+    /**
+     * Measured by the modem at most [OUT_OF_SERVICE_MAX_AGE] ms ago, [ICell.timestamp] is since boot
+     */
+    private fun ICell.isFresh(): Boolean =
+        timestamp?.let { SystemClock.elapsedRealtime() - it in 0..OUT_OF_SERVICE_MAX_AGE } == true
+
     private fun getTelephony(subId: SubscriptionId): ITelephonyManagerCompat {
         return NetMonsterFactory.getTelephony(context, subId)
     }
 
+
+    companion object {
+
+        /**
+         * Oldest cell of an out of service subscription that's still taken, in milliseconds
+         */
+        private const val OUT_OF_SERVICE_MAX_AGE = 20_000L
+    }
 }
