@@ -12,6 +12,7 @@ import cz.mroczis.netmonster.core.subscription.SubscriptionManagerCompat22
 import cz.mroczis.netmonster.core.telephony.*
 import cz.mroczis.netmonster.core.telephony.TelephonyManagerCompat14
 import cz.mroczis.netmonster.core.telephony.TelephonyManagerCompat17
+import cz.mroczis.netmonster.core.telephony.TelephonyManagerCompat24
 import cz.mroczis.netmonster.core.telephony.TelephonyManagerCompat29
 import cz.mroczis.netmonster.core.telephony.TelephonyManagerCompat30
 
@@ -28,6 +29,7 @@ object NetMonsterFactory {
         when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> TelephonyManagerCompat30(context, subId)
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> TelephonyManagerCompat29(context, subId)
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> TelephonyManagerCompat24(context, subId)
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 -> TelephonyManagerCompat17(context, subId)
             else -> TelephonyManagerCompat14(context, subId)
         }

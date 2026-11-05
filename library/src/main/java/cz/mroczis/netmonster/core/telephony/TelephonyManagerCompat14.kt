@@ -133,8 +133,24 @@ internal open class TelephonyManagerCompat14(
     @RequiresPermission(
         allOf = [Manifest.permission.READ_PHONE_STATE]
     )
-    override fun getNetworkType(): NetworkType =
-        NetworkTypeTable.get(telephony.networkType)
+    override fun getNetworkType(): NetworkType {
+        val type = telephony.networkType
+        // Data over Wi-Fi (VoWiFi, ePDG) says nothing about the radio, the cellular network is what's monitored -
+        // a SIM out of service has IWLAN while its modem is camped on a cell
+        val radio = if (type == NETWORK_TYPE_IWLAN) getCellularNetworkType() ?: type else type
+        return NetworkTypeTable.get(radio)
+    }
+
+    /**
+     * TelephonyManager.NETWORK_TYPE_* of the cellular network the SIM is registered to or searching on,
+     * null when it's unknown
+     */
+    protected open fun getCellularNetworkType(): Int? = null
+
+    /**
+     * TelephonyManager.NETWORK_TYPE_* of a cellular radio - not unknown and not Wi-Fi
+     */
+    protected fun Int.isCellular() = this != TelephonyManager.NETWORK_TYPE_UNKNOWN && this != NETWORK_TYPE_IWLAN
 
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun getServiceState(): ServiceState? =
@@ -154,4 +170,12 @@ internal open class TelephonyManagerCompat14(
     override fun getDisplayInfo(): DisplayInfo =
         DisplayInfo(getNetworkType(), DisplayInfo.NetworkOverrideType.NONE)
 
+
+    private companion object {
+
+        /**
+         * TelephonyManager.NETWORK_TYPE_IWLAN, public since Android 7.1
+         */
+        const val NETWORK_TYPE_IWLAN = 18
+    }
 }
