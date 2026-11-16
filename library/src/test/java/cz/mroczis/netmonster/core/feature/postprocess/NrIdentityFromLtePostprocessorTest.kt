@@ -49,6 +49,36 @@ class NrIdentityFromLtePostprocessorTest : FreeSpec({
         result.filterIsInstance<CellLte>().single() shouldBe lte
     }
 
+    "Xiaomi 15 / HyperOS 4 (Qualcomm); NR NSA without NCI, PCI+TAC copied from the anchor" {
+        // Captured on HyperOS 4.0.4.0 / Android 17: CellIdentityNr reported the LTE
+        // anchor's PCI (420, TAC 55383) with nci and PLMN unavailable, while the
+        // modem's own QMI GET_SYS_INFO carried the real nR PCI (776) on n41.
+        val lteAnchor = lte.copy(pci = 420, tac = 55383, eci = 59515700)
+        val nrNoIdentity = nr(nci = null, tac = 55383).copy(pci = 420)
+
+        val result = postprocessor.postprocess(listOf(lteAnchor, nrNoIdentity))
+        val cell = result.filterIsInstance<CellNr>().single()
+        cell.pci shouldBe null
+        cell.tac shouldBe null
+        cell.nci shouldBe null
+        cell.connectionStatus shouldBe SecondaryConnection(isGuess = false)
+        result.filterIsInstance<CellLte>().single() shouldBe lteAnchor
+    }
+
+    "NR without NCI but its own PCI is kept" {
+        val lteAnchor = lte.copy(pci = 420, tac = 55383, eci = 59515700)
+        val nrOwnPci = nr(nci = null, tac = 55383).copy(pci = 776)
+
+        postprocessor.postprocess(listOf(lteAnchor, nrOwnPci)) shouldBe listOf(lteAnchor, nrOwnPci)
+    }
+
+    "NR without NCI and same PCI but different TAC is kept" {
+        val lteAnchor = lte.copy(pci = 420, tac = 55383, eci = 59515700)
+        val nrOtherTac = nr(nci = null, tac = 11111).copy(pci = 420)
+
+        postprocessor.postprocess(listOf(lteAnchor, nrOtherTac)) shouldBe listOf(lteAnchor, nrOtherTac)
+    }
+
     "NR with different identity is kept" {
         val nr = nr(15016772067, 1826)
         postprocessor.postprocess(listOf(lte, nr)) shouldBe listOf(lte, nr)
